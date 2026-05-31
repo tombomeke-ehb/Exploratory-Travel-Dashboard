@@ -1,0 +1,66 @@
+{
+  "xsappname": "exploratory-travel-dashboard",
+  "tenant-mode": "dedicated",
+  "description": "PrimePath Travel – Exploratory Travel Dashboard Security Descriptor",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.TravelAdmin",
+      "description": "Travel Coördinator – volledige lees- en schrijftoegang tot alle reisdata en eigen velden."
+    },
+    {
+      "name": "$XSAPPNAME.TeamLead",
+      "description": "Team Lead – lezen van alle data, goedkeuren/afkeuren van reizen van eigen teamleden."
+    },
+    {
+      "name": "$XSAPPNAME.TravelViewer",
+      "description": "HR / Administratie – read-only toegang voor rapportage en statistieken."
+    }
+  ],
+  "attributes": [],
+  "role-templates": [
+    {
+      "name": "TravelAdmin",
+      "description": "Rol voor de Travel Coördinator",
+      "scope-references": [
+        "$XSAPPNAME.TravelAdmin"
+      ]
+    },
+    {
+      "name": "TeamLead",
+      "description": "Rol voor de Team Lead",
+      "scope-references": [
+        "$XSAPPNAME.TeamLead"
+      ]
+    },
+    {
+      "name": "TravelViewer",
+      "description": "Rol voor HR / Administratie (read-only)",
+      "scope-references": [
+        "$XSAPPNAME.TravelViewer"
+      ]
+    }
+  ],
+  "role-collections": [
+    {
+      "name": "PrimePath_TravelAdmin",
+      "description": "Toewijzen aan de Travel Coördinator",
+      "role-template-references": [
+        "$XSAPPNAME.TravelAdmin"
+      ]
+    },
+    {
+      "name": "PrimePath_TeamLead",
+      "description": "Toewijzen aan Team Leads",
+      "role-template-references": [
+        "$XSAPPNAME.TeamLead"
+      ]
+    },
+    {
+      "name": "PrimePath_TravelViewer",
+      "description": "Toewijzen aan HR / Administratie medewerkers",
+      "role-template-references": [
+        "$XSAPPNAME.TravelViewer"
+      ]
+    }
+  ]
+}
