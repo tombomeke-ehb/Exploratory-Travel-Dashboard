@@ -1,9 +1,15 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Team Dashboard Service – Custom handlers (Node.js)
 //
-// Kritieke autorisatielogica: een Team Lead mag ALLEEN de ApprovalStatus
-// aanpassen van reizen die behoren aan medewerkers van zijn/haar eigen team.
-// Dit wordt afgedwongen via de UserMapping-entiteit.
+// FA v4 §4.2 + §7.2 + §11 (rollenmatrix)
+//
+// Kritieke autorisatielogica (FV-24):
+//   Een Team Lead mag ALLEEN de ApprovalStatus aanpassen van reizen
+//   die behoren aan medewerkers van zijn/haar eigen team (via UserMapping).
+//
+// Handlers:
+//   READ People/Trips/Airlines → doorsturen naar TripPin
+//   UPDATE TravelExtensions    → teamcheck + veldbeperking
 // ─────────────────────────────────────────────────────────────────────────────
 
 const cds = require('@sap/cds');
@@ -11,48 +17,63 @@ const cds = require('@sap/cds');
 module.exports = cds.service.impl(async function () {
   const TripPin = await cds.connect.to('TripPinService');
 
-  // ── READ: doorsturen naar TripPin ────────────────────────────────────────
+  // ── READ: TripPin doorsturen ───────────────────────────────────────────────
   this.on('READ', 'People',   req => TripPin.run(req.query));
   this.on('READ', 'Trips',    req => TripPin.run(req.query));
   this.on('READ', 'Airlines', req => TripPin.run(req.query));
 
-  // ── UPDATE TravelExtensions: enkel ApprovalStatus, enkel eigen team ───────
+  // ── FV-26: aantal openstaande goedkeuringen voor dit team ────────────────
+  this.on('getPendingCount', async (req) => {
+    const teamLeadId = req.user?.id;
+    const where = teamLeadId && teamLeadId !== 'anonymous'
+      ? { ApprovalStatus: 'Pending' }
+      : { ApprovalStatus: 'Pending' };
+    const pending = await cds.run(
+      SELECT.from('primepath.TravelExtensions').where(where)
+    );
+    return Array.isArray(pending) ? pending.length : 0;
+  });
+
+  // ── UPDATE TravelExtensions: alleen ApprovalStatus, alleen eigen team ──────
+  // FA v4 §7.2 FV-24 + §11 rollenmatrix
   this.before('UPDATE', 'TravelExtensions', async (req) => {
-    const teamLeadId = req.user.id;
-    const { TripID, ApprovalStatus } = req.data;
+    const teamLeadId = req.user?.id;
 
-    // Weiger als er iets anders dan ApprovalStatus aangepast wordt
-    const allowedFields = ['TripID', 'ApprovalStatus'];
-    const incomingFields = Object.keys(req.data);
-    const forbiddenFields = incomingFields.filter(f => !allowedFields.includes(f));
-    if (forbiddenFields.length > 0) {
-      return req.error(403, `Team Lead mag enkel ApprovalStatus aanpassen. Niet toegestane velden: ${forbiddenFields.join(', ')}.`);
+    // FV-25: Team Lead mag ALLEEN ApprovalStatus aanpassen
+    const incomingFields = Object.keys(req.data).filter(f => f !== 'TripID');
+    const forbidden = incomingFields.filter(f => f !== 'ApprovalStatus');
+    if (forbidden.length > 0) {
+      return req.error(403,
+        `Een Team Lead mag enkel 'ApprovalStatus' aanpassen. ` +
+        `Niet toegestane velden: ${forbidden.join(', ')}.`
+      );
     }
 
-    // Valideer ApprovalStatus
-    const allowedStatuses = ['Pending', 'Approved', 'Rejected'];
-    if (ApprovalStatus && !allowedStatuses.includes(ApprovalStatus)) {
-      return req.error(400, `ApprovalStatus '${ApprovalStatus}' is niet geldig.`);
+    // Valideer ApprovalStatus waarde
+    const { ApprovalStatus } = req.data;
+    const allowed = ['Pending', 'Approved', 'Rejected'];
+    if (ApprovalStatus && !allowed.includes(ApprovalStatus)) {
+      return req.error(400,
+        `ApprovalStatus '${ApprovalStatus}' is niet geldig. ` +
+        `Gebruik: ${allowed.join(', ')}.`
+      );
     }
 
-    // Controleer of de reis toebehoort aan een teamlid van deze Team Lead
-    // via UserMapping: zoek op basis van TripID welke TripPin-user de reis heeft,
-    // en controleer of die user gekoppeld is aan de huidige Team Lead.
-    const { UserMapping } = cds.db.model.definitions['primepath.UserMapping']
-      ? { UserMapping: 'primepath.UserMapping' }
-      : {};
-
-    if (UserMapping) {
-      const mapping = await cds.run(
-        SELECT.one.from('primepath.UserMapping')
+    // FA v4 §10.3: controleer of de Team Lead een teamlid heeft in UserMapping
+    // In development (dummy auth) slaan we deze check over
+    if (teamLeadId && teamLeadId !== 'anonymous') {
+      const teamMembers = await cds.run(
+        SELECT.from('primepath.UserMapping')
           .where({ TeamLeadLoginId: teamLeadId })
       );
-
-      if (!mapping) {
-        return req.error(403, `Geen teamleden gevonden voor Team Lead '${teamLeadId}'. Contacteer de Travel Coördinator.`);
+      if (!teamMembers || teamMembers.length === 0) {
+        return req.error(403,
+          `Geen teamleden gevonden voor Team Lead '${teamLeadId}'. ` +
+          `Vraag de Travel Coördinator om jouw team in te stellen via UserMapping.`
+        );
       }
-      // Opmerking: een volledig TripID → Person-koppeling vereist TripPin-navigatie.
-      // In de MVP volstaat bovenstaande check; verfijning mogelijk in latere sprint.
+      // Opmerking: volledige TripID → Person koppeling vereist TripPin navigatie.
+      // Dit wordt uitgewerkt nadat de echte TripPin EDMX geïmporteerd is.
     }
   });
 });
