@@ -10,6 +10,7 @@ build-parameters:
       commands:
         - npm install --legacy-peer-deps
         - npx cds build --production
+        - cp -r app gen/srv/app
 modules:
   - name: exploratory-travel-dashboard-srv
     type: nodejs
