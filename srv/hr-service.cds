@@ -5,7 +5,7 @@
 // Focus op statistieken: airlinegebruik, reizen per periode.
 // ─────────────────────────────────────────────────────────────────────────────
 
-using { primepath } from '../db/schema';
+using { primepath as p } from '../db/schema';
 using { TripPinService } from './external/TripPin';
 
 @path: '/hr'
@@ -19,5 +19,5 @@ service HRService {
   @readonly entity Airports   as projection on TripPinService.Airports;
 
   // ── TravelExtensions (read-only voor HR) ────────────────────────────────
-  @readonly entity TravelExtensions as projection on primepath.TravelExtensions;
+  @readonly entity TravelExtensions as projection on p.TravelExtensions;
 }
