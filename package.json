@@ -8,6 +8,8 @@
   "dependencies": {
     "@sap/cds": "^8",
     "@sap/cds-dk": "^8",
+    "@sap-cloud-sdk/resilience": "^3",
+    "@sap-cloud-sdk/http-client": "^3",
     "express": "^4"
   },
   "devDependencies": {
