@@ -5,7 +5,6 @@
 // FV-01 t/m FV-21: dashboard KPI's, trips, people, airlines, airports
 // ─────────────────────────────────────────────────────────────────────────────
 
-using TravelService from '../../srv/travel-service';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TRIPS – List Report (FV-11 t/m FV-17)
@@ -215,3 +214,4 @@ annotate TravelService.Airports with @(
     ]
   }
 );
+    
