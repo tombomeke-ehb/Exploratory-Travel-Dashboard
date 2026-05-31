@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PrimePath Travel – Exploratory Travel Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: '72', 'SAP72', Arial, sans-serif;
+      background: #f5f6f7;
+      color: #32363a;
+      min-height: 100vh;
+    }
+
+    /* ── Shell header ── */
+    .shell-header {
+      background: #0a6ed1;
+      color: #fff;
+      padding: 0 2rem;
+      height: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 4px rgba(0,0,0,.2);
+    }
+    .shell-header .logo {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: .5px;
+    }
+    .shell-header .subtitle {
+      font-size: .75rem;
+      opacity: .85;
+    }
+
+    /* ── Page title ── */
+    .page-title {
+      background: #fff;
+      border-bottom: 1px solid #d9d9d9;
+      padding: 1.25rem 2rem .75rem;
+    }
+    .page-title h1 {
+      font-size: 1.375rem;
+      font-weight: 600;
+      color: #32363a;
+    }
+    .page-title p {
+      font-size: .875rem;
+      color: #6a6d70;
+      margin-top: .25rem;
+    }
+
+    /* ── App grid ── */
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      padding: 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ── App card ── */
+    .app-card {
+      background: #fff;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      padding: 1.75rem 1.5rem 1.5rem;
+      text-decoration: none;
+      color: inherit;
+      transition: box-shadow .15s, border-color .15s;
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+    }
+    .app-card:hover {
+      box-shadow: 0 4px 16px rgba(10,110,209,.15);
+      border-color: #0a6ed1;
+    }
+
+    .app-card .icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    .icon-travel  { background: #e8f3fc; }
+    .icon-team    { background: #eaf5ea; }
+    .icon-hr      { background: #fef3e2; }
+
+    .app-card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .app-card .role-badge {
+      display: inline-block;
+      font-size: .7rem;
+      font-weight: 600;
+      padding: .2rem .6rem;
+      border-radius: 20px;
+      margin-bottom: .25rem;
+    }
+    .badge-travel { background: #e8f3fc; color: #0a6ed1; }
+    .badge-team   { background: #eaf5ea; color: #107e3e; }
+    .badge-hr     { background: #fef3e2; color: #c0392b; }
+
+    .app-card p {
+      font-size: .875rem;
+      color: #6a6d70;
+      line-height: 1.5;
+    }
+
+    .app-card .features {
+      list-style: none;
+      margin-top: .25rem;
+      display: flex;
+      flex-direction: column;
+      gap: .3rem;
+    }
+    .app-card .features li {
+      font-size: .8rem;
+      color: #32363a;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .app-card .features li::before {
+      content: '✓';
+      color: #0a6ed1;
+      font-weight: 700;
+      font-size: .75rem;
+    }
+
+    .app-card .open-btn {
+      margin-top: auto;
+      padding-top: 1rem;
+      font-size: .8rem;
+      color: #0a6ed1;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+    }
+    .open-btn::after { content: '→'; }
+
+    /* ── API section ── */
+    .api-section {
+      max-width: 1100px;
+      margin: 0 auto 2rem;
+      padding: 0 2rem;
+    }
+    .api-section h3 {
+      font-size: .875rem;
+      font-weight: 600;
+      color: #6a6d70;
+      margin-bottom: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .api-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+    }
+    .api-link {
+      background: #fff;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      padding: .4rem .9rem;
+      font-size: .8rem;
+      color: #0a6ed1;
+      text-decoration: none;
+      transition: background .1s;
+    }
+    .api-link:hover { background: #e8f3fc; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: .75rem;
+      color: #9ca0a4;
+      border-top: 1px solid #e5e5e5;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="shell-header">
+    <span class="logo">✈ PrimePath Travel</span>
+    <span class="subtitle">Exploratory Travel Dashboard · SAP BTP &amp; CAP</span>
+  </header>
+
+  <div class="page-title">
+    <h1>Travel Dashboard</h1>
+    <p>Kies jouw dashboard op basis van je rol binnen PrimePath Travel.</p>
+  </div>
+
+  <div class="app-grid">
+
+    <!-- Travel Coördinator -->
+    <a class="app-card" href="/travel/">
+      <div class="icon icon-travel">✈</div>
+      <div>
+        <span class="role-badge badge-travel">Travel Coördinator</span>
+        <h2>Travel Dashboard</h2>
+      </div>
+      <p>Centraal beheer van alle reizen, statussen en interne velden.</p>
+      <ul class="features">
+        <li>Overzicht actieve reizen + KPI's</li>
+        <li>Filteren op datum, bestemming, status</li>
+        <li>Projectcode &amp; notities beheren</li>
+        <li>Alle medewerkers, airlines &amp; luchthavens</li>
+      </ul>
+      <span class="open-btn">Dashboard openen</span>
+    </a>
+
+    <!-- Team Lead -->
+    <a class="app-card" href="/team/">
+      <div class="icon icon-team">👥</div>
+      <div>
+        <span class="role-badge badge-team">Team Lead</span>
+        <h2>Team Dashboard</h2>
+      </div>
+      <p>Beschikbaarheid van teamleden en reisgoedkeuringen beheren.</p>
+      <ul class="features">
+        <li>Wie van mijn team is op reis?</li>
+        <li>Reizen goedkeuren of afkeuren</li>
+        <li>Openstaande goedkeuringen filteren</li>
+        <li>Reistijdlijn per medewerker</li>
+      </ul>
+      <span class="open-btn">Dashboard openen</span>
+    </a>
+
+    <!-- HR / Admin -->
+    <a class="app-card" href="/hr/">
+      <div class="icon icon-hr">📊</div>
+      <div>
+        <span class="role-badge badge-hr">HR / Administratie</span>
+        <h2>HR Dashboard</h2>
+      </div>
+      <p>Statistieken en rapportage voor kwartaalanalyse en airlineonderhandelingen.</p>
+      <ul class="features">
+        <li>Meest gebruikte airlines (grafiek)</li>
+        <li>Aantal reizen per periode</li>
+        <li>Read-only medewerkeroverzicht</li>
+        <li>Exporteerbare rapportagedata</li>
+      </ul>
+      <span class="open-btn">Dashboard openen</span>
+    </a>
+
+  </div>
+
+  <!-- OData API links -->
+  <div class="api-section">
+    <h3>OData API Endpoints</h3>
+    <div class="api-links">
+      <a class="api-link" href="/travel/$metadata">Travel Service (metadata)</a>
+      <a class="api-link" href="/travel/Trips">Trips</a>
+      <a class="api-link" href="/travel/People">People</a>
+      <a class="api-link" href="/travel/Airlines">Airlines</a>
+      <a class="api-link" href="/travel/Airports">Airports</a>
+      <a class="api-link" href="/travel/TravelExtensions">TravelExtensions</a>
+      <a class="api-link" href="/team/$metadata">Team Service (metadata)</a>
+      <a class="api-link" href="/hr/$metadata">HR Service (metadata)</a>
+    </div>
+  </div>
+
+  <footer>
+    EhB Cloud Integration &nbsp;·&nbsp; In samenwerking met Flexso &nbsp;·&nbsp; Demo: 19 juni 2026
+  </footer>
+
+</body>
+</html>
