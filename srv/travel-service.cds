@@ -1,26 +1,56 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Travel Dashboard Service – voor de Travel Coördinator (TravelAdmin-rol)
+// Travel Dashboard Service – Travel Coördinator (TravelAdmin-rol)
 //
-// Volledige toegang tot alle TripPin-data (read-only) en alle eigen velden.
-// Volgt SAP CAP best practice: aparte service per rol/doel.
+// FA v4 §4.1, §7.1, §11 (rollenmatrix)
+// Volledige toegang tot TripPin-data (read-only) en eigen PrimePath-velden.
+//
+// KPI-functies voor het dashboard (FV-01 t/m FV-06):
+//   - getActiveTripsCount    → FV-01: totaal actieve reizen vandaag
+//   - getOnTravelCount       → FV-03: medewerkers momenteel op reis
+//   - getTopAirline          → FV-02: meest gebruikte airline
+//   - getAirlineStats        → FV-06: airlinegebruik voor grafiek
 // ─────────────────────────────────────────────────────────────────────────────
 
 using { primepath as p } from '../db/schema';
-
-// Externe TripPin-entiteiten (worden aangevuld na: cds import TripPin.xml)
 using { TripPinService } from './external/TripPin';
 
 @path: '/travel'
 @requires: 'TravelAdmin'
 service TravelService {
 
-  // ── TripPin data (read-only) ─────────────────────────────────────────────
-  @readonly entity People     as projection on TripPinService.People;
-  @readonly entity Trips      as projection on TripPinService.Trips;
-  @readonly entity Airlines   as projection on TripPinService.Airlines;
-  @readonly entity Airports   as projection on TripPinService.Airports;
+  // ── TripPin entiteiten (read-only) ────────────────────────────────────────
+  @readonly entity People   as projection on TripPinService.People;
+  @readonly entity Trips    as projection on TripPinService.Trips;
+  @readonly entity Airlines as projection on TripPinService.Airlines;
+  @readonly entity Airports as projection on TripPinService.Airports;
 
-  // ── Eigen velden (volledig CRUD voor TravelAdmin) ────────────────────────
+  // ── Eigen PrimePath-velden (volledig CRUD voor TravelAdmin) ───────────────
+  // FA v4 §7.4: ProjectCode, ApprovalStatus, InternalNote
   entity TravelExtensions as projection on p.TravelExtensions;
-  entity UserMapping      as projection on p.UserMapping;
+
+  // FA v4 §10.3: beheer van team-koppelingen
+  entity UserMapping as projection on p.UserMapping;
+
+  // ── KPI-functies voor het dashboard ───────────────────────────────────────
+  // FA v4 §7.1 dashboard-vereisten FV-01 t/m FV-06
+
+  // FV-01: totaal aantal actieve reizen op dit moment
+  function getActiveTripsCount() returns Integer;
+
+  // FV-03: aantal medewerkers momenteel op reis (actieve reis vandaag)
+  function getOnTravelCount() returns Integer;
+
+  // FV-02: meest gebruikte airline (op basis van aantal boekingen)
+  function getTopAirline() returns {
+    AirlineCode : String;
+    Name        : String;
+    TripCount   : Integer;
+  };
+
+  // FV-06: airlinegebruik voor grafiek (taart- of staafdiagram)
+  function getAirlineStats() returns array of {
+    AirlineCode : String;
+    Name        : String;
+    TripCount   : Integer;
+  };
 }
