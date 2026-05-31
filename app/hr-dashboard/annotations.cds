@@ -5,7 +5,7 @@
 // FV-27 t/m FV-30: airline-statistieken, reizen per periode, read-only
 // ─────────────────────────────────────────────────────────────────────────────
 
-using { HRService } from '../../srv/hr-service';
+using HRService from '../../srv/hr-service';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // AIRLINES – Statistieken (FV-27)
