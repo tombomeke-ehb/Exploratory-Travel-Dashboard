@@ -40,24 +40,24 @@ module.exports = cds.service.impl(async function () {
   this.on('READ', 'Airlines', req => TripPin.run(req.query));
   this.on('READ', 'Airports', req => TripPin.run(req.query));
 
-  // ── WRITE TravelExtensions: validatie ──────────────────────────────────────
+  // ── WRITE TravelExtensions: validatie (FV-17, FV-22, FV-23) ──────────────
   this.before(['CREATE', 'UPDATE'], 'TravelExtensions', (req) => {
     const { ProjectCode, ApprovalStatus, InternalNote } = req.data;
 
-    // Valideer ProjectCode: moet beginnen met 'PROJ-'
+    // FV-22: ProjectCode moet beginnen met 'PROJ-'
     if (ProjectCode !== undefined && ProjectCode !== null && ProjectCode !== '') {
       if (!ProjectCode.startsWith('PROJ-')) {
-        return req.error(400, `ProjectCode '${ProjectCode}' moet beginnen met 'PROJ-'.`);
+        return req.error(400, `ProjectCode '${ProjectCode}' moet beginnen met 'PROJ-'. Voorbeeld: PROJ-2024-042`);
       }
     }
 
-    // Valideer ApprovalStatus: enkel toegelaten waarden
+    // FV-21: ApprovalStatus enkel toegelaten waarden
     const allowedStatuses = ['Pending', 'Approved', 'Rejected'];
     if (ApprovalStatus !== undefined && !allowedStatuses.includes(ApprovalStatus)) {
       return req.error(400, `ApprovalStatus '${ApprovalStatus}' is niet geldig. Gebruik: ${allowedStatuses.join(', ')}.`);
     }
 
-    // Valideer InternalNote: max 500 tekens
+    // FV-23: InternalNote max 500 tekens
     if (InternalNote && InternalNote.length > 500) {
       return req.error(400, `InternalNote mag maximaal 500 tekens bevatten (huidig: ${InternalNote.length}).`);
     }

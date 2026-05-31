@@ -5,7 +5,7 @@
 // Volgt SAP CAP best practice: aparte service per rol/doel.
 // ─────────────────────────────────────────────────────────────────────────────
 
-using { primepath } from '../db/schema';
+using { primepath as p } from '../db/schema';
 
 // Externe TripPin-entiteiten (worden aangevuld na: cds import TripPin.xml)
 using { TripPinService } from './external/TripPin';
@@ -21,6 +21,6 @@ service TravelService {
   @readonly entity Airports   as projection on TripPinService.Airports;
 
   // ── Eigen velden (volledig CRUD voor TravelAdmin) ────────────────────────
-  entity TravelExtensions as projection on primepath.TravelExtensions;
-  entity UserMapping      as projection on primepath.UserMapping;
+  entity TravelExtensions as projection on p.TravelExtensions;
+  entity UserMapping      as projection on p.UserMapping;
 }
