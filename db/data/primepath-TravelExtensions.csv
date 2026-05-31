@@ -1,0 +1,4 @@
+TripID,ProjectCode,ApprovalStatus,InternalNote
+0,PROJ-2024-001,Approved,Eerste testreis goedgekeurd
+1003,PROJ-2024-002,Pending,Klant vraagt check-in voor 7u
+1007,PROJ-2024-003,Rejected,Reis geannuleerd wegens projectwijziging
