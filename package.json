@@ -39,6 +39,9 @@
             "url": "https://services.odata.org/V4/TripPinServiceRW"
           }
         }
+      },
+      "[production]": {
+        "auth": "xsuaa"
       }
     },
     "features": {
