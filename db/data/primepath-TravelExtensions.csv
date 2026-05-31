@@ -1,4 +1,7 @@
 TripID,ProjectCode,ApprovalStatus,InternalNote
-0,PROJ-2024-001,Approved,Eerste testreis goedgekeurd
-1003,PROJ-2024-002,Pending,Klant vraagt check-in voor 7u
-1007,PROJ-2024-003,Rejected,Reis geannuleerd wegens projectwijziging
+0,PROJ-2024-001,Approved,Klant bevestigd. Hotel geboekt via kantoor.
+1003,PROJ-2024-002,Pending,Klant vraagt check-in vóór 7u. Taxi besteld.
+1007,PROJ-2024-003,Rejected,Reis geannuleerd wegens projectwijziging. Budget teruggestort.
+1,PROJ-2024-004,Approved,
+2,PROJ-2024-005,Pending,Visum aanvraag in behandeling - opvolgen!
+3,PROJ-2024-006,Approved,Eerste klantbezoek voor Q3-project.
