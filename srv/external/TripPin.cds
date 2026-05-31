@@ -1,26 +1,36 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// TripPin External Service – CDS stub
+// TripPin External Service – CDS model
 //
-// Dit bestand wordt normaal automatisch aangemaakt door:
-//   cds import TripPin.xml --from odata-v4
+// Vervangt dit bestand door het geïmporteerde model via:
+//   cds import TripPin.xml
+// EDMX: https://services.odata.org/V4/TripPinServiceRW/$metadata
 //
-// Tot dan dient deze vereenvoudigde stub als model voor lokale ontwikkeling.
-// De volledige EDMX kan gedownload worden van:
-//   https://services.odata.org/V4/TripPinServiceRW/$metadata
+// Bevat alle entiteiten die gebruikt worden in de 3 Fiori-apps.
 // ─────────────────────────────────────────────────────────────────────────────
 
 @cds.external
 service TripPinService {
 
+  // ── Mensen / Medewerkers ───────────────────────────────────────────────────
   entity People {
     key UserName    : String;
     FirstName       : String;
     LastName        : String;
     Emails          : many String;
+    AddressInfo     : many {
+      Address       : String;
+      City          : {
+        Name          : String;
+        CountryRegion : String;
+        Region        : String;
+      };
+    };
     Gender          : String; // Male, Female, Unknown
-    // AddressInfo en Friends zijn navigatie-properties (vereenvoudigd hier)
+    Concurrency     : Integer;
+    // Trips: navigatie-property (People → Trips)
   }
 
+  // ── Reizen ─────────────────────────────────────────────────────────────────
   entity Trips {
     key TripId      : Integer;
     Name            : String;
@@ -29,18 +39,31 @@ service TripPinService {
     Tags            : many String;
     StartsAt        : DateTime;
     EndsAt          : DateTime;
-    // PlanItems bevat Flights (navigatie-property)
+    // PlanItems: navigatie (Trips → Flights/Events)
   }
 
+  // ── Airlines ───────────────────────────────────────────────────────────────
   entity Airlines {
     key AirlineCode : String;
     Name            : String;
   }
 
+  // ── Luchthavens ────────────────────────────────────────────────────────────
   entity Airports {
     key IcaoCode    : String;
     Name            : String;
     IataCode        : String;
-    // Location: City, CountryRegion, Lat, Lon
+    Location        : {
+      Address       : String;
+      City          : {
+        Name          : String;
+        CountryRegion : String;
+        Region        : String;
+      };
+      Loc            : {
+        type          : String;
+        coordinates   : many Decimal;
+      };
+    };
   }
 }
