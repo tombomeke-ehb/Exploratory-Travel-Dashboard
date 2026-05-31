@@ -6,14 +6,17 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
+    "@cap-js/hana": "^2",
+    "@sap-cloud-sdk/http-client": "^3",
+    "@sap-cloud-sdk/resilience": "^3",
     "@sap/cds": "^8",
     "@sap/cds-dk": "^8",
-    "@sap-cloud-sdk/resilience": "^3",
-    "@sap-cloud-sdk/http-client": "^3",
+    "@sap/xssec": "^4",
     "express": "^4"
   },
   "devDependencies": {
-    "@cap-js/sqlite": "^1"
+    "@cap-js/sqlite": "^1",
+    "@sap/cds-dk": "^9"
   },
   "scripts": {
     "start": "cds-serve",
@@ -39,6 +42,9 @@
             "url": "https://services.odata.org/V4/TripPinServiceRW"
           }
         }
+      },
+      "[production]": {
+        "auth": "xsuaa"
       }
     },
     "features": {
