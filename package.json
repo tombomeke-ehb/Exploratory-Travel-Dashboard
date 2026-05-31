@@ -1,0 +1,46 @@
+{
+  "name": "exploratory-travel-dashboard",
+  "version": "1.0.0",
+  "description": "PrimePath Travel – Exploratory Travel Dashboard (SAP BTP + CAP + Fiori Elements)",
+  "repository": "https://github.com/tombomeke-ehb/Exploratory-Travel-Dashboard",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@sap/cds": "^8",
+    "@sap/cds-dk": "^8",
+    "express": "^4"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^1"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch": "cds watch"
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "sqlite",
+        "[production]": {
+          "kind": "hana"
+        }
+      },
+      "TripPinService": {
+        "kind": "odata-v4",
+        "[production]": {
+          "credentials": {
+            "destination": "TripPinApi"
+          }
+        },
+        "[development]": {
+          "credentials": {
+            "url": "https://services.odata.org/V4/TripPinServiceRW"
+          }
+        }
+      }
+    },
+    "features": {
+      "fetch_csrf": true
+    }
+  }
+}

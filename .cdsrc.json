@@ -1,0 +1,8 @@
+{
+  "requires": {
+    "auth": {
+      "[development]": { "kind": "dummy" },
+      "[production]":  { "kind": "xsuaa" }
+    }
+  }
+}
