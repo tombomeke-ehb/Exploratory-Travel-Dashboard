@@ -5,7 +5,7 @@
 // FV-22 t/m FV-26: teamoverzicht, reistijdlijn, goedkeuring
 // ─────────────────────────────────────────────────────────────────────────────
 
-using TeamService from '../../srv/team-service';
+using { TeamService } from '../../srv/team-service';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PEOPLE – Teamoverzicht (FV-22)
