@@ -1,16 +1,101 @@
-const cds = require('@sap/cds');
-const path = require('path');
-const fs = require('fs');
+// ─────────────────────────────────────────────────────────────────────────────
+// PrimePath – Custom server bootstrap
+//
+// Voegt toe:
+//   1. cookie-parser vóór de CDS auth-middleware (zodat req.cookies beschikbaar is)
+//   2. POST /auth/login  – valideert credentials, zet httpOnly JWT-cookie
+//   3. POST /auth/logout – wist het JWT-cookie
+//   4. GET  /            – serveert de landingspagina (index.html)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const cds          = require('@sap/cds')
+const path         = require('path')
+const fs           = require('fs')
+const express      = require('express')
+const cookieParser = require('cookie-parser')
+const jwt          = require('jsonwebtoken')
+const bcrypt       = require('bcryptjs')
+
+const JWT_SECRET  = process.env.JWT_SECRET || 'primepath-dev-secret-CHANGE-IN-PRODUCTION'
+const JWT_EXPIRES = '8h'
+const COOKIE_NAME = 'primepath_auth'
+
+// ── Voeg cookie-parser toe VOOR de CDS auth-middleware ──────────────────────
+// cds.middlewares.before = [context, trace, auth, ctx_model]
+// We plaatsen cookie-parser vóór 'auth' zodat req.cookies al geparsed is
+// wanneer auth-strategy.js draait.
+cds.middlewares.add(cookieParser(), { before: 'auth' })
 
 cds.on('bootstrap', (app) => {
-  // Zoek index.html op — in productie staat het als app-index.html naast server.js
-  const prodPath = path.join(__dirname, 'app-index.html');
-  const devPath  = path.join(__dirname, 'app', 'index.html');
-  const indexPath = fs.existsSync(prodPath) ? prodPath : devPath;
 
-  if (fs.existsSync(indexPath)) {
-    app.get('/', (_req, res) => res.sendFile(indexPath));
+  // ── Statische HTML-pagina's (landingspagina + loginpagina's) ──────────────
+  // In productie staan de HTML-bestanden naast server.js (gekopieerd via mta.yaml).
+  // In development worden ze direct gelezen vanuit app/.
+  function serveHtml (filename, route) {
+    const prodPath = path.join(__dirname, filename)
+    const devPath  = path.join(__dirname, 'app', filename)
+    const filePath = fs.existsSync(prodPath) ? prodPath : devPath
+    if (fs.existsSync(filePath)) app.get(route, (_req, res) => res.sendFile(filePath))
   }
-});
 
-module.exports = cds.server;
+  serveHtml('index.html',          '/')
+  serveHtml('travel-login.html',   '/travel-login.html')
+  serveHtml('team-login.html',     '/team-login.html')
+  serveHtml('hr-login.html',       '/hr-login.html')
+
+  // ── JSON body-parser voor auth-endpoints ──────────────────────────────────
+  app.use('/auth', express.json())
+
+  // ── POST /auth/login ──────────────────────────────────────────────────────
+  // Body: { username: string, password: string }
+  // Succes: zet httpOnly-cookie, geeft { role, name } terug
+  // Fout:   401 of 400
+  app.post('/auth/login', async (req, res) => {
+    const { username, password } = req.body || {}
+
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Gebruikersnaam en wachtwoord zijn verplicht.' })
+    }
+
+    try {
+      const db   = await cds.connect.to('db')
+      const user = await db.run(SELECT.one.from('primepath.Users').where({ username }))
+
+      if (!user) {
+        return res.status(401).json({ error: 'Ongeldige gebruikersnaam of wachtwoord.' })
+      }
+
+      const valid = await bcrypt.compare(password, user.passwordHash)
+      if (!valid) {
+        return res.status(401).json({ error: 'Ongeldige gebruikersnaam of wachtwoord.' })
+      }
+
+      const token = jwt.sign(
+        { sub: user.username, role: user.role, name: user.displayName },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRES }
+      )
+
+      res.cookie(COOKIE_NAME, token, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure:   process.env.NODE_ENV === 'production',
+        maxAge:   8 * 60 * 60 * 1000   // 8 uur in ms
+      })
+
+      return res.json({ role: user.role, name: user.displayName })
+
+    } catch (err) {
+      cds.log('auth').error('Login error:', err)
+      return res.status(500).json({ error: 'Interne serverfout.' })
+    }
+  })
+
+  // ── POST /auth/logout ─────────────────────────────────────────────────────
+  app.post('/auth/logout', (_req, res) => {
+    res.clearCookie(COOKIE_NAME)
+    res.json({ ok: true })
+  })
+})
+
+module.exports = cds.server

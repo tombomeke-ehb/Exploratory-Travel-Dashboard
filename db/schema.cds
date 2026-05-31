@@ -62,3 +62,21 @@ entity UserMapping {
   @title: 'Weergavenaam'
   DisplayName        : String(256);
 }
+
+// ── Users ─────────────────────────────────────────────────────────────────────
+// Lokale gebruikerstabel voor dashboard-authenticatie (vervangt SAP XSUAA).
+// Wachtwoorden worden opgeslagen als bcrypt-hash (saltfactor 10).
+entity Users {
+  @title: 'Gebruikersnaam'
+  key username     : String(128);
+
+  @title: 'Wachtwoord (bcrypt hash)'
+  passwordHash     : String(256);
+
+  @title: 'Rol'
+  @description: 'TravelAdmin | TeamLead | TravelViewer'
+  role             : String(50);
+
+  @title: 'Weergavenaam'
+  displayName      : String(256);
+}

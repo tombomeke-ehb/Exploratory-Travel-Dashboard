@@ -10,7 +10,10 @@ build-parameters:
       commands:
         - npm install --legacy-peer-deps
         - npx cds build --production
-        - cp app/index.html gen/srv/app-index.html
+        - cp app/index.html gen/srv/index.html
+        - cp app/travel-login.html gen/srv/travel-login.html
+        - cp app/team-login.html gen/srv/team-login.html
+        - cp app/hr-login.html gen/srv/hr-login.html
 modules:
   - name: exploratory-travel-dashboard-srv
     type: nodejs
@@ -21,13 +24,15 @@ modules:
     build-parameters:
       builder: npm
     provides:
-      - name: srv-api # required by consumers of CAP services (e.g. approuter)
+      - name: srv-api
         properties:
           srv-url: ${default-url}
     requires:
-      - name: exploratory-travel-dashboard-auth
       - name: exploratory-travel-dashboard-db
       - name: exploratory-travel-dashboard-destination
+    # Na deployment: cf set-env exploratory-travel-dashboard-srv JWT_SECRET <geheim> && cf restage
+    properties:
+      NODE_ENV: production
 
   - name: exploratory-travel-dashboard-db-deployer
     type: hdb
@@ -38,19 +43,6 @@ modules:
       - name: exploratory-travel-dashboard-db
 
 resources:
-  - name: exploratory-travel-dashboard-auth
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: xsuaa
-      service-plan: application
-      path: ./xs-security.json
-      config:
-        xsappname: exploratory-travel-dashboard-${org}-${space}
-        tenant-mode: dedicated
-        oauth2-configuration:
-          credential-types:
-            - "binding-secret"
-            - "x509"
   - name: exploratory-travel-dashboard-db
     type: com.sap.xs.hdi-container
     parameters:
