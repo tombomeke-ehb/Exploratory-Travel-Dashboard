@@ -5,27 +5,23 @@
 
 namespace primepath;
 
-using { cuid, managed } from '@sap/cds/common';
+using { managed } from '@sap/cds/common';
+
+// ── ApprovalStatus type ───────────────────────────────────────────────────────
+type ApprovalStatus : String(20) enum {
+  Pending  = 'Pending';
+  Approved = 'Approved';
+  Rejected = 'Rejected';
+}
 
 // ── TravelExtensions ──────────────────────────────────────────────────────────
 // Koppelt PrimePath-specifieke velden aan een TripPin-reis via TripID.
-// TripID is de primary key (overeenkomst met TripPin Trip.TripId).
 
-entity TravelExtensions {
+entity TravelExtensions : managed {
   key TripID         : Integer;           // Verwijzing naar TripPin Trip.TripId
   ProjectCode        : String(20);        // Bijv. 'PROJ-2024-042'
-  ApprovalStatus     : String(20)
-    default 'Pending'
-    @assert.range enum {
-      Pending    = 'Pending';
-      Approved   = 'Approved';
-      Rejected   = 'Rejected';
-    };
+  ApprovalStatus     : primepath.ApprovalStatus default 'Pending';
   InternalNote       : String(500);       // Max 500 tekens
-  CreatedAt          : Timestamp @cds.on.insert: $now;
-  ModifiedAt         : Timestamp @cds.on.update: $now;
-  CreatedBy          : String    @cds.on.insert: $user;
-  ModifiedBy         : String    @cds.on.update: $user;
 }
 
 // ── UserMapping ───────────────────────────────────────────────────────────────
