@@ -1,36 +1,64 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // PrimePath Travel – Lokaal datamodel
-// Bevat enkel de eigen uitbreidingen op TripPin (read-only externe bron).
+//
+// Bevat:
+//   - ApprovalStatus type (enum)
+//   - TravelExtensions: PrimePath-velden per TripPin-reis (via TripID)
+//   - UserMapping: koppeling BTP-loginID ↔ TripPin-UserName per Team Lead
 // ─────────────────────────────────────────────────────────────────────────────
 
 namespace primepath;
 
 using { managed } from '@sap/cds/common';
 
-// ── ApprovalStatus type ───────────────────────────────────────────────────────
+// ── ApprovalStatus enum ───────────────────────────────────────────────────────
+// FA v4 §7.4: drie mogelijke waarden
 type ApprovalStatus : String(20) enum {
-  Pending  = 'Pending';
-  Approved = 'Approved';
-  Rejected = 'Rejected';
+  Pending  = 'Pending';   // In behandeling
+  Approved = 'Approved';  // Goedgekeurd
+  Rejected = 'Rejected';  // Afgekeurd
 }
 
 // ── TravelExtensions ──────────────────────────────────────────────────────────
-// Koppelt PrimePath-specifieke velden aan een TripPin-reis via TripID.
+// FA v4 §7.4 + §10.2
+// Koppelt PrimePath-velden aan een TripPin-reis via TripID (integer).
+// managed voegt automatisch createdAt/createdBy/modifiedAt/modifiedBy toe.
 
 entity TravelExtensions : managed {
-  key TripID         : Integer;           // Verwijzing naar TripPin Trip.TripId
-  ProjectCode        : String(20);        // Bijv. 'PROJ-2024-042'
+  key TripID         : Integer;
+
+  @title: 'Projectcode'
+  @description: 'Interne projectreferentie. Begint altijd met PROJ-. Bijv. PROJ-2024-042.'
+  ProjectCode        : String(30);
+
+  @title: 'Goedkeuringsstatus'
+  @description: 'In behandeling / Goedgekeurd / Afgekeurd'
   ApprovalStatus     : primepath.ApprovalStatus default 'Pending';
-  InternalNote       : String(500);       // Max 500 tekens
+
+  @title: 'Interne notitie'
+  @description: 'Vrij tekstveld voor opmerkingen. Max. 500 tekens.'
+  InternalNote       : String(500);
 }
 
 // ── UserMapping ───────────────────────────────────────────────────────────────
-// Koppelt BTP-loginID aan TripPin-UserName zodat de Team Lead
-// enkel de reizen van zijn/haar teamleden kan goedkeuren.
+// FA v4 §10.3
+// Koppelt BTP-loginID (e-mail) aan TripPin-UserName.
+// Nodig zodat de Team Lead enkel zijn/haar eigen teamleden kan goedkeuren.
+// Beheerd door de Travel Coördinator (TravelAdmin-rol).
 
 entity UserMapping {
-  key BtpLoginId      : String(256);      // BTP-loginID (e-mailadres)
-  TripPinUserName     : String(256);      // Bijbehorende UserName in TripPin
-  TeamLeadLoginId     : String(256);      // BTP-loginID van de verantwoordelijke Team Lead
-  DisplayName         : String(256);      // Weergavenaam (optioneel)
+  @title: 'BTP Login ID'
+  @description: 'E-mailadres waarmee de medewerker inlogt op SAP BTP.'
+  key BtpLoginId     : String(256);
+
+  @title: 'TripPin Gebruikersnaam'
+  @description: 'Bijbehorende UserName in de TripPin-databron.'
+  TripPinUserName    : String(256);
+
+  @title: 'Team Lead (BTP Login ID)'
+  @description: 'BTP-loginID van de verantwoordelijke Team Lead.'
+  TeamLeadLoginId    : String(256);
+
+  @title: 'Weergavenaam'
+  DisplayName        : String(256);
 }
