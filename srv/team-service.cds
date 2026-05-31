@@ -6,7 +6,7 @@
 // (gecontroleerd via UserMapping in de custom handler).
 // ─────────────────────────────────────────────────────────────────────────────
 
-using { primepath } from '../db/schema';
+using { primepath as p } from '../db/schema';
 using { TripPinService } from './external/TripPin';
 
 @path: '/team'
@@ -18,17 +18,10 @@ service TeamService {
   @readonly entity Trips      as projection on TripPinService.Trips;
   @readonly entity Airlines   as projection on TripPinService.Airlines;
 
-  // ── TravelExtensions: lezen voor iedereen, schrijven enkel ApprovalStatus
+  // ── TravelExtensions: volledige projection, schrijven enkel ApprovalStatus
   //    via eigen team – afgedwongen in team-service.js handler.
-  entity TravelExtensions as projection on primepath.TravelExtensions {
-    TripID,
-    ApprovalStatus,   // Enige bewerkbare kolom voor TeamLead
-    ProjectCode,      // Leesbaar
-    InternalNote,     // Leesbaar
-    ModifiedAt,
-    ModifiedBy
-  };
+  entity TravelExtensions as projection on p.TravelExtensions;
 
   // ── UserMapping: read-only (nodig om teamleden op te zoeken) ────────────
-  @readonly entity UserMapping as projection on primepath.UserMapping;
+  @readonly entity UserMapping as projection on p.UserMapping;
 }
