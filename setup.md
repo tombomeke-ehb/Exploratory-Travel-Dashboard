@@ -132,8 +132,10 @@ cf restage exploratory-travel-dashboard-srv
 
 ## Stap 8 – App testen
 
-Zoek de URL op:
+**Productie-URL (PrimePath trial):**
+https://a182fdf5trial-dev-exploratory-travel-dashboard-srv.cfapps.us10-001.hana.ondemand.com/
 
+Voor andere accounts, zoek de URL op via:
 ```bash
 cf apps
 ```
@@ -164,7 +166,7 @@ Het JWT Secret hoef je niet opnieuw in te stellen.
 
 ## Problemen oplossen
 
-**`Cannot GET /`** — de `server.js` kan `app-index.html` niet vinden. Controleer of de `mta.yaml` build-stap `cp app/index.html gen/srv/app-index.html` bevat.
+**`Cannot GET /`** — de `server.js` kan `index.html` niet vinden. Controleer of de `mta.yaml` build-stap `cp app/index.html gen/srv/index.html` bevat.
 
 **`Unauthorized` (401)** — het JWT Secret is niet ingesteld. Voer Stap 7 opnieuw uit.
 

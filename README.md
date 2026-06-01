@@ -18,6 +18,8 @@ Centraal exploratief webdashboard voor PrimePath Travel, gebouwd op SAP BTP met 
 
 Authenticatie verloopt via een eigen login-systeem (database + JWT). SAP XSUAA is **niet** vereist.
 
+**Productie-URL:** https://a182fdf5trial-dev-exploratory-travel-dashboard-srv.cfapps.us10-001.hana.ondemand.com/
+
 ---
 
 ## Projectstructuur
