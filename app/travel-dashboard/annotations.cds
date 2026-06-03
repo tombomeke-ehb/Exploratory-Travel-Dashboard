@@ -67,7 +67,12 @@ annotate TravelService.TravelExtensions with {
   InternalNote   @title: 'Interne notitie';
 }
 annotate TravelService.People with @(
-  UI.HeaderInfo: { TypeName: 'Medewerker', TypeNamePlural: 'Medewerkers', Title: { Value: LastName }, Description: { Value: UserName } },
+  UI.HeaderInfo: {
+    TypeName: 'Medewerker',
+    TypeNamePlural: 'Medewerkers',
+    Title: { Value: FirstName },
+    Description: { Value: LastName }
+  },
   UI.SelectionFields: [ LastName, UserName ],
   UI.LineItem: [
     { $Type: 'UI.DataField', Value: UserName,  Label: 'Gebruikersnaam' },
@@ -75,7 +80,10 @@ annotate TravelService.People with @(
     { $Type: 'UI.DataField', Value: LastName,  Label: 'Familienaam' },
     { $Type: 'UI.DataField', Value: Gender,    Label: 'Geslacht' }
   ],
-  UI.Facets: [{ $Type: 'UI.ReferenceFacet', Label: 'Persoonsgegevens', Target: '@UI.FieldGroup#PersonInfo' }],
+  UI.Facets: [
+    { $Type: 'UI.ReferenceFacet', Label: 'Persoonsgegevens', Target: '@UI.FieldGroup#PersonInfo' },
+    { $Type: 'UI.ReferenceFacet', Label: 'Reisoverzicht', Target: 'Trips/@UI.LineItem' }
+  ],
   UI.FieldGroup#PersonInfo: { Label: 'Medewerkerdetails', Data: [
     { $Type: 'UI.DataField', Value: UserName,  Label: 'Gebruikersnaam' },
     { $Type: 'UI.DataField', Value: FirstName, Label: 'Voornaam' },
