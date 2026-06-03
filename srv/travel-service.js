@@ -97,32 +97,16 @@ module.exports = cds.service.impl(async function () {
   // KPI-functies – dashboard (FA v4 §7.1, FV-01 t/m FV-06)
   // ══════════════════════════════════════════════════════════════════════════
 
-  // FV-01: totaal aantal actieve reizen (StartsAt <= nu <= EndsAt)
+  // FV-01: totaal aantal actieve reizen (StartsAt <= vandaag <= EndsAt)
+  // Opmerking: TripPin-data dateert van 2014, dus dit zal 0 retourneren bij live data.
+  // De logica is correct – het resultaat hangt af van de TripPin-dataset.
   this.on('getActiveTripsCount', async () => {
-    const now   = new Date().toISOString();
-    const trips = await TripPin.run(SELECT.from('TripPinService.Trips'));
-    if (!trips) return 0;
-    const arr   = Array.isArray(trips) ? trips : [trips];
-    return arr.filter(t =>
-      t.StartsAt && t.EndsAt &&
-      new Date(t.StartsAt) <= new Date(now) &&
-      new Date(t.EndsAt)   >= new Date(now)
-    ).length;
+    return _countActiveTrips(TripPin, false);
   });
 
   // FV-03: aantal unieke personen momenteel op reis
   this.on('getOnTravelCount', async () => {
-    const now   = new Date().toISOString();
-    const trips = await TripPin.run(SELECT.from('TripPinService.Trips'));
-    if (!trips) return 0;
-    const arr   = Array.isArray(trips) ? trips : [trips];
-    const active = arr.filter(t =>
-      t.StartsAt && t.EndsAt &&
-      new Date(t.StartsAt) <= new Date(now) &&
-      new Date(t.EndsAt)   >= new Date(now)
-    );
-    // TripPin-stub heeft geen PersonID op Trips → gebruik aantal actieve trips als proxy
-    return active.length;
+    return _countActiveTrips(TripPin, true);
   });
 
   // FV-02: meest gebruikte airline
@@ -137,6 +121,46 @@ module.exports = cds.service.impl(async function () {
     return _buildAirlineStats(TripPin);
   });
 });
+
+// ── Hulpfunctie: tel actieve reizen of personen op reis ──────────────────────
+// FV-01: countPersons=false → tel actieve trips
+// FV-03: countPersons=true  → tel unieke personen met een actieve trip
+async function _countActiveTrips(TripPin, countPersons) {
+  const now = new Date();
+  let activeCount = 0;
+  const activePersons = new Set();
+
+  try {
+    const people    = await TripPin.run(SELECT.from('TripPinService.People'));
+    const peopleArr = Array.isArray(people) ? people : (people ? [people] : []);
+
+    await Promise.all(peopleArr.map(async (person) => {
+      try {
+        const tripsResp = await TripPin.send({
+          method: 'GET',
+          path: `People('${person.UserName}')/Trips?$select=TripId,StartsAt,EndsAt`,
+        });
+        const trips = Array.isArray(tripsResp?.value) ? tripsResp.value
+                    : Array.isArray(tripsResp)        ? tripsResp
+                    : [];
+
+        for (const trip of trips) {
+          if (!trip.StartsAt || !trip.EndsAt) continue;
+          const start = new Date(trip.StartsAt);
+          const end   = new Date(trip.EndsAt);
+          if (start <= now && end >= now) {
+            activeCount++;
+            activePersons.add(person.UserName);
+          }
+        }
+      } catch { /* negeer fouten per persoon */ }
+    }));
+  } catch {
+    return 0;
+  }
+
+  return countPersons ? activePersons.size : activeCount;
+}
 
 // ── Hulpfunctie: bouw airline-statistieken op uit TripPin-data ────────────────
 // FA v4 §7.3 FV-27: telt vluchten per airline via FlightNumber-prefix.
