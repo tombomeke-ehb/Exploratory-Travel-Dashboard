@@ -1,29 +1,44 @@
 // Fiori Annotations - Travel Dashboard
+// Opmerking: TravelService.Trips is een read-only projectie op TripPinService.Trips.
+// PrimePath-velden (ApprovalStatus, ProjectCode, InternalNote) zitten in TravelExtensions.
 annotate TravelService.Trips with @(
   UI.HeaderInfo: { TypeName: 'Reis', TypeNamePlural: 'Reizen', Title: { Value: Name }, Description: { Value: Description } },
-  UI.SelectionFields: [ StartsAt, EndsAt, ApprovalStatus ],
+  UI.SelectionFields: [ StartsAt, EndsAt ],
   UI.LineItem: [
-    { $Type: 'UI.DataField', Value: TripId,        Label: 'Trip ID' },
-    { $Type: 'UI.DataField', Value: Name,           Label: 'Naam' },
-    { $Type: 'UI.DataField', Value: StartsAt,       Label: 'Vertrek' },
-    { $Type: 'UI.DataField', Value: EndsAt,         Label: 'Aankomst' },
-    { $Type: 'UI.DataField', Value: Budget,         Label: 'Budget' },
-    { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus' },
-    { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' }
-  ],
-  UI.Facets: [
-    { $Type: 'UI.ReferenceFacet', Label: 'Reisinfo (TripPin)',       Target: '@UI.FieldGroup#TripPin'   },
-    { $Type: 'UI.ReferenceFacet', Label: 'PrimePath Interne Velden', Target: '@UI.FieldGroup#PrimePath' }
-  ],
-  UI.FieldGroup#TripPin: { Label: 'Reisgegevens (read-only)', Data: [
     { $Type: 'UI.DataField', Value: TripId,     Label: 'Trip ID' },
     { $Type: 'UI.DataField', Value: Name,        Label: 'Naam' },
-    { $Type: 'UI.DataField', Value: Description, Label: 'Beschrijving' },
-    { $Type: 'UI.DataField', Value: StartsAt,    Label: 'Vertrekdatum' },
+    { $Type: 'UI.DataField', Value: StartsAt,    Label: 'Vertrek' },
     { $Type: 'UI.DataField', Value: EndsAt,      Label: 'Aankomst' },
-    { $Type: 'UI.DataField', Value: Budget,      Label: 'Budget' }
-  ]},
+    { $Type: 'UI.DataField', Value: Budget,      Label: 'Budget' },
+    { $Type: 'UI.DataField', Value: Description, Label: 'Beschrijving' }
+  ],
+  UI.Facets: [
+    { $Type: 'UI.ReferenceFacet', Label: 'Reisinfo (TripPin)', Target: '@UI.FieldGroup#TripPin' }
+  ],
+  UI.FieldGroup#TripPin: { Label: 'Reisgegevens (read-only)', Data: [
+    { $Type: 'UI.DataField', Value: TripId,      Label: 'Trip ID' },
+    { $Type: 'UI.DataField', Value: Name,         Label: 'Naam' },
+    { $Type: 'UI.DataField', Value: Description,  Label: 'Beschrijving' },
+    { $Type: 'UI.DataField', Value: StartsAt,     Label: 'Vertrekdatum' },
+    { $Type: 'UI.DataField', Value: EndsAt,       Label: 'Aankomst' },
+    { $Type: 'UI.DataField', Value: Budget,       Label: 'Budget' }
+  ]}
+);
+// FV-11–17: TravelExtensions – beheerscherm voor PrimePath-velden (TravelAdmin)
+annotate TravelService.TravelExtensions with @(
+  UI.HeaderInfo: { TypeName: 'Reisextensie', TypeNamePlural: 'Reisextensies', Title: { Value: TripID } },
+  UI.SelectionFields: [ ApprovalStatus ],
+  UI.LineItem: [
+    { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
+    { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
+    { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus' },
+    { $Type: 'UI.DataField', Value: InternalNote,   Label: 'Interne notitie' }
+  ],
+  UI.Facets: [
+    { $Type: 'UI.ReferenceFacet', Label: 'PrimePath Interne Velden', Target: '@UI.FieldGroup#PrimePath' }
+  ],
   UI.FieldGroup#PrimePath: { Label: 'Interne PrimePath Velden', Data: [
+    { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
     { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
     { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus' },
     { $Type: 'UI.DataField', Value: InternalNote,   Label: 'Interne notitie' }
