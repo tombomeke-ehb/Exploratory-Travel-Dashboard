@@ -29,21 +29,26 @@ module.exports = cds.service.impl(async function () {
   this.on('READ', 'Airlines', req => TripPin.run(req.query));
   this.on('READ', 'Airports', req => TripPin.run(req.query));
 
-  // FV-05: TravelExtensions met StartsAt uit TripPin voor sortering
+  // FV-05 + FV-15: TravelExtensions met StartsAt, TripName, TripBudget, TripDescription uit TripPin
   this.on('READ', 'TravelExtensions', async (req) => {
     const extensions = await cds.run(req.query);
     const extArr = Array.isArray(extensions) ? extensions : (extensions ? [extensions] : []);
     if (extArr.length === 0) return extensions;
 
-    // Haal StartsAt op vanuit TripPin voor elk TripID
+    // Haal TripPin-velden op voor elk TripID (StartsAt, Name, Budget, Description)
     await Promise.all(extArr.map(async (ext) => {
       try {
         const tripResp = await TripPin.send({
           method: 'GET',
-          path: `Trips(${ext.TripID})?$select=TripId,StartsAt`,
+          path: `Trips(${ext.TripID})?$select=TripId,StartsAt,Name,Budget,Description`,
         });
-        if (tripResp && tripResp.StartsAt) {
-          ext.StartsAt = tripResp.StartsAt;
+        if (tripResp) {
+          // FV-05: vertrekdatum voor sortering
+          if (tripResp.StartsAt) ext.StartsAt = tripResp.StartsAt;
+          // FV-15: TripPin-velden voor detailpagina
+          if (tripResp.Name)        ext.TripName        = tripResp.Name;
+          if (tripResp.Budget)      ext.TripBudget      = tripResp.Budget?.Value ?? tripResp.Budget;
+          if (tripResp.Description) ext.TripDescription = tripResp.Description;
         }
       } catch { /* negeer fouten per extensie */ }
     }));

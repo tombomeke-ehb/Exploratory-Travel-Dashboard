@@ -44,11 +44,17 @@ annotate TravelService.TravelExtensions with @(
     { $Type: 'UI.DataField', Value: InternalNote,   Label: 'Interne notitie' }
   ],
   UI.Facets: [
+    { $Type: 'UI.ReferenceFacet', Label: 'Reisgegevens (TripPin)', Target: '@UI.FieldGroup#TripPinInfo' },
     { $Type: 'UI.ReferenceFacet', Label: 'PrimePath Interne Velden', Target: '@UI.FieldGroup#PrimePath' }
   ],
+  UI.FieldGroup#TripPinInfo: { Label: 'Reisgegevens (TripPin)', Data: [
+    { $Type: 'UI.DataField', Value: TripName,        Label: 'Reisnaam' },
+    { $Type: 'UI.DataField', Value: TripBudget,      Label: 'Budget' },
+    { $Type: 'UI.DataField', Value: TripDescription, Label: 'Beschrijving' },
+    { $Type: 'UI.DataField', Value: StartsAt,        Label: 'Vertrekdatum' }
+  ]},
   UI.FieldGroup#PrimePath: { Label: 'Interne PrimePath Velden', Data: [
     { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
-    { $Type: 'UI.DataField', Value: StartsAt,        Label: 'Vertrekdatum' },
     { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
     { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus' },
     { $Type: 'UI.DataField', Value: InternalNote,   Label: 'Interne notitie' }
