@@ -14,15 +14,16 @@ annotate TeamService.People with @(
     { $Type: 'UI.DataField', Value: LastName,  Label: 'Familienaam' }
   ]}
 );
+// Opmerking: TeamService.Trips is een read-only projectie op TripPinService.Trips.
+// ApprovalStatus staat in TravelExtensions, niet in Trips.
 annotate TeamService.Trips with @(
   UI.HeaderInfo: { TypeName: 'Reis', TypeNamePlural: 'Reizen', Title: { Value: Name }, Description: { Value: StartsAt } },
-  UI.SelectionFields: [ StartsAt, EndsAt, ApprovalStatus ],
+  UI.SelectionFields: [ StartsAt, EndsAt ],
   UI.LineItem: [
-    { $Type: 'UI.DataField', Value: TripId,        Label: 'Trip ID' },
-    { $Type: 'UI.DataField', Value: Name,           Label: 'Naam' },
-    { $Type: 'UI.DataField', Value: StartsAt,       Label: 'Vertrek' },
-    { $Type: 'UI.DataField', Value: EndsAt,         Label: 'Aankomst' },
-    { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus' }
+    { $Type: 'UI.DataField', Value: TripId,  Label: 'Trip ID' },
+    { $Type: 'UI.DataField', Value: Name,     Label: 'Naam' },
+    { $Type: 'UI.DataField', Value: StartsAt, Label: 'Vertrek' },
+    { $Type: 'UI.DataField', Value: EndsAt,   Label: 'Aankomst' }
   ]
 );
 annotate TeamService.TravelExtensions with @(
