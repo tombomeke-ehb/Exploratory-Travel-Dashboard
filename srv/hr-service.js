@@ -11,6 +11,11 @@
 
 const cds = require('@sap/cds');
 
+// ── In-memory cache voor airline-statistieken ────────────────────────────────
+let _airlineStatsCache = null;
+let _airlineStatsCacheTime = 0;
+const CACHE_TTL = 5 * 60 * 1000;
+
 module.exports = cds.service.impl(async function () {
   const TripPin = await cds.connect.to('TripPinService');
 
@@ -24,6 +29,10 @@ module.exports = cds.service.impl(async function () {
   // Telt vluchten per airline via FlightNumber-prefix in PlanItems.
   // FlightNumber formaat: "AA26" → airlinecode = "AA".
   this.on('getAirlineStats', async () => {
+    if (_airlineStatsCache && (Date.now() - _airlineStatsCacheTime < CACHE_TTL)) {
+      return _airlineStatsCache;
+    }
+
     const airlines   = await TripPin.run(SELECT.from('TripPinService.Airlines'));
     const airlineArr = Array.isArray(airlines) ? airlines : (airlines ? [airlines] : []);
     const airlineMap = Object.fromEntries(airlineArr.map(a => [a.AirlineCode, a.Name]));
@@ -70,17 +79,22 @@ module.exports = cds.service.impl(async function () {
       }
     } catch { /* fallback */ }
 
+    let result;
     if (Object.keys(counts).length === 0) {
-      return airlineArr.map(a => ({ AirlineCode: a.AirlineCode, Name: a.Name, TripCount: 0 }));
+      result = airlineArr.map(a => ({ AirlineCode: a.AirlineCode, Name: a.Name, TripCount: 0 }));
+    } else {
+      result = Object.entries(counts)
+        .map(([code, count]) => ({
+          AirlineCode: code,
+          Name:        airlineMap[code] ?? code,
+          TripCount:   count,
+        }))
+        .sort((a, b) => b.TripCount - a.TripCount);
     }
 
-    return Object.entries(counts)
-      .map(([code, count]) => ({
-        AirlineCode: code,
-        Name:        airlineMap[code] ?? code,
-        TripCount:   count,
-      }))
-      .sort((a, b) => b.TripCount - a.TripCount);
+    _airlineStatsCache = result;
+    _airlineStatsCacheTime = Date.now();
+    return result;
   });
 
   // ── FV-28: aantal reizen in een periode ───────────────────────────────────

@@ -166,6 +166,11 @@ async function _countActiveTrips(TripPin, countPersons) {
   return countPersons ? activePersons.size : activeCount;
 }
 
+// ── In-memory cache voor airline-statistieken ────────────────────────────────
+let _airlineStatsCache = null;
+let _airlineStatsCacheTime = 0;
+const CACHE_TTL = 5 * 60 * 1000;
+
 // ── Hulpfunctie: bouw airline-statistieken op uit TripPin-data ────────────────
 // FA v4 §7.3 FV-27: telt vluchten per airline via FlightNumber-prefix.
 //
@@ -175,6 +180,10 @@ async function _countActiveTrips(TripPin, countPersons) {
 // CAP remote-service ondersteunt geen diep geneste navigatie via SELECT.
 // Oplossing: haal People op, dan per persoon de PlanItems via TripPin HTTP-send.
 async function _buildAirlineStats(TripPin) {
+  if (_airlineStatsCache && (Date.now() - _airlineStatsCacheTime < CACHE_TTL)) {
+    return _airlineStatsCache;
+  }
+
   const airlines = await TripPin.run(SELECT.from('TripPinService.Airlines'));
   const airlineArr = Array.isArray(airlines) ? airlines : (airlines ? [airlines] : []);
   const airlineMap = Object.fromEntries(airlineArr.map(a => [a.AirlineCode, a.Name]));
@@ -233,13 +242,18 @@ async function _buildAirlineStats(TripPin) {
 
   // Als er geen vluchten gevonden zijn (bijv. TripPin heeft verouderde data),
   // retourneer de bekende airlines met TripCount 0 zodat de grafiek toch data toont.
+  let result;
   if (Object.keys(counts).length === 0) {
-    return airlineArr.map(a => ({ AirlineCode: a.AirlineCode, Name: a.Name, TripCount: 0 }));
+    result = airlineArr.map(a => ({ AirlineCode: a.AirlineCode, Name: a.Name, TripCount: 0 }));
+  } else {
+    result = Object.entries(counts).map(([code, count]) => ({
+      AirlineCode: code,
+      Name:        airlineMap[code] ?? code,
+      TripCount:   count,
+    })).sort((a, b) => b.TripCount - a.TripCount);
   }
 
-  return Object.entries(counts).map(([code, count]) => ({
-    AirlineCode: code,
-    Name:        airlineMap[code] ?? code,
-    TripCount:   count,
-  })).sort((a, b) => b.TripCount - a.TripCount);
+  _airlineStatsCache = result;
+  _airlineStatsCacheTime = Date.now();
+  return result;
 }
