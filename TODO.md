@@ -37,6 +37,12 @@
 - [ ] **[Naam]** TeamLead-flow testen: log in als `teamlead`, pas ApprovalStatus aan van eigen teamlid, controleer dat reizen van anderen geblokkeerd zijn (`srv/team-service.js`)
 - [ ] **[Naam]** Demo-script schrijven: welke flow per rol? (TravelAdmin → TeamLead → HR) — max 5 min per rol
 
+### Ontbrekende FV's — kritiek
+- [ ] **[Naam]** **FV-01** KPI-tegel "totaal actieve reizen" zichtbaar op Travel Dashboard startscherm — `getActiveTripsCount` bestaat in `srv/travel-service.js` maar controleer of het ook visueel als tegel getoond wordt in `app/travel-dashboard/webapp/`
+- [ ] **[Naam]** **FV-03** KPI-tegel "medewerkers op reis" zichtbaar op Travel Dashboard startscherm — `getOnTravelCount` bestaat maar controleer of het als tegel geïntegreerd is
+- [ ] **[Naam]** **FV-22** Eerstvolgende reis per teamlid tonen in teamledenlijst — Team Dashboard toont de statusbadge maar toont het ook de datum en naam van de eerstvolgende reis per teamlid? (`app/team-dashboard/annotations.cds` LineItem)
+- [ ] **[Naam]** **FV-26** Filter "In behandeling" als aparte filteroptie in Team Dashboard — is er een duidelijke filterknop of preset specifiek voor `ApprovalStatus = 'Pending'`? (`app/team-dashboard/annotations.cds` SelectionFields)
+
 ### Security (kritiek voor productie/demo)
 - [ ] **[Naam]** Harde fout bij opstarten als `JWT_SECRET` ontbreekt of nog de defaultwaarde heeft in productie — voeg toe aan `server.js` en `srv/auth-strategy.js`:
   ```js
@@ -55,10 +61,18 @@
 
 ## 🟡 Gewenst voor demo (nice-to-have)
 
+### Ontbrekende FV's — nice-to-have
+- [ ] **[Naam]** **FV-02 / FV-06** Airline-grafiek (taart- of staafdiagram) op Travel Dashboard startscherm — `getAirlineStats` bestaat maar wordt het ook als grafiek gerenderd in de Travel Dashboard UI? (FV-27 voor HR is apart)
+- [ ] **[Naam]** **FV-05** Eerstvolgende reizen gesorteerd op vertrekdatum als sectie op Travel Dashboard startscherm — is er een "komende reizen" blok zichtbaar bij het inloggen als TravelAdmin?
+- [ ] **[Naam]** **FV-07** E-mailadres tonen in medewerkerslijst Travel Dashboard — de statusbadge staat er maar het `Emails`-veld uit TripPin People is niet zichtbaar in de LineItem (`app/travel-dashboard/annotations.cds`)
+- [ ] **[Naam]** **FV-13** Datumfilter als bereik (van–tot) op reislijst — `SelectionFields` heeft `StartsAt` en `EndsAt` maar controleer of die samen als bereikfilter werken of als twee losse filters
+- [ ] **[Naam]** **FV-18** Gebruikstelling (aantal boekingen) tonen in airlinelijst — de lijst toont nu alleen `AirlineCode` en `Name`, niet het aantal boekingen per airline; vereist een computed veld of extra annotatie via `getAirlineStats`
+- [ ] **[Naam]** **FV-20** Stad tonen in luchthavenslijst — controleer of `Location.City` zichtbaar is in de airports annotations (`app/travel-dashboard/annotations.cds`); TripPin Airports heeft een genest `Location`-object
+- [ ] **[Naam]** **FV-29** People-lijst bereikbaar vanuit HR Dashboard — `HRService.People` is geannoteerd maar is de lijst ook als navigatiepunt opgenomen in het HR Dashboard naast Trips en Airlines?
+
 ### Data & functionaliteit
 - [ ] **[Naam]** Mock-reisdata toevoegen met datums in **juni 2026** zodat KPI-tegels echte waarden tonen en de statusbadge werkt — update `db/data/primepath-TravelExtensions.csv` met 5–10 rijen met `StartsAt`/`EndsAt` in 2026
 - [ ] **[Naam]** Statusbadge 'Op reis'/'Beschikbaar' werkend maken — afhankelijk van bovenstaande mock-data (de logica staat al in `srv/travel-service.js` en `srv/team-service.js`)
-- [ ] **[Naam]** Filter 'In behandeling' testen in Team Dashboard (FV-26) — controleer of de knop zichtbaar is en correct filtert
 - [ ] **[Naam]** HR-grafiek testen: laadt `getAirlineStats` correct? Worden airlines getoond? (`srv/hr-service.js`)
 - [ ] **[Naam]** Landingspagina (`app/index.html`) testen in productie-URL
 
@@ -92,14 +106,14 @@
 
 ## 🔵 Buiten scope voor demo (bewust niet gedaan)
 
-- [ ] Globale cross-entiteit zoekbalk (FV-04) — Fiori Elements ondersteunt dit niet standaard
-- [ ] Filter op bestemming (FV-12) — TripPin Trips heeft geen Destination-veld op rootniveau
-- [ ] Doorklikken reisdetail → airline (FV-16) — vereist extra associaties in CDS
-- [ ] Doorklikken airline → reizen (FV-19) — vereist extra associaties in CDS
-- [ ] Doorklikken medewerker → specifieke reis (FV-10) — vereist People → TravelExtensions koppeling
-- [ ] Visuele Gantt-tijdlijn (FV-23 visueel) — Fiori Elements heeft geen ingebouwde tijdlijnweergave
-- [ ] CSV-exportfunctie HR-dashboard — de landingspagina vermeldt "exporteerbare rapportagedata" maar dit is niet geïmplementeerd
-- [ ] Redis/HANA-gebaseerde cache voor airline-stats — in-memory cache werkt niet bij meerdere CF-instanties
+- Globale cross-entiteit zoekbalk (FV-04) — Fiori Elements ondersteunt dit niet standaard
+- Filter op bestemming (FV-12) — TripPin Trips heeft geen Destination-veld op rootniveau
+- Doorklikken reisdetail → airline (FV-16) — vereist extra associaties in CDS
+- Doorklikken airline → reizen (FV-19) — vereist extra associaties in CDS
+- Doorklikken medewerker → specifieke reis (FV-10) — vereist People → TravelExtensions koppeling
+- Visuele Gantt-tijdlijn (FV-23 visueel) — Fiori Elements heeft geen ingebouwde tijdlijnweergave
+- CSV-exportfunctie HR-dashboard — de landingspagina vermeldt "exporteerbare rapportagedata" maar dit is niet geïmplementeerd
+- Redis/HANA-gebaseerde cache voor airline-stats — in-memory cache werkt niet bij meerdere CF-instanties
 
 ---
 
