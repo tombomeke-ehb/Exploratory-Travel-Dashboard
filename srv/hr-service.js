@@ -21,26 +21,57 @@ module.exports = cds.service.impl(async function () {
   this.on('READ', 'Airports', req => TripPin.run(req.query));
 
   // ── FV-27: airline-statistieken voor grafiek ──────────────────────────────
+  // Telt vluchten per airline via FlightNumber-prefix in PlanItems.
+  // FlightNumber formaat: "AA26" → airlinecode = "AA".
   this.on('getAirlineStats', async () => {
-    const [trips, airlines] = await Promise.all([
-      TripPin.run(SELECT.from('TripPinService.Trips')),
-      TripPin.run(SELECT.from('TripPinService.Airlines')),
-    ]);
-
-    const tripArr    = Array.isArray(trips)    ? trips    : (trips    ? [trips]    : []);
+    const airlines   = await TripPin.run(SELECT.from('TripPinService.Airlines'));
     const airlineArr = Array.isArray(airlines) ? airlines : (airlines ? [airlines] : []);
-
     const airlineMap = Object.fromEntries(airlineArr.map(a => [a.AirlineCode, a.Name]));
+    const knownCodes = new Set(airlineArr.map(a => a.AirlineCode));
 
-    // Tel reizen per airline via Tags-veld (2-letter IATA-codes)
     const counts = {};
-    for (const trip of tripArr) {
-      const tags = Array.isArray(trip.Tags) ? trip.Tags : [];
-      for (const tag of tags) {
-        if (/^[A-Z]{2}$/.test(tag)) {
-          counts[tag] = (counts[tag] || 0) + 1;
-        }
+
+    try {
+      const people    = await TripPin.run(SELECT.from('TripPinService.People'));
+      const peopleArr = Array.isArray(people) ? people : (people ? [people] : []);
+      const SAMPLE_SIZE = Math.min(peopleArr.length, 8);
+
+      for (const person of peopleArr.slice(0, SAMPLE_SIZE)) {
+        try {
+          const tripsResp = await TripPin.send({
+            method: 'GET',
+            path: `People('${person.UserName}')/Trips?$select=TripId`,
+          });
+          const trips = Array.isArray(tripsResp?.value) ? tripsResp.value
+                      : Array.isArray(tripsResp)        ? tripsResp
+                      : [];
+
+          for (const trip of trips) {
+            try {
+              const planResp = await TripPin.send({
+                method: 'GET',
+                path: `People('${person.UserName}')/Trips(${trip.TripId})/PlanItems?$select=FlightNumber`,
+              });
+              const items = Array.isArray(planResp?.value) ? planResp.value
+                          : Array.isArray(planResp)        ? planResp
+                          : [];
+
+              for (const item of items) {
+                if (item.FlightNumber) {
+                  const match = item.FlightNumber.match(/^([A-Z]{2})/);
+                  if (match && knownCodes.has(match[1])) {
+                    counts[match[1]] = (counts[match[1]] || 0) + 1;
+                  }
+                }
+              }
+            } catch { /* negeer PlanItems-fouten per trip */ }
+          }
+        } catch { /* negeer fouten per persoon */ }
       }
+    } catch { /* fallback */ }
+
+    if (Object.keys(counts).length === 0) {
+      return airlineArr.map(a => ({ AirlineCode: a.AirlineCode, Name: a.Name, TripCount: 0 }));
     }
 
     return Object.entries(counts)
