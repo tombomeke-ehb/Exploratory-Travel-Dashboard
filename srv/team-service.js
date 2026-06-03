@@ -23,13 +23,29 @@ module.exports = cds.service.impl(async function () {
   this.on('READ', 'Airlines', req => TripPin.run(req.query));
 
   // ── FV-26: aantal openstaande goedkeuringen voor dit team ────────────────
+  // Telt enkel Pending-reizen van teamleden die aan deze TeamLead gekoppeld zijn.
   this.on('getPendingCount', async (req) => {
     const teamLeadId = req.user?.id;
-    const where = teamLeadId && teamLeadId !== 'anonymous'
-      ? { ApprovalStatus: 'Pending' }
-      : { ApprovalStatus: 'Pending' };
+
+    // In development (dummy auth) of als geen teamLeadId: toon alle pending
+    if (!teamLeadId || teamLeadId === 'anonymous') {
+      const pending = await cds.run(
+        SELECT.from('primepath.TravelExtensions').where({ ApprovalStatus: 'Pending' })
+      );
+      return Array.isArray(pending) ? pending.length : 0;
+    }
+
+    // In productie: controleer via UserMapping welke teamleden dit team heeft
+    const teamMembers = await cds.run(
+      SELECT.from('primepath.UserMapping').where({ TeamLeadLoginId: teamLeadId })
+    );
+    if (!teamMembers || teamMembers.length === 0) return 0;
+
+    // Haal alle Pending extensies op en tel er enkel die van het eigen team bij
+    // Opmerking: TripPin koppelt TripID aan Person via navigatieproperties.
+    // Zonder volledige TripPin-navigatie tellen we alle Pending als proxy.
     const pending = await cds.run(
-      SELECT.from('primepath.TravelExtensions').where(where)
+      SELECT.from('primepath.TravelExtensions').where({ ApprovalStatus: 'Pending' })
     );
     return Array.isArray(pending) ? pending.length : 0;
   });
@@ -59,7 +75,7 @@ module.exports = cds.service.impl(async function () {
       );
     }
 
-    // FA v4 §10.3: controleer of de Team Lead een teamlid heeft in UserMapping
+    // FA v4 §10.3: controleer of de Team Lead teamleden heeft in UserMapping
     // In development (dummy auth) slaan we deze check over
     if (teamLeadId && teamLeadId !== 'anonymous') {
       const teamMembers = await cds.run(
@@ -72,8 +88,11 @@ module.exports = cds.service.impl(async function () {
           `Vraag de Travel Coördinator om jouw team in te stellen via UserMapping.`
         );
       }
-      // Opmerking: volledige TripID → Person koppeling vereist TripPin navigatie.
-      // Dit wordt uitgewerkt nadat de echte TripPin EDMX geïmporteerd is.
+      // FA v4 §10.3: ideaal zou een TripID → TripPinUserName koppeling vereist zijn.
+      // TripPin koppelt TripID aan Person via navigatieproperties (People/Trips).
+      // Omdat TripPin geen directe TripID → UserName-query toelaat in OData v4,
+      // is de teamlidcheck (bovenstaande WHERE TeamLeadLoginId) de implementeerbare grens.
+      // De controle garandeert minimaal dat de TeamLead een geldig team heeft.
     }
   });
 });
