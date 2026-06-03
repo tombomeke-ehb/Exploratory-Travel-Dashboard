@@ -61,17 +61,33 @@ module.exports = cds.service.impl(async function () {
       return Array.isArray(pending) ? pending.length : 0;
     }
 
-    // In productie: controleer via UserMapping welke teamleden dit team heeft
+    // In productie: haal teamleden op via UserMapping voor deze TeamLead
     const teamMembers = await cds.run(
       SELECT.from('primepath.UserMapping').where({ TeamLeadLoginId: teamLeadId })
     );
     if (!teamMembers || teamMembers.length === 0) return 0;
 
-    // Haal alle Pending extensies op en tel er enkel die van het eigen team bij
-    // Opmerking: TripPin koppelt TripID aan Person via navigatieproperties.
-    // Zonder volledige TripPin-navigatie tellen we alle Pending als proxy.
+    // FV-26: haal TripIDs op voor elk teamlid via TripPin-navigatie
+    const teamTripIds = new Set();
+    await Promise.all(teamMembers.map(async (member) => {
+      try {
+        const tripsResp = await TripPin.send({
+          method: 'GET',
+          path: `People('${member.TripPinUserName}')/Trips?$select=TripId`,
+        });
+        const trips = Array.isArray(tripsResp?.value) ? tripsResp.value
+                    : Array.isArray(tripsResp)        ? tripsResp
+                    : [];
+        trips.forEach(t => { if (t.TripId !== undefined) teamTripIds.add(t.TripId); });
+      } catch { /* negeer fouten per teamlid */ }
+    }));
+
+    if (teamTripIds.size === 0) return 0;
+
+    // Tel enkel Pending-extensies van de TripIDs van dit team
     const pending = await cds.run(
-      SELECT.from('primepath.TravelExtensions').where({ ApprovalStatus: 'Pending' })
+      SELECT.from('primepath.TravelExtensions')
+        .where({ ApprovalStatus: 'Pending', TripID: { in: [...teamTripIds] } })
     );
     return Array.isArray(pending) ? pending.length : 0;
   });
