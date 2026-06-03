@@ -104,19 +104,4 @@
 
 ---
 
-## 🛠️ Technische schuld (na demo)
-
-- [ ] Code-duplicatie oplossen: `_buildAirlineStats` en `OnTravel`-logica staan identiek in meerdere services — extraheer naar `srv/lib/airline-stats.js` en `srv/lib/on-travel.js`
-- [ ] `gen/`-map volledig uitsluiten van git (`.gitignore` updaten)
-- [ ] JWT_SECRET rouleren na de demo
-- [ ] Wachtwoorden rouleren na de demo — demo-wachtwoorden (`Admin1234!`, `Lead1234!`, `HR1234!`) vervangen door sterke productiewachtwoorden
-- [ ] TripPin-data vervangen door echte productiedata of een mock-server met actuele datums
-- [ ] `fetch_csrf: true` documenteren of verwijderen uit `package.json` (regel 49) — veroorzaakt extra HTTP-calls naar TripPin bij schrijfoperaties
-- [ ] `sameSite: 'lax'` op auth-cookie wijzigen naar `'strict'` voor betere CSRF-bescherming (`server.js` regel 81)
-- [ ] `.env.example`-bestand aanmaken met de vereiste omgevingsvariabelen (`JWT_SECRET`)
-- [ ] OData API-links verwijderen van de publieke landingspagina (`app/index.html` regels 263–272) — information disclosure voor niet-ingelogde gebruikers
-- [ ] Geautomatiseerde tests toevoegen (`@cap-js/test` of Jest) — nu zijn er geen tests
-
----
-
 *Laatste update: 3 juni 2026 | Contactpersoon: Tom*
