@@ -150,17 +150,33 @@ Open de URL in de browser. Je ziet de landingspagina met 3 dashboards. Klik op e
 
 ---
 
-## Updates deployen
+## Updates deployen na codewijzigingen
 
-Bij wijzigingen aan de code:
+Bij wijzigingen aan de code voer je de volgende stappen volledig uit:
 
 ```bash
+# 1. Zorg dat je ingelogd bent op CF
+cf login -a https://api.cf.us10-001.hana.ondemand.com
+
+# 2. Pull de laatste wijzigingen
 git pull
+
+# 3. Installeer eventuele nieuwe dependencies
+npm install --legacy-peer-deps
+
+# 4. Build de MTA
 mbt build
+
+# 5. Deploy naar BTP
 cf deploy mta_archives/exploratory-travel-dashboard_1.0.0.mtar -f
+
+# 6. Controleer de logs
+cf logs exploratory-travel-dashboard-srv --recent
 ```
 
-Het JWT Secret hoef je niet opnieuw in te stellen.
+> Het JWT Secret hoef je **niet** opnieuw in te stellen bij updates — het blijft bewaard in de CF-omgevingsvariabelen.
+
+> Na CDS-wijzigingen (bijv. in `.cds`-bestanden): voer altijd `npx cds build --production` uit vóór `mbt build` om zeker te zijn dat de gegenereerde bestanden actueel zijn.
 
 ---
 
@@ -183,6 +199,19 @@ cf login -a https://api.cf.us10-001.hana.ondemand.com
 ```
 
 Voer je BTP-email en wachtwoord in, kies org en space `dev`. Daarna herhaal je het `cf deploy`-commando. Je kunt ook via de BAS Command Palette inloggen: `Ctrl+Shift+P` → **CF: Login to Cloud Foundry**.
+
+**`Trips/@UI.LineItem` toont leeg op de medewerkerdetailpagina** — de `People → Trips` navigatieproperty ontbreekt in de CDS-service. Controleer of `srv/travel-service.cds` en `srv/team-service.cds` de volgende regel bevatten in de `People`-projectie:
+
+```cds
+Trips: redirected to Trips
+```
+
+Voer na elke CDS-wijziging opnieuw uit:
+```bash
+npx cds build --production
+mbt build
+cf deploy mta_archives/exploratory-travel-dashboard_1.0.0.mtar -f
+```
 
 ---
 
