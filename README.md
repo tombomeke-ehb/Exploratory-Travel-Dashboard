@@ -103,17 +103,21 @@ De login-endpoints werken wél (handig om de flow te testen).
 - HANA Cloud instance beschikbaar in je CF space
 - BTP Destination `TripPinApi` geconfigureerd (zie [Externe databron](#externe-databron))
 
-### Stap 0 – Inloggen op Cloud Foundry (BAS)
+### Stap 0 – Inloggen op Cloud Foundry (verplicht vóór elke deploy)
 
-> Doe dit elke keer voor je deployt — CF-sessies verlopen na enkele uren inactiviteit.
+> CF-sessies verlopen na enkele uren inactiviteit. Log opnieuw in als je een `Authentication has expired`-fout krijgt.
 
 ```bash
 cf login -a https://api.cf.us10-001.hana.ondemand.com
 ```
 
-Kies daarna org (`a182fdf5trial`) en space (`dev`). Je kunt ook via de BAS Command Palette: `Ctrl+Shift+P` → **CF: Login to Cloud Foundry**.
+Voer je BTP-emailadres en wachtwoord in. Kies daarna:
+- **Org:** `a182fdf5trial`
+- **Space:** `dev`
 
-Controleer of je ingelogd bent:
+Je kunt ook inloggen via de BAS Command Palette: `Ctrl+Shift+P` → **CF: Login to Cloud Foundry**.
+
+Controleer of je correct ingelogd bent:
 ```bash
 cf target
 ```
@@ -181,6 +185,8 @@ Gebruikers worden opgeslagen in de HANA-tabel `primepath_Users`. Er is geen XSUA
 
 **Uitloggen:** `POST /auth/logout` wist het cookie.
 
+> **Let op voor TeamLead-authenticatie:** Het veld `UserMapping.TeamLeadLoginId` moet overeenkomen met de `username`-kolom uit de `Users`-tabel — **niet** het e-mailadres. Gebruik dus `teamlead` (de gebruikersnaam), niet `teamlead@primepath.be` of een ander e-mailadres. Zie `db/data/primepath-UserMapping.csv` en `db/data/primepath-Users.csv` voor de demo-waarden.
+
 ---
 
 ## Externe databron
@@ -208,6 +214,18 @@ node -e "const b=require('bcryptjs'); console.log(b.hashSync('NieuwWachtwoord1!'
 ```
 
 Zet de hash dan in de `primepath_Users`-tabel.
+
+---
+
+## Bekende beperkingen
+
+| Beperking | Oorzaak | Gevolg |
+|-----------|---------|--------|
+| TripPin-data dateert van 2014 | Externe TripPin-service bevat alleen historische reisdata | KPI-tegels tonen demo-fallbackwaarden: **7 actieve reizen**, **3 op reis** |
+| Statusbadge toont altijd 'Beschikbaar' | TripPin-reisdatums liggen vóór 2024 — geen enkele reis is vandaag actief | `OnTravel`-berekening levert altijd `false` op voor echte TripPin-data |
+| People → Trips navigatie vereist expliciete CDS-property | CAP behoudt geen navigatieproperties automatisch bij remote service projecties | Opgelost in versie 1.0.0: `Trips: redirected to Trips` toegevoegd aan `People`-projectie in `srv/travel-service.cds` en `srv/team-service.cds` |
+
+> Voor de demo werkt de app correct met de ingebouwde fallbackwaarden. Wil je echte waarden zien, voeg dan reisdata toe met datums in 2026 aan `db/data/primepath-TravelExtensions.csv`.
 
 ---
 
