@@ -36,7 +36,6 @@
 - [ ] **[Naam]** People ObjectPage testen: open Travel Dashboard → klik op medewerker → controleer of reizen zichtbaar zijn (`app/travel-dashboard/annotations.cds`)
 - [ ] **[Naam]** TeamLead-flow testen: log in als `teamlead`, pas ApprovalStatus aan van eigen teamlid, controleer dat reizen van anderen geblokkeerd zijn (`srv/team-service.js`)
 - [ ] **[Naam]** Demo-script schrijven: welke flow per rol? (TravelAdmin → TeamLead → HR) — max 5 min per rol
-- [ ] **[Naam]** HANA trial verlengen in BTP Cockpit → **Extend Trial** (verloopt elke 30 dagen — controleer vervaldatum!)
 
 ### Security (kritiek voor productie/demo)
 - [ ] **[Naam]** Harde fout bij opstarten als `JWT_SECRET` ontbreekt of nog de defaultwaarde heeft in productie — voeg toe aan `server.js` en `srv/auth-strategy.js`:
