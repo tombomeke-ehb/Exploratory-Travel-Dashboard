@@ -103,6 +103,21 @@ De login-endpoints werken wél (handig om de flow te testen).
 - HANA Cloud instance beschikbaar in je CF space
 - BTP Destination `TripPinApi` geconfigureerd (zie [Externe databron](#externe-databron))
 
+### Stap 0 – Inloggen op Cloud Foundry (BAS)
+
+> Doe dit elke keer voor je deployt — CF-sessies verlopen na enkele uren inactiviteit.
+
+```bash
+cf login -a https://api.cf.us10-001.hana.ondemand.com
+```
+
+Kies daarna org (`a182fdf5trial`) en space (`dev`). Je kunt ook via de BAS Command Palette: `Ctrl+Shift+P` → **CF: Login to Cloud Foundry**.
+
+Controleer of je ingelogd bent:
+```bash
+cf target
+```
+
 ### Stap 1 – Build
 
 ```bash

@@ -176,6 +176,14 @@ Het JWT Secret hoef je niet opnieuw in te stellen.
 
 **Trial verlopen** — ga naar de BTP Cockpit en klik op **Extend Trial**. Dit moet elke 30 dagen.
 
+**`Authentication has expired` tijdens `cf deploy`** — je CF-sessie is verlopen (dit gebeurt na enkele uren inactiviteit). Log opnieuw in:
+
+```bash
+cf login -a https://api.cf.us10-001.hana.ondemand.com
+```
+
+Voer je BTP-email en wachtwoord in, kies org en space `dev`. Daarna herhaal je het `cf deploy`-commando. Je kunt ook via de BAS Command Palette inloggen: `Ctrl+Shift+P` → **CF: Login to Cloud Foundry**.
+
 ---
 
 *EhB Cloud Integration · In samenwerking met Flexso · Demo: 19 juni 2026*
