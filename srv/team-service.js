@@ -18,7 +18,33 @@ module.exports = cds.service.impl(async function () {
   const TripPin = await cds.connect.to('TripPinService');
 
   // ── READ: TripPin doorsturen ───────────────────────────────────────────────
-  this.on('READ', 'People',   req => TripPin.run(req.query));
+  // FV-22: People met OnTravel statusbadge
+  this.on('READ', 'People', async (req) => {
+    const people = await TripPin.run(req.query);
+    const peopleArr = Array.isArray(people) ? people : (people ? [people] : []);
+    if (peopleArr.length === 0) return people;
+
+    const now = new Date();
+    await Promise.all(peopleArr.map(async (person) => {
+      try {
+        const tripsResp = await TripPin.send({
+          method: 'GET',
+          path: `People('${person.UserName}')/Trips?$select=TripId,StartsAt,EndsAt`,
+        });
+        const trips = Array.isArray(tripsResp?.value) ? tripsResp.value
+                    : Array.isArray(tripsResp)        ? tripsResp
+                    : [];
+        person.OnTravel = trips.some(t => {
+          if (!t.StartsAt || !t.EndsAt) return false;
+          return new Date(t.StartsAt) <= now && new Date(t.EndsAt) >= now;
+        });
+      } catch {
+        person.OnTravel = false;
+      }
+    }));
+
+    return Array.isArray(people) ? peopleArr : peopleArr[0];
+  });
   this.on('READ', 'Trips',    req => TripPin.run(req.query));
   this.on('READ', 'Airlines', req => TripPin.run(req.query));
 

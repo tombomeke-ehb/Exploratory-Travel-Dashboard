@@ -78,8 +78,18 @@ annotate TravelService.People with @(
     { $Type: 'UI.DataField', Value: UserName,  Label: 'Gebruikersnaam' },
     { $Type: 'UI.DataField', Value: FirstName, Label: 'Voornaam' },
     { $Type: 'UI.DataField', Value: LastName,  Label: 'Familienaam' },
-    { $Type: 'UI.DataField', Value: Gender,    Label: 'Geslacht' }
+    { $Type: 'UI.DataField', Value: Gender,    Label: 'Geslacht' },
+    {
+      $Type: 'UI.DataFieldForAnnotation',
+      Target: '@UI.DataPoint#TravelStatus',
+      Label: 'Status'
+    }
   ],
+  UI.DataPoint #TravelStatus: {
+    Value: OnTravel,
+    Title: 'Resstatus',
+    Criticality: { $edmJson: { $If: [{ $Eq: [{ $Path: 'OnTravel' }, true] }, 1, 3] } }
+  },
   UI.Facets: [
     { $Type: 'UI.ReferenceFacet', Label: 'Persoonsgegevens', Target: '@UI.FieldGroup#PersonInfo' },
     { $Type: 'UI.ReferenceFacet', Label: 'Reisoverzicht', Target: 'Trips/@UI.LineItem' }
@@ -88,7 +98,8 @@ annotate TravelService.People with @(
     { $Type: 'UI.DataField', Value: UserName,  Label: 'Gebruikersnaam' },
     { $Type: 'UI.DataField', Value: FirstName, Label: 'Voornaam' },
     { $Type: 'UI.DataField', Value: LastName,  Label: 'Familienaam' },
-    { $Type: 'UI.DataField', Value: Gender,    Label: 'Geslacht' }
+    { $Type: 'UI.DataField', Value: Gender,    Label: 'Geslacht' },
+    { $Type: 'UI.DataField', Value: OnTravel,  Label: 'Op reis' }
   ]}
 );
 annotate TravelService.Airlines with @(

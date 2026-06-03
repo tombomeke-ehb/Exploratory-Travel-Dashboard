@@ -19,7 +19,11 @@ using { TripPinService } from './external/TripPin';
 service TravelService {
 
   // ── TripPin entiteiten (read-only) ────────────────────────────────────────
-  @readonly entity People   as projection on TripPinService.People;
+  // FV-07: OnTravel als virtueel veld voor statusbadge
+  @readonly entity People as projection on TripPinService.People {
+    *,
+    virtual null as OnTravel : Boolean
+  };
   @readonly entity Trips    as projection on TripPinService.Trips;
   @readonly entity Airlines as projection on TripPinService.Airlines;
   @readonly entity Airports as projection on TripPinService.Airports;

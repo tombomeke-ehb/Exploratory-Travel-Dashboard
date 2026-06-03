@@ -1,17 +1,35 @@
 // Fiori Annotations - Team Dashboard
 annotate TeamService.People with @(
-  UI.HeaderInfo: { TypeName: 'Teamlid', TypeNamePlural: 'Teamleden', Title: { Value: LastName }, Description: { Value: UserName } },
+  UI.HeaderInfo: {
+    TypeName: 'Teamlid',
+    TypeNamePlural: 'Teamleden',
+    Title: { Value: FirstName },
+    Description: { Value: LastName }
+  },
   UI.SelectionFields: [ LastName, UserName ],
   UI.LineItem: [
     { $Type: 'UI.DataField', Value: UserName,  Label: 'Gebruikersnaam' },
     { $Type: 'UI.DataField', Value: FirstName, Label: 'Voornaam' },
-    { $Type: 'UI.DataField', Value: LastName,  Label: 'Familienaam' }
+    { $Type: 'UI.DataField', Value: LastName,  Label: 'Familienaam' },
+    {
+      $Type: 'UI.DataFieldForAnnotation',
+      Target: '@UI.DataPoint#TravelStatus',
+      Label: 'Status'
+    }
   ],
-  UI.Facets: [{ $Type: 'UI.ReferenceFacet', Label: 'Persoonsgegevens', Target: '@UI.FieldGroup#PersonInfo' }],
+  UI.DataPoint #TravelStatus: {
+    Value: OnTravel,
+    Title: 'Resstatus',
+    Criticality: { $edmJson: { $If: [{ $Eq: [{ $Path: 'OnTravel' }, true] }, 1, 3] } }
+  },
+  UI.Facets: [
+    { $Type: 'UI.ReferenceFacet', Label: 'Persoonsgegevens', Target: '@UI.FieldGroup#PersonInfo' }
+  ],
   UI.FieldGroup#PersonInfo: { Label: 'Teamlid details', Data: [
     { $Type: 'UI.DataField', Value: UserName,  Label: 'Gebruikersnaam' },
     { $Type: 'UI.DataField', Value: FirstName, Label: 'Voornaam' },
-    { $Type: 'UI.DataField', Value: LastName,  Label: 'Familienaam' }
+    { $Type: 'UI.DataField', Value: LastName,  Label: 'Familienaam' },
+    { $Type: 'UI.DataField', Value: OnTravel,  Label: 'Op reis' }
   ]}
 );
 // Opmerking: TeamService.Trips is een read-only projectie op TripPinService.Trips.

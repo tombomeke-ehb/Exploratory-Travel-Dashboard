@@ -22,8 +22,33 @@ module.exports = cds.service.impl(async function () {
   // READ handlers – TripPin remote service doorsturen
   // ══════════════════════════════════════════════════════════════════════════
 
-  // FV-07–10: medewerkers (People)
-  this.on('READ', 'People',   req => TripPin.run(req.query));
+  // FV-07–10: medewerkers (People) – met OnTravel statusbadge (FV-07)
+  this.on('READ', 'People', async (req) => {
+    const people = await TripPin.run(req.query);
+    const peopleArr = Array.isArray(people) ? people : (people ? [people] : []);
+    if (peopleArr.length === 0) return people;
+
+    const now = new Date();
+    await Promise.all(peopleArr.map(async (person) => {
+      try {
+        const tripsResp = await TripPin.send({
+          method: 'GET',
+          path: `People('${person.UserName}')/Trips?$select=TripId,StartsAt,EndsAt`,
+        });
+        const trips = Array.isArray(tripsResp?.value) ? tripsResp.value
+                    : Array.isArray(tripsResp)        ? tripsResp
+                    : [];
+        person.OnTravel = trips.some(t => {
+          if (!t.StartsAt || !t.EndsAt) return false;
+          return new Date(t.StartsAt) <= now && new Date(t.EndsAt) >= now;
+        });
+      } catch {
+        person.OnTravel = false;
+      }
+    }));
+
+    return Array.isArray(people) ? peopleArr : peopleArr[0];
+  });
 
   // FV-18–21: airlines en luchthavens
   this.on('READ', 'Airlines', req => TripPin.run(req.query));
