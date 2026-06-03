@@ -55,6 +55,16 @@
           "pattern": "Trips({key}):?query:",
           "name": "TripsObjectPage",
           "target": "TripsObjectPage"
+        },
+        {
+          "pattern": "People:?query:",
+          "name": "PeopleList",
+          "target": "PeopleList"
+        },
+        {
+          "pattern": "People({key}):?query:",
+          "name": "PeopleObjectPage",
+          "target": "PeopleObjectPage"
         }
       ],
       "targets": {
@@ -80,6 +90,32 @@
           "options": {
             "settings": {
               "entitySet": "Trips",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "PeopleList": {
+          "type": "Component",
+          "id": "PeopleList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "entitySet": "People",
+              "variantManagement": "Page",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "People": { "detail": { "route": "PeopleObjectPage" } }
+              }
+            }
+          }
+        },
+        "PeopleObjectPage": {
+          "type": "Component",
+          "id": "PeopleObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "entitySet": "People",
               "editableHeaderContent": false
             }
           }

@@ -23,7 +23,8 @@ annotate TeamService.People with @(
     Criticality: { $edmJson: { $If: [{ $Eq: [{ $Path: 'OnTravel' }, true] }, 1, 3] } }
   },
   UI.Facets: [
-    { $Type: 'UI.ReferenceFacet', Label: 'Persoonsgegevens', Target: '@UI.FieldGroup#PersonInfo' }
+    { $Type: 'UI.ReferenceFacet', Label: 'Persoonsgegevens', Target: '@UI.FieldGroup#PersonInfo' },
+    { $Type: 'UI.ReferenceFacet', Label: 'Reistijdlijn', Target: 'Trips/@UI.LineItem' }
   ],
   UI.FieldGroup#PersonInfo: { Label: 'Teamlid details', Data: [
     { $Type: 'UI.DataField', Value: UserName,  Label: 'Gebruikersnaam' },
