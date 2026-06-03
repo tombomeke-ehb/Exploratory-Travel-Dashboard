@@ -26,7 +26,11 @@ service TravelService {
 
   // ── Eigen PrimePath-velden (volledig CRUD voor TravelAdmin) ───────────────
   // FA v4 §7.4: ProjectCode, ApprovalStatus, InternalNote
-  entity TravelExtensions as projection on p.TravelExtensions;
+  // FV-05: StartsAt als virtueel veld voor sortering (ingevuld vanuit TripPin)
+  entity TravelExtensions as projection on p.TravelExtensions {
+    *,
+    virtual null as StartsAt : DateTime
+  };
 
   // FA v4 §10.3: beheer van team-koppelingen
   entity UserMapping as projection on p.UserMapping;

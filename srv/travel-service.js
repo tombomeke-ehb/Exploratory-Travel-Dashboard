@@ -29,6 +29,35 @@ module.exports = cds.service.impl(async function () {
   this.on('READ', 'Airlines', req => TripPin.run(req.query));
   this.on('READ', 'Airports', req => TripPin.run(req.query));
 
+  // FV-05: TravelExtensions met StartsAt uit TripPin voor sortering
+  this.on('READ', 'TravelExtensions', async (req) => {
+    const extensions = await cds.run(req.query);
+    const extArr = Array.isArray(extensions) ? extensions : (extensions ? [extensions] : []);
+    if (extArr.length === 0) return extensions;
+
+    // Haal StartsAt op vanuit TripPin voor elk TripID
+    await Promise.all(extArr.map(async (ext) => {
+      try {
+        const tripResp = await TripPin.send({
+          method: 'GET',
+          path: `Trips(${ext.TripID})?$select=TripId,StartsAt`,
+        });
+        if (tripResp && tripResp.StartsAt) {
+          ext.StartsAt = tripResp.StartsAt;
+        }
+      } catch { /* negeer fouten per extensie */ }
+    }));
+
+    // Sorteer op StartsAt ascending (FV-05)
+    extArr.sort((a, b) => {
+      if (!a.StartsAt) return 1;
+      if (!b.StartsAt) return -1;
+      return new Date(a.StartsAt) - new Date(b.StartsAt);
+    });
+
+    return Array.isArray(extensions) ? extArr : extArr[0];
+  });
+
   // FV-11–16: reizen – data mashup TripPin + TravelExtensions
   this.on('READ', 'Trips', async (req) => {
     const trips = await TripPin.run(req.query);

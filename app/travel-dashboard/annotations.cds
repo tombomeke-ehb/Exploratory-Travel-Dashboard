@@ -25,11 +25,20 @@ annotate TravelService.Trips with @(
   ]}
 );
 // FV-11–17: TravelExtensions – beheerscherm voor PrimePath-velden (TravelAdmin)
+// FV-05: PresentationVariant sorteert op StartsAt ascending
 annotate TravelService.TravelExtensions with @(
+  UI.PresentationVariant: {
+    SortOrder: [{
+      Property: StartsAt,
+      Descending: false
+    }],
+    Visualizations: ['@UI.LineItem']
+  },
   UI.HeaderInfo: { TypeName: 'Reisextensie', TypeNamePlural: 'Reisextensies', Title: { Value: TripID } },
   UI.SelectionFields: [ ApprovalStatus ],
   UI.LineItem: [
     { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
+    { $Type: 'UI.DataField', Value: StartsAt,        Label: 'Vertrekdatum' },
     { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
     { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus' },
     { $Type: 'UI.DataField', Value: InternalNote,   Label: 'Interne notitie' }
@@ -39,6 +48,7 @@ annotate TravelService.TravelExtensions with @(
   ],
   UI.FieldGroup#PrimePath: { Label: 'Interne PrimePath Velden', Data: [
     { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
+    { $Type: 'UI.DataField', Value: StartsAt,        Label: 'Vertrekdatum' },
     { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
     { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus' },
     { $Type: 'UI.DataField', Value: InternalNote,   Label: 'Interne notitie' }
