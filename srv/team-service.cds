@@ -21,9 +21,11 @@ service TeamService {
 
   // ── TripPin data (read-only) ───────────────────────────────────────────────
   // FV-22: OnTravel als virtueel veld voor statusbadge
+  // FV-23: expliciete Trips navigatieproperty zodat People → Trips werkt
   @readonly entity People as projection on TripPinService.People {
     *,
-    virtual null as OnTravel : Boolean
+    virtual null as OnTravel : Boolean,
+    Trips: redirected to Trips
   };
   @readonly entity Trips    as projection on TripPinService.Trips;
   @readonly entity Airlines as projection on TripPinService.Airlines;
