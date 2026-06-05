@@ -4,7 +4,7 @@
 // Bevat:
 //   - ApprovalStatus type (enum)
 //   - TravelExtensions: PrimePath-velden per TripPin-reis (via TripID)
-//   - UserMapping: koppeling BTP-loginID ↔ TripPin-UserName per Team Lead
+//   - UserMapping: koppeling TripPin-UserName medewerker ↔ TripPin-UserName Team Lead
 // ─────────────────────────────────────────────────────────────────────────────
 
 namespace primepath;
@@ -42,25 +42,21 @@ entity TravelExtensions : managed {
 
 // ── UserMapping ───────────────────────────────────────────────────────────────
 // FA v4 §10.3
-// Koppelt BTP-loginID (e-mail) aan TripPin-UserName.
-// Nodig zodat de Team Lead enkel zijn/haar eigen teamleden kan goedkeuren.
+// Koppelt TripPin-UserName van een medewerker aan de TripPin-UserName van zijn/haar TeamLead.
+// Puur TripPin-gebaseerd: geen BTP-afhankelijkheid.
 // Beheerd door de Travel Coördinator (TravelAdmin-rol).
 
 entity UserMapping {
-  @title: 'BTP Login ID'
-  @description: 'E-mailadres waarmee de medewerker inlogt op SAP BTP.'
-  key BtpLoginId     : String(256);
+  @title: 'TripPin Gebruikersnaam (medewerker)'
+  @description: 'UserName van de medewerker in de TripPin-databron.'
+  key TripPinUserName    : String(256);
 
-  @title: 'TripPin Gebruikersnaam'
-  @description: 'Bijbehorende UserName in de TripPin-databron.'
-  TripPinUserName    : String(256);
-
-  @title: 'Team Lead (BTP Login ID)'
-  @description: 'BTP-loginID van de verantwoordelijke Team Lead.'
-  TeamLeadLoginId    : String(256);
+  @title: 'TripPin Gebruikersnaam (Team Lead)'
+  @description: 'UserName van de verantwoordelijke Team Lead in de TripPin-databron.'
+  TeamLeadUserName       : String(256);
 
   @title: 'Weergavenaam'
-  DisplayName        : String(256);
+  DisplayName            : String(256);
 }
 
 // ── Users ─────────────────────────────────────────────────────────────────────
@@ -68,15 +64,19 @@ entity UserMapping {
 // Wachtwoorden worden opgeslagen als bcrypt-hash (saltfactor 10).
 entity Users {
   @title: 'Gebruikersnaam'
-  key username     : String(128);
+  key username          : String(128);
 
   @title: 'Wachtwoord (bcrypt hash)'
-  passwordHash     : String(256);
+  passwordHash          : String(256);
 
   @title: 'Rol'
   @description: 'TravelAdmin | TeamLead | TravelViewer'
-  role             : String(50);
+  role                  : String(50);
 
   @title: 'Weergavenaam'
-  displayName      : String(256);
+  displayName           : String(256);
+
+  @title: 'TripPin Gebruikersnaam'
+  @description: 'Bijbehorende UserName in de TripPin-databron. Vereist voor TeamLead-rol.'
+  tripPinUserName       : String(256);
 }

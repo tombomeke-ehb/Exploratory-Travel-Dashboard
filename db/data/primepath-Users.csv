@@ -1,4 +1,4 @@
-username,passwordHash,role,displayName
-traveladmin,$2b$10$XuI4vM/0gO49vb.ONdrm2Of1i5etiEz4TCDd5AoHeplUE6BxUvMJ.,TravelAdmin,Travel Coordinator
-teamlead,$2b$10$mcAQy5S4yxBcyN1iuuyOp.WdkssFiSslhZDRI.oIVfayWzqkTQRQe,TeamLead,Team Lead
-hrviewer,$2b$10$lvaZgyyWd.JPPDR7TamPRu2TeNc4hnfGo7HvvadFTyjUGwCbI.OAO,TravelViewer,HR Medewerker
+username,passwordHash,role,displayName,tripPinUserName
+traveladmin,$2b$10$XuI4vM/0gO49vb.ONdrm2Of1i5etiEz4TCDd5AoHeplUE6BxUvMJ.,TravelAdmin,Travel Coordinator,
+teamlead,$2b$10$mcAQy5S4yxBcyN1iuuyOp.WdkssFiSslhZDRI.oIVfayWzqkTQRQe,TeamLead,Team Lead,angelhuffman
+hrviewer,$2b$10$lvaZgyyWd.JPPDR7TamPRu2TeNc4hnfGo7HvvadFTyjUGwCbI.OAO,TravelViewer,HR Medewerker,

@@ -1,5 +1,5 @@
-BtpLoginId,TripPinUserName,TeamLeadLoginId,DisplayName
-russellwhyte@primepath.com,russellwhyte,teamlead,Russell Whyte
-scottketchum@primepath.com,scottketchum,teamlead,Scott Ketchum
-ronaldmundy@primepath.com,ronaldmundy,teamlead,Ronald Mundy
-javieralfred@primepath.com,javieralfred,teamlead,Javier Alfred
+TripPinUserName,TeamLeadUserName,DisplayName
+russellwhyte,angelhuffman,Russell Whyte
+scottketchum,angelhuffman,Scott Ketchum
+ronaldmundy,angelhuffman,Ronald Mundy
+javieralfred,angelhuffman,Javier Alfred

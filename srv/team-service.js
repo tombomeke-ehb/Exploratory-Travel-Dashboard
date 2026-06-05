@@ -6,6 +6,7 @@
 // Kritieke autorisatielogica (FV-24):
 //   Een Team Lead mag ALLEEN de ApprovalStatus aanpassen van reizen
 //   die behoren aan medewerkers van zijn/haar eigen team (via UserMapping).
+//   Teamkoppeling gebeurt puur via TripPin-gebruikersnamen (geen BTP-afhankelijkheid).
 //
 // Handlers:
 //   READ People/Trips/Airlines → doorsturen naar TripPin
@@ -51,19 +52,26 @@ module.exports = cds.service.impl(async function () {
   // ── FV-26: aantal openstaande goedkeuringen voor dit team ────────────────
   // Telt enkel Pending-reizen van teamleden die aan deze TeamLead gekoppeld zijn.
   this.on('getPendingCount', async (req) => {
-    const teamLeadId = req.user?.id;
+    const localUserId = req.user?.id;
 
-    // In development (dummy auth) of als geen teamLeadId: toon alle pending
-    if (!teamLeadId || teamLeadId === 'anonymous') {
+    // In development (dummy auth) of als geen localUserId: toon alle pending
+    if (!localUserId || localUserId === 'anonymous') {
       const pending = await cds.run(
         SELECT.from('primepath.TravelExtensions').where({ ApprovalStatus: 'Pending' })
       );
       return Array.isArray(pending) ? pending.length : 0;
     }
 
-    // In productie: haal teamleden op via UserMapping voor deze TeamLead
+    // Zoek TripPin-username op voor de ingelogde TeamLead
+    const localUser = await cds.run(
+      SELECT.one.from('primepath.Users').where({ username: localUserId })
+    );
+    const teamLeadTripPin = localUser?.tripPinUserName;
+    if (!teamLeadTripPin) return 0;
+
+    // Haal teamleden op via UserMapping (puur TripPin-gebruikersnamen)
     const teamMembers = await cds.run(
-      SELECT.from('primepath.UserMapping').where({ TeamLeadLoginId: teamLeadId })
+      SELECT.from('primepath.UserMapping').where({ TeamLeadUserName: teamLeadTripPin })
     );
     if (!teamMembers || teamMembers.length === 0) return 0;
 
@@ -95,7 +103,7 @@ module.exports = cds.service.impl(async function () {
   // ── UPDATE TravelExtensions: alleen ApprovalStatus, alleen eigen team ──────
   // FA v4 §7.2 FV-24 + §11 rollenmatrix
   this.before('UPDATE', 'TravelExtensions', async (req) => {
-    const teamLeadId = req.user?.id;
+    const localUserId = req.user?.id;
 
     // FV-25: Team Lead mag ALLEEN ApprovalStatus aanpassen
     const incomingFields = Object.keys(req.data).filter(f => f !== 'TripID');
@@ -119,22 +127,27 @@ module.exports = cds.service.impl(async function () {
 
     // FA v4 §10.3: controleer of de Team Lead teamleden heeft in UserMapping
     // In development (dummy auth) slaan we deze check over
-    if (teamLeadId && teamLeadId !== 'anonymous') {
+    if (localUserId && localUserId !== 'anonymous') {
+      const localUser = await cds.run(
+        SELECT.one.from('primepath.Users').where({ username: localUserId })
+      );
+      const teamLeadTripPin = localUser?.tripPinUserName;
+      if (!teamLeadTripPin) {
+        return req.error(403,
+          `Geen TripPin-gebruikersnaam geconfigureerd voor '${localUserId}'. ` +
+          `Vraag de Travel Coördinator om jouw TripPin-gebruikersnaam in te stellen.`
+        );
+      }
       const teamMembers = await cds.run(
         SELECT.from('primepath.UserMapping')
-          .where({ TeamLeadLoginId: teamLeadId })
+          .where({ TeamLeadUserName: teamLeadTripPin })
       );
       if (!teamMembers || teamMembers.length === 0) {
         return req.error(403,
-          `Geen teamleden gevonden voor Team Lead '${teamLeadId}'. ` +
+          `Geen teamleden gevonden voor Team Lead '${teamLeadTripPin}'. ` +
           `Vraag de Travel Coördinator om jouw team in te stellen via UserMapping.`
         );
       }
-      // FA v4 §10.3: ideaal zou een TripID → TripPinUserName koppeling vereist zijn.
-      // TripPin koppelt TripID aan Person via navigatieproperties (People/Trips).
-      // Omdat TripPin geen directe TripID → UserName-query toelaat in OData v4,
-      // is de teamlidcheck (bovenstaande WHERE TeamLeadLoginId) de implementeerbare grens.
-      // De controle garandeert minimaal dat de TeamLead een geldig team heeft.
     }
   });
 });
