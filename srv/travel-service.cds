@@ -12,7 +12,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 using { primepath as p } from '../db/schema';
-using { TripPinService } from './external/TripPin';
+using { primepath.shared as shared } from './shared';
 
 @path: '/travel'
 @requires: 'TravelAdmin'
@@ -21,14 +21,14 @@ service TravelService {
   // ── TripPin entiteiten (read-only) ────────────────────────────────────────
   // FV-07: OnTravel als virtueel veld voor statusbadge
   // FV-08: expliciete Trips navigatieproperty zodat People → Trips werkt
-  @readonly entity People as projection on TripPinService.People {
+  @readonly entity People as projection on shared.People {
     *,
     virtual null as OnTravel : Boolean,
     Trips: redirected to Trips
   };
-  @readonly entity Trips    as projection on TripPinService.Trips;
-  @readonly entity Airlines as projection on TripPinService.Airlines;
-  @readonly entity Airports as projection on TripPinService.Airports;
+  @readonly entity Trips    as projection on shared.Trips;
+  @readonly entity Airlines as projection on shared.Airlines;
+  @readonly entity Airports as projection on shared.Airports;
 
   // ── Eigen PrimePath-velden (volledig CRUD voor TravelAdmin) ───────────────
   // FA v4 §7.4: ProjectCode, ApprovalStatus, InternalNote

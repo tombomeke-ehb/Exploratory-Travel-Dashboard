@@ -13,7 +13,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 using { primepath as p } from '../db/schema';
-using { TripPinService } from './external/TripPin';
+using { primepath.shared as shared } from './shared';
 
 @path: '/team'
 @requires: 'TeamLead'
@@ -22,13 +22,13 @@ service TeamService {
   // ── TripPin data (read-only) ───────────────────────────────────────────────
   // FV-22: OnTravel als virtueel veld voor statusbadge
   // FV-23: expliciete Trips navigatieproperty zodat People → Trips werkt
-  @readonly entity People as projection on TripPinService.People {
+  @readonly entity People as projection on shared.People {
     *,
     virtual null as OnTravel : Boolean,
     Trips: redirected to Trips
   };
-  @readonly entity Trips    as projection on TripPinService.Trips;
-  @readonly entity Airlines as projection on TripPinService.Airlines;
+  @readonly entity Trips    as projection on shared.Trips;
+  @readonly entity Airlines as projection on shared.Airlines;
 
   // ── TravelExtensions: lezen voor iedereen ─────────────────────────────────
   // Schrijven enkel ApprovalStatus – afgedwongen in team-service.js

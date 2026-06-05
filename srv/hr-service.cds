@@ -11,17 +11,17 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 using { primepath as p } from '../db/schema';
-using { TripPinService } from './external/TripPin';
+using { primepath.shared as shared } from './shared';
 
 @path: '/hr'
 @requires: 'TravelViewer'
 service HRService {
 
   // ── TripPin data (read-only) ───────────────────────────────────────────────
-  @readonly entity People   as projection on TripPinService.People;
-  @readonly entity Trips    as projection on TripPinService.Trips;
-  @readonly entity Airlines as projection on TripPinService.Airlines;
-  @readonly entity Airports as projection on TripPinService.Airports;
+  @readonly entity People   as projection on shared.People;
+  @readonly entity Trips    as projection on shared.Trips;
+  @readonly entity Airlines as projection on shared.Airlines;
+  @readonly entity Airports as projection on shared.Airports;
 
   // ── PrimePath velden (read-only voor HR) ──────────────────────────────────
   @readonly entity TravelExtensions as projection on p.TravelExtensions;
