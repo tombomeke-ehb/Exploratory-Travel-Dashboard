@@ -1,11 +1,8 @@
 {
   "requires": {
     "auth": {
-      "[development]": { "kind": "dummy" },
-      "[production]": {
-        "kind": "custom",
-        "impl": "./srv/auth-strategy"
-      }
+      "kind": "custom",
+      "impl": "./srv/auth-strategy"
     }
   }
 }
