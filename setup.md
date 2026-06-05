@@ -38,11 +38,47 @@ HANA Cloud is de productiedatabase. Dit doe je éénmalig.
 5. Klik **Create** en wacht — dit kan 10–15 minuten duren
 6. Controleer of de status **Running** toont voor je verdergaat
 
+> **Samenwerkings-tip:** Als je samenwerkt op één gedeelde omgeving, hoeft alleen de **Host** (de beheerder van de gedeelde omgeving) deze database-instance aan te maken. De overige teamleden kunnen deze stap overslaan.
+
 > Als de aanmaak mislukt wegens een fout wachtwoord: verwijder de instance via het contextmenu en begin opnieuw. Er is geen "edit" optie.
 
 ---
 
-## Stap 3 – CF CLI instellen
+## Stap 3 – SAP Business Application Studio (BAS) instellen
+
+Je gaat nu SAP Business Application Studio (BAS) openen en een Dev Space aanmaken om in te kunnen werken.
+
+1. Ga in de BTP Cockpit terug naar je **Subaccount: trial** (klik op **trial** in het broodkruimelpad bovenaan)
+2. Navigeer in het linkermenu naar **Instances and Subscriptions**
+3. Klik onder *Subscriptions* op **SAP Business Application Studio** om de applicatie te openen
+4. Klik op **Create Dev Space**
+5. Vul een naam in voor je Dev Space (bijv. `ExploratoryTravelDashboardDev`) en kies het type **SAP Fiori**
+6. Klik onderaan op de knop **Create Dev Space**
+7. Wacht tot de status van de Dev Space verandert naar **RUNNING** en klik op de naam van de Dev Space om deze te openen
+8. Je bevindt je nu in de SAP BAS-omgeving waar je de volgende stappen kunt uitvoeren.
+
+---
+
+## Stap 4 – Samenwerken op één gedeelde BTP-omgeving (Aanbevolen)
+
+Als team is het handiger om **samen te werken op één gedeelde BTP-omgeving**. Hierdoor delen jullie dezelfde database, destinations en deployen jullie naar dezelfde applicatie-URL.
+
+Kies één teamlid als **Host** (bijv. degene met subaccount `a182fdf5trial`). Deze Host voert de volgende stappen uit in de BTP Cockpit om anderen toegang te geven:
+
+1. **Teammate uitnodigen voor de Cloud Foundry Org:**
+   - Ga naar het **Subaccount: trial** van de Host.
+   - Klik in het linkermenu op **Cloud Foundry** → **Org Members**.
+   - Klik op **Configure Members** → **Add Members** en vul het SAP BTP-e-mailadres van je teamgenoot in. Geef hen de rol **Org Manager** (of Org User).
+2. **Teammate toegang geven tot de Space:**
+   - Klik in het linkermenu op **Cloud Foundry** → **Spaces**.
+   - Klik op de space **dev**.
+   - Klik op **Members** (of Space Members) → **Configure Members** → **Add Members** en voeg je teamgenoot toe met de rol **Space Developer**.
+
+*De teamgenoot kan nu in de volgende stappen direct inloggen op de Org van de Host.*
+
+---
+
+## Stap 5 – CF CLI instellen
 
 Open een terminal (PowerShell of BAS terminal) en log in op Cloud Foundry:
 
@@ -51,10 +87,10 @@ cf login -a https://api.cf.us10-001.hana.ondemand.com
 ```
 
 Voer je BTP-emailadres en wachtwoord in. Selecteer daarna:
-- **Org:** `<jouw-gebruiker>trial` (bijv. `a182fdf5trial`)
+- **Org:** De Org van de **Host** (bijv. `a182fdf5trial`)
 - **Space:** `dev`
 
-Controleer of je correct ingelogd bent:
+Controleer of je correct op de gedeelde omgeving bent ingelogd:
 
 ```bash
 cf target
@@ -62,12 +98,13 @@ cf target
 
 ---
 
-## Stap 4 – TripPin Destination aanmaken
+## Stap 6 – TripPin Destination controleren (Eenmalig per subaccount)
 
-De app haalt reisdata op via een BTP Destination.
+De app haalt externe OData-reisdata op via een BTP Destination. De **Host** moet controleren of deze eenmalig is aangemaakt op de gedeelde omgeving:
 
-1. Ga in de BTP Cockpit naar je **Subaccount** (niet de space) → **Connectivity** → **Destinations**
-2. Klik op **New Destination** en vul in:
+1. Ga in de BTP Cockpit naar het **Subaccount** van de Host → **Connectivity** → **Destinations**.
+2. Controleer of er al een destination staat met de naam `TripPinApi`.
+3. Als deze er nog niet staat (of als je toch op een eigen/apart trial subaccount werkt), klik dan op **New Destination** en vul in:
 
 | Veld | Waarde |
 |------|--------|
@@ -77,11 +114,11 @@ De app haalt reisdata op via een BTP Destination.
 | Proxy Type | Internet |
 | Authentication | NoAuthentication |
 
-3. Klik **Save** en daarna **Check Connection** — je zou een groene status moeten zien
+4. Klik **Save** en daarna **Check Connection** — je zou een groene status moeten zien.
 
 ---
 
-## Stap 5 – Repository klonen en dependencies installeren
+## Stap 7 – Repository klonen en dependencies installeren
 
 ```bash
 git clone https://github.com/tombomeke-ehb/Exploratory-Travel-Dashboard.git
@@ -91,7 +128,7 @@ npm install --legacy-peer-deps
 
 ---
 
-## Stap 6 – Bouwen en deployen
+## Stap 8 – Bouwen en deployen
 
 ```bash
 mbt build
@@ -99,7 +136,7 @@ cf deploy mta_archives/exploratory-travel-dashboard_1.0.0.mtar -f
 ```
 
 De deploy doet automatisch:
-- CAP service deployen naar Cloud Foundry
+- CAP service deployen naar Cloud Foundry van de Host
 - HANA-tabellen aanmaken via de db-deployer
 - Demo-gebruikers laden vanuit de CSV-seeddata
 
@@ -113,9 +150,9 @@ Je zou `exploratory-travel-dashboard-srv` met status **Started** moeten zien. De
 
 ---
 
-## Stap 7 – JWT Secret instellen (verplicht)
+## Stap 9 – JWT Secret instellen (Eenmalig per deploy-omgeving)
 
-Zonder dit werkt de login niet correct in productie:
+Zonder dit werkt de login niet correct in productie. Dit hoeft maar **één keer** op de gedeelde app te gebeuren (door de Host of de Teammate):
 
 ```bash
 # Genereer een veilig geheim
@@ -126,14 +163,14 @@ cf set-env exploratory-travel-dashboard-srv JWT_SECRET <geheim-dat-je-net-genere
 cf restage exploratory-travel-dashboard-srv
 ```
 
-> Je hoeft dit maar één keer te doen. Het geheim blijft bewaard bij volgende deploys.
+> Het JWT-geheim hoeft niet opnieuw te worden ingesteld bij volgende updates — het blijft bewaard in de CF-omgevingsvariabelen.
 
 ---
 
-## Stap 8 – App testen
+## Stap 10 – App testen
 
-**Productie-URL (PrimePath trial):**
-https://a182fdf5trial-dev-exploratory-travel-dashboard-srv.cfapps.us10-001.hana.ondemand.com/
+**Productie-URL (Gedeelde app):**
+https://<host-org-naam>-dev-exploratory-travel-dashboard-srv.cfapps.us10-001.hana.ondemand.com/
 
 Voor andere accounts, zoek de URL op via:
 ```bash
@@ -155,7 +192,7 @@ Open de URL in de browser. Je ziet de landingspagina met 3 dashboards. Klik op e
 Bij wijzigingen aan de code voer je de volgende stappen volledig uit:
 
 ```bash
-# 1. Zorg dat je ingelogd bent op CF
+# 1. Zorg dat je ingelogd bent op CF (op de gedeelde Org en Space)
 cf login -a https://api.cf.us10-001.hana.ondemand.com
 
 # 2. Pull de laatste wijzigingen
@@ -184,7 +221,7 @@ cf logs exploratory-travel-dashboard-srv --recent
 
 **`Cannot GET /`** — de `server.js` kan `index.html` niet vinden. Controleer of de `mta.yaml` build-stap `cp app/index.html gen/srv/index.html` bevat.
 
-**`Unauthorized` (401)** — het JWT Secret is niet ingesteld. Voer Stap 7 opnieuw uit.
+**`Unauthorized` (401)** — het JWT Secret is niet ingesteld. Voer Stap 9 opnieuw uit.
 
 **HANA aanmaak mislukt** — verwijder de instance en maak opnieuw aan met een geldig wachtwoord (min. 8 tekens, hoofdletter, cijfer, speciaal teken).
 
@@ -198,7 +235,7 @@ cf logs exploratory-travel-dashboard-srv --recent
 cf login -a https://api.cf.us10-001.hana.ondemand.com
 ```
 
-Voer je BTP-email en wachtwoord in, kies org en space `dev`. Daarna herhaal je het `cf deploy`-commando. Je kunt ook via de BAS Command Palette inloggen: `Ctrl+Shift+P` → **CF: Login to Cloud Foundry**.
+Voer je BTP-email en wachtwoord in, kies org (van de Host) en space `dev`. Daarna herhaal je het `cf deploy`-commando. Je kunt ook via de BAS Command Palette inloggen: `Ctrl+Shift+P` → **CF: Login to Cloud Foundry**.
 
 **`Trips/@UI.LineItem` toont leeg op de medewerkerdetailpagina** — de `People → Trips` navigatieproperty ontbreekt in de CDS-service. Controleer of `srv/travel-service.cds` en `srv/team-service.cds` de volgende regel bevatten in de `People`-projectie:
 
