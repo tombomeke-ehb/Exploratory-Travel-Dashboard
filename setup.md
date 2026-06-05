@@ -20,6 +20,10 @@ npm install --legacy-peer-deps
 ### Stap 2 — Lokaal starten
 
 ```bash
+npm install -g @sap/cds-dk
+```
+
+```bash
 npx cds watch
 ```
 
