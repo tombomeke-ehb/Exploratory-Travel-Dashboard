@@ -28,6 +28,7 @@ service TripPinService {
     Gender          : String; // Male, Female, Unknown
     Concurrency     : Integer;
     // Trips: navigatie-property (People → Trips)
+    Trips           : Association to many Trips;
   }
 
   // ── Reizen ─────────────────────────────────────────────────────────────────
