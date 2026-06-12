@@ -12,7 +12,7 @@
 - [x] TravelExtensions CRUD voor TravelAdmin (ProjectCode, ApprovalStatus, InternalNote)
 - [x] Validatie ProjectCode (begint met PROJ-), ApprovalStatus enum, InternalNote max 500 tekens
 - [x] TeamLead-beperking: alleen ApprovalStatus aanpassen van eigen teamleden
-- [x] UserMapping JWT-mismatch gefixt (TeamLeadLoginId = username)
+- [x] UserMapping JWT-mismatch gefixt (verouderde omschrijving: sinds de V6-vereenvoudiging loopt de koppeling via Users.tripPinUserName → UserMapping.TeamLeadUserName)
 - [x] HR Dashboard volledig read-only
 - [x] Airlines- en Airports-lijsten in alle dashboards
 - [x] Datumfilter getTripCountByPeriod (FV-28)
@@ -32,15 +32,15 @@
 
 ### Klantfeedback Stijn — verplicht te verwerken
 
-- [ ] **[Naam]** **[V0.1 → AANPASSEN]** Landingspagina herzien: de huidige drie afzonderlijke rolkaarten waarbij de gebruiker zelf zijn rol kiest zijn **verwarrend voor de demo**. Stijn geeft aan: alle kaarten tonen maar met een duidelijk label/badge welke rol toegang heeft tot welke kaart (bijv. "Alleen voor Travel Coördinator"). Zo hoef je geen XSUAA-selectie te faken. Pas `app/index.html` aan.
+- [x] **[V0.1 → GEDAAN]** Landingspagina herzien: rolbadges per kaart staan al in `app/index.html` (badge-travel/team/hr). Enkel nog visueel verifiëren op de productie-URL. ~~Oorspronkelijke taak:~~ Landingspagina herzien: de huidige drie afzonderlijke rolkaarten waarbij de gebruiker zelf zijn rol kiest zijn **verwarrend voor de demo**. Stijn geeft aan: alle kaarten tonen maar met een duidelijk label/badge welke rol toegang heeft tot welke kaart (bijv. "Alleen voor Travel Coördinator"). Zo hoef je geen XSUAA-selectie te faken. Pas `app/index.html` aan.
 
-- [ ] **[Ismael]** **[V0.3 → ARCHITECTUUR]** Servicestructuur herzien volgens feedback Stijn: breng eerst in kaart wat **alle rollen gemeenschappelijk** nodig hebben (People, Trips, Airlines, Airports lezen) en definieer dit **één keer**. Hergebruik dit in de drie services via `using`. Enkel wat echt per rol verschilt (ApprovalStatus-rechten van TravelAdmin vs TeamLead, teamfiltering, HR-stats) leeft in de rol-specifieke service. Pas de CDS `.cds`-bestanden aan zodat de gedeelde entiteiten niet driemaal apart gedefinieerd zijn.
+- [x] **[Ismael]** **[V0.3 → GEDAAN]** Gerealiseerd in `srv/shared.cds`: gedeelde projecties op People/Trips/Airlines/Airports, hergebruikt via `using` in alle drie de services. ~~Oorspronkelijke taak:~~ Servicestructuur herzien volgens feedback Stijn: breng eerst in kaart wat **alle rollen gemeenschappelijk** nodig hebben (People, Trips, Airlines, Airports lezen) en definieer dit **één keer**. Hergebruik dit in de drie services via `using`. Enkel wat echt per rol verschilt (ApprovalStatus-rechten van TravelAdmin vs TeamLead, teamfiltering, HR-stats) leeft in de rol-specifieke service. Pas de CDS `.cds`-bestanden aan zodat de gedeelde entiteiten niet driemaal apart gedefinieerd zijn.
   > *Stijn: "Beter is om eerst in kaart te brengen wat alle rollen moeten kunnen zien of doen, en pas daarna op te splitsen — in overkoepelende (gedeelde) zaken en rol-specifieke zaken. De gedeelde zaken definiëren we één keer en hergebruiken we."*
 
 - [ ] **[Naam]** **[V3 → IMPLEMENTEREN]** TravelAdmin override-mogelijkheid op ApprovalStatus toevoegen: als een TeamLead een reis heeft afgekeurd, moet de TravelAdmin dit alsnog kunnen overschrijven. Dit is niet om de TeamLead te betwisten, maar voor opvolging wanneer de lead niet beschikbaar is. Voeg dit toe als extra UPDATE-rechten op `TravelExtensions.ApprovalStatus` voor TravelAdmin in `srv/travel-service.js`.
   > *Stijn: "Een rol die override-mogelijkheden heeft, niet zozeer om de beslissingen van de teamlead te betwisten maar om de opvolging te verzekeren wanneer de lead niet beschikbaar is."*
 
-- [ ] **[Hassan]** **[V6 → VEREENVOUDIGEN]** UserMapping vereenvoudigen: de huidige mapping gebruikt BTP login-IDs (e-mailadressen). Stijn raadt aan om **puur met TripPin-data** te werken: maak een lokale mapping die `TripPin UserName` van een medewerker koppelt aan de `TripPin UserName` van zijn/haar TeamLead — los van BTP-logins. Dit maakt de koppeling eenvoudiger en minder afhankelijk van BTP-configuratie. Pas `db/schema.cds` (UserMapping entiteit) en `srv/team-service.js` (teamcheck-logica) aan.
+- [x] **[Hassan]** **[V6 → GEDAAN]** Gerealiseerd in `db/schema.cds`: UserMapping is puur TripPin-gebaseerd (`TripPinUserName` → `TeamLeadUserName`), teamcheck in `srv/team-service.js` gebruikt dit al. Let op: README vermeldt nog het oude `TeamLeadLoginId` → rechtzetten (zie TA-sectie onderaan). ~~Oorspronkelijke taak:~~ UserMapping vereenvoudigen: de huidige mapping gebruikt BTP login-IDs (e-mailadressen). Stijn raadt aan om **puur met TripPin-data** te werken: maak een lokale mapping die `TripPin UserName` van een medewerker koppelt aan de `TripPin UserName` van zijn/haar TeamLead — los van BTP-logins. Dit maakt de koppeling eenvoudiger en minder afhankelijk van BTP-configuratie. Pas `db/schema.cds` (UserMapping entiteit) en `srv/team-service.js` (teamcheck-logica) aan.
   > *Stijn: "Ik zou eerder werken met data vanuit TripPin. Waar je een mapping tabel maakt op de entity People - los van BTP."*
 
 ### Ontbrekende FV's — kritiek
@@ -140,6 +140,8 @@
 
 ## 🔵 Buiten scope voor demo (bewust niet gedaan)
 
+> ⚠️ **Let op (review 12 juni):** FV-04, FV-10, FV-12, FV-16, FV-19 en FV-23 staan hieronder als buiten scope, maar staan in de Functionele Analyse v4 nog als vereisten en NIET in §6.2 'Wat bouwen we niet'. Dat is een risico bij de beoordeling (FA belooft wat de demo niet toont). Kies vóór 19 juni: (a) deze FV's alsnog opnemen in FA §6.2 met motivering, of (b) ze in de presentatie expliciet benoemen als bewuste fase-2-keuzes.
+
 - Globale cross-entiteit zoekbalk (FV-04) — Fiori Elements ondersteunt dit niet standaard
 - Filter op bestemming (FV-12) — TripPin Trips heeft geen Destination-veld op rootniveau
 - Doorklikken reisdetail → airline (FV-16) — vereist extra associaties in CDS
@@ -154,4 +156,32 @@
 
 ---
 
-*Laatste update: 5 juni 2026 | Contactpersoon: Tom*
+## 📄 TA v4 is leidend - code in lijn brengen met de Technische Analyse (12 juni 2026)
+
+> Afspraak team: de Technische Analyse v4 beschrijft de doelarchitectuur. Onderstaande punten brengen de code in lijn met de TA. Punten die al elders in deze TODO staan, zijn hier enkel gekoppeld aan het TA-hoofdstuk.
+
+### Nieuw (nog niet elders in deze TODO)
+
+- [ ] **[Naam]** **[TA §6.3]** React demo-dashboard (`app/dashboard/`) koppelen aan de CAP-services (/travel, /team, /hr) i.p.v. rechtstreeks aan TripPin, zodat login, rollen en teamfiltering ook daar gelden. Mockdata enkel als fallback wanneer de backend onbereikbaar is. Pas `app/dashboard/data.jsx` aan.
+- [ ] **[Naam]** **[TA §6.4]** Beheerscherm voor gebruikersaccounts bovenop AdminService (/admin): accounts aanmaken, rol toekennen, wachtwoord resetten (server-side bcrypt-hash). Alleen voor TravelAdmin.
+- [ ] **[Naam]** **[TA §3.3 + README]** README rechtzetten: tekst vermeldt nog `UserMapping.TeamLeadLoginId`, schema gebruikt `TeamLeadUserName`. README en `db/schema.cds` gelijktrekken.
+- [ ] **[Naam]** **[TA Bijlage A]** Repo opschonen: `db.sqlite-shm`, `db.sqlite-wal` en `cds-test.log` uit versiebeheer (`.gitignore` + `git rm --cached`).
+
+### Al in deze TODO, nu gekoppeld aan de TA (afwerken vóór 19 juni)
+
+- [ ] **[TA §7.3]** TravelAdmin override op ApprovalStatus (zie 🔴 Klantfeedback V3)
+- [ ] **[TA §7.3]** Volledige TripID-eigenaarschap check TeamLead UPDATE (zie 🔒 Security)
+- [ ] **[TA §8.4]** Harde fout bij ontbrekende/default JWT_SECRET in productie (zie 🔒 Security)
+- [ ] **[TA §8.4]** Rate limiting op /auth/login, max 10 pogingen / 15 min (zie 🔒 Security)
+- [ ] **[TA §7.4 + §10]** Seed-data met juni 2026-datums zodat KPI's en OnTravel-badge echte waarden tonen (zie 🟡 Data)
+- [ ] **[TA §4.3]** getUpcomingTripsCount toevoegen als extra KPI (zie 🟡 Klantfeedback V7)
+- [ ] **[TA §4.3]** getAirlineStats uitbreiden met TotalBudget per airline (zie 🟡 Klantfeedback V8)
+- [ ] **[TA §10]** Nette foutafhandeling bij verdwenen/hergebruikt TripID (zie 🟡 Klantfeedback V5)
+- [ ] **[TA §7.3]** Datumvalidatie in getTripCountByPeriod (zie 🟡 UX-verbeteringen)
+- [ ] **[TA §6.2]** Logout-knop + automatische redirect naar login bij 401 (zie 🟡 UX-verbeteringen)
+- [ ] **[TA §6.2]** Landingspagina met rolbadges i.p.v. rolkeuze (zie 🔴 Klantfeedback V0.1)
+- [ ] **[TA §6.2]** Nederlandse labels in annotations + consistent sap_horizon-thema (zie 🎨 Design/UX)
+
+---
+
+*Laatste update: 12 juni 2026 | Contactpersoon: Tom*
