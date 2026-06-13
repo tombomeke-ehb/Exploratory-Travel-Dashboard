@@ -153,6 +153,34 @@ module.exports = cds.service.impl(async function () {
   });
 
   // ══════════════════════════════════════════════════════════════════════════
+  // V3 / FA v4 §7.3 – TravelAdmin override op ApprovalStatus (audit)
+  // ══════════════════════════════════════════════════════════════════════════
+  // De TravelAdmin heeft volledige UPDATE-rechten en mag een reeds genomen beslissing
+  // van een Team Lead overschrijven — niet om die te betwisten, maar voor opvolging
+  // wanneer de lead niet beschikbaar is. We blokkeren dit niet, maar leggen een override
+  // van een reeds besliste status (Approved/Rejected) vast als audit-event. De velden
+  // modifiedBy/modifiedAt worden automatisch bijgehouden via de 'managed'-mixin.
+  this.before('UPDATE', 'TravelExtensions', async (req) => {
+    const incoming = req.data.ApprovalStatus;
+    if (!incoming) return;   // geen statuswijziging in dit verzoek
+
+    const keyParam = req.params?.[req.params.length - 1];
+    const tripId = req.data.TripID
+                ?? (keyParam && typeof keyParam === 'object' ? keyParam.TripID : keyParam);
+    if (tripId === undefined) return;
+
+    const current = await SELECT.one.from(TravelExtensions).where({ TripID: tripId });
+    if (current
+        && ['Approved', 'Rejected'].includes(current.ApprovalStatus)
+        && current.ApprovalStatus !== incoming) {
+      cds.log('travel-service').info(
+        `Override: TravelAdmin '${req.user?.id ?? 'onbekend'}' wijzigt ApprovalStatus van ` +
+        `reis ${tripId} van '${current.ApprovalStatus}' naar '${incoming}'.`
+      );
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════════════════════
   // KPI-functies – dashboard (FA v4 §7.1, FV-01 t/m FV-06)
   // ══════════════════════════════════════════════════════════════════════════
 
