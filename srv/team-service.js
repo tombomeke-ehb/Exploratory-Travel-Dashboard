@@ -30,7 +30,7 @@ module.exports = cds.service.impl(async function () {
       try {
         const tripsResp = await TripPin.send({
           method: 'GET',
-          path: `People('${person.UserName}')/Trips?$select=TripId,StartsAt,EndsAt`,
+          path: `People('${person.UserName}')/Trips?$select=TripId,Name,StartsAt,EndsAt`,
         });
         const trips = Array.isArray(tripsResp?.value) ? tripsResp.value
                     : Array.isArray(tripsResp)        ? tripsResp
@@ -39,6 +39,15 @@ module.exports = cds.service.impl(async function () {
           if (!t.StartsAt || !t.EndsAt) return false;
           return new Date(t.StartsAt) <= now && new Date(t.EndsAt) >= now;
         });
+
+        // FV-22: eerstvolgende reis = vroegste reis met StartsAt in de toekomst
+        const upcoming = trips
+          .filter(t => t.StartsAt && new Date(t.StartsAt) > now)
+          .sort((a, b) => new Date(a.StartsAt) - new Date(b.StartsAt));
+        if (upcoming.length > 0) {
+          person.NextTripName = upcoming[0].Name ?? null;
+          person.NextTripDate = upcoming[0].StartsAt;
+        }
       } catch {
         person.OnTravel = false;
       }
