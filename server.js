@@ -16,7 +16,7 @@ const cookieParser = require('cookie-parser')
 const jwt          = require('jsonwebtoken')
 const bcrypt       = require('bcryptjs')
 
-const JWT_SECRET  = process.env.JWT_SECRET || 'primepath-dev-secret-CHANGE-IN-PRODUCTION'
+const { JWT_SECRET } = require('./srv/jwt-config')
 const JWT_EXPIRES = '8h'
 const COOKIE_NAME = 'primepath_auth'
 
