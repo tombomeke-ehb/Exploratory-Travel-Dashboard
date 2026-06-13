@@ -2,6 +2,9 @@ node_modules/
 gen/
 *.db
 *.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.log
 .env
 default-env.json
 mta_archives/
