@@ -20,11 +20,13 @@ using { primepath.shared as shared } from './shared';
 service TeamService {
 
   // ── TripPin data (read-only) ───────────────────────────────────────────────
-  // FV-22: OnTravel als virtueel veld voor statusbadge
+  // FV-22: OnTravel als statusbadge + eerstvolgende reis (naam + datum)
   // FV-23: expliciete Trips navigatieproperty zodat People → Trips werkt
   @readonly entity People as projection on shared.People {
     *,
-    virtual null as OnTravel : Boolean,
+    virtual null as OnTravel     : Boolean,
+    virtual null as NextTripName : String,
+    virtual null as NextTripDate : DateTime,
     Trips: redirected to Trips
   };
   @readonly entity Trips    as projection on shared.Trips;
