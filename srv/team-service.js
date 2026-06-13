@@ -76,19 +76,7 @@ module.exports = cds.service.impl(async function () {
     if (!teamMembers || teamMembers.length === 0) return 0;
 
     // FV-26: haal TripIDs op voor elk teamlid via TripPin-navigatie
-    const teamTripIds = new Set();
-    await Promise.all(teamMembers.map(async (member) => {
-      try {
-        const tripsResp = await TripPin.send({
-          method: 'GET',
-          path: `People('${member.TripPinUserName}')/Trips?$select=TripId`,
-        });
-        const trips = Array.isArray(tripsResp?.value) ? tripsResp.value
-                    : Array.isArray(tripsResp)        ? tripsResp
-                    : [];
-        trips.forEach(t => { if (t.TripId !== undefined) teamTripIds.add(t.TripId); });
-      } catch { /* negeer fouten per teamlid */ }
-    }));
+    const teamTripIds = await _collectTeamTripIds(TripPin, teamMembers);
 
     if (teamTripIds.size === 0) return 0;
 
