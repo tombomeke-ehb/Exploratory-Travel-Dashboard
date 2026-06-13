@@ -12,11 +12,12 @@
 //             teruggeeft: async (req, res, next) => void.
 // ─────────────────────────────────────────────────────────────────────────────
 
+const { JWT_SECRET } = require('./jwt-config')
+
 module.exports = function primepath_auth_factory(_options) {
   const cds = require('@sap/cds')
   const jwt = require('jsonwebtoken')
 
-  const JWT_SECRET = process.env.JWT_SECRET || 'primepath-dev-secret-CHANGE-IN-PRODUCTION'
   const COOKIE_NAME = 'primepath_auth'
 
   return async function primepath_auth(req, res, next) {
