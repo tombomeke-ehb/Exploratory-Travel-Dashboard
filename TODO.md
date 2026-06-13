@@ -60,7 +60,7 @@
   }
   ```
 - [ ] **[Naam]** Volledige TripID-eigenaarschap check in TeamLead UPDATE: controleer of het TripID daadwerkelijk toebehoort aan een teamlid van de ingelogde TeamLead (`srv/team-service.js` regels 122–138) — de huidige check verifieert alleen of de TeamLead überhaupt teamleden heeft, niet of dit specifieke trip van hen is
-- [ ] **[Naam]** Rate limiting toevoegen op `/auth/login` — installeer `express-rate-limit`, max 10 pogingen per 15 minuten per IP (`server.js` vóór regel 53):
+- [x] **[Claude]** Rate limiting toevoegen op `/auth/login` — installeer `express-rate-limit`, max 10 pogingen per 15 minuten per IP (`server.js` vóór regel 53):
   ```bash
   npm install express-rate-limit
   ```
@@ -172,7 +172,7 @@
 - [ ] **[TA §7.3]** TravelAdmin override op ApprovalStatus (zie 🔴 Klantfeedback V3)
 - [ ] **[TA §7.3]** Volledige TripID-eigenaarschap check TeamLead UPDATE (zie 🔒 Security)
 - [x] **[TA §8.4]** Harde fout bij ontbrekende/default JWT_SECRET in productie (zie 🔒 Security)
-- [ ] **[TA §8.4]** Rate limiting op /auth/login, max 10 pogingen / 15 min (zie 🔒 Security)
+- [x] **[TA §8.4]** Rate limiting op /auth/login, max 10 pogingen / 15 min (zie 🔒 Security)
 - [ ] **[TA §7.4 + §10]** Seed-data met juni 2026-datums zodat KPI's en OnTravel-badge echte waarden tonen (zie 🟡 Data)
 - [ ] **[TA §4.3]** getUpcomingTripsCount toevoegen als extra KPI (zie 🟡 Klantfeedback V7)
 - [ ] **[TA §4.3]** getAirlineStats uitbreiden met TotalBudget per airline (zie 🟡 Klantfeedback V8)
