@@ -65,10 +65,15 @@ npm run watch          # of: cds watch
 npm start              # cds-serve
 
 # Model valideren / compileren (doe dit na elke .cds-wijziging)
-npx cds compile srv --to sql > /dev/null   # faalt = modelfout
+npx cds compile srv > /dev/null   # faalt = modelfout (CSN-compile)
+# Let op: 'cds compile --to sql' / '--to edmx' faalt hier bewust door de remote
+# TripPin-associaties (unmanaged, geen ON-conditie). Gebruik dus de CSN-compile hierboven.
 
 # JS-syntax snel checken
 node --check server.js
+
+# Boot-smoketest (vangt JS-laadfouten in de service-handlers)
+npx cds-serve   # verwacht: 'server listening on ...' zonder errors; daarna stoppen
 
 # BTP-deploy (na alle fixes)
 mbt build
