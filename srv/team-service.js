@@ -76,19 +76,7 @@ module.exports = cds.service.impl(async function () {
     if (!teamMembers || teamMembers.length === 0) return 0;
 
     // FV-26: haal TripIDs op voor elk teamlid via TripPin-navigatie
-    const teamTripIds = new Set();
-    await Promise.all(teamMembers.map(async (member) => {
-      try {
-        const tripsResp = await TripPin.send({
-          method: 'GET',
-          path: `People('${member.TripPinUserName}')/Trips?$select=TripId`,
-        });
-        const trips = Array.isArray(tripsResp?.value) ? tripsResp.value
-                    : Array.isArray(tripsResp)        ? tripsResp
-                    : [];
-        trips.forEach(t => { if (t.TripId !== undefined) teamTripIds.add(t.TripId); });
-      } catch { /* negeer fouten per teamlid */ }
-    }));
+    const teamTripIds = await _collectTeamTripIds(TripPin, teamMembers);
 
     if (teamTripIds.size === 0) return 0;
 
@@ -148,6 +136,48 @@ module.exports = cds.service.impl(async function () {
           `Vraag de Travel Coördinator om jouw team in te stellen via UserMapping.`
         );
       }
+
+      // Volledige eigenaarschapscheck (FV-24): hoort dit specifieke TripID bij een teamlid?
+      // De vorige check bevestigde enkel dát er teamleden zijn, niet dat deze reis van hen is.
+      const tripId = req.data?.TripID ?? _tripIdFromParams(req);
+      const teamTripIds = await _collectTeamTripIds(TripPin, teamMembers);
+      if (tripId === undefined || !teamTripIds.has(Number(tripId))) {
+        return req.error(403,
+          `Je mag de goedkeuringsstatus van reis ${tripId} niet aanpassen: ` +
+          `deze reis hoort niet bij een lid van jouw team.`
+        );
+      }
     }
   });
 });
+
+// ── Hulpfuncties ─────────────────────────────────────────────────────────────
+
+// Haal de TripID-sleutel uit het UPDATE-verzoek (req.data of req.params).
+function _tripIdFromParams(req) {
+  const p = req.params?.[req.params.length - 1];
+  if (p === undefined || p === null) return undefined;
+  return (typeof p === 'object') ? p.TripID : p;
+}
+
+// Verzamel alle TripIDs die toebehoren aan de opgegeven teamleden, via TripPin-navigatie.
+async function _collectTeamTripIds(TripPin, teamMembers) {
+  const teamTripIds = new Set();
+  await Promise.all(teamMembers.map(async (member) => {
+    try {
+      const tripsResp = await TripPin.send({
+        method: 'GET',
+        path: `People('${member.TripPinUserName}')/Trips?$select=TripId`,
+      });
+      const trips = Array.isArray(tripsResp?.value) ? tripsResp.value
+                  : Array.isArray(tripsResp)        ? tripsResp
+                  : [];
+      trips.forEach(t => { if (t.TripId !== undefined) teamTripIds.add(Number(t.TripId)); });
+    } catch (err) {
+      cds.log('team-service').warn(
+        `Kon trips van teamlid '${member.TripPinUserName}' niet ophalen:`, err.message
+      );
+    }
+  }));
+  return teamTripIds;
+}
