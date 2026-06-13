@@ -8,9 +8,11 @@ annotate TeamService.People with @(
   },
   UI.SelectionFields: [ LastName, UserName ],
   UI.LineItem: [
-    { $Type: 'UI.DataField', Value: UserName,  Label: 'Gebruikersnaam' },
-    { $Type: 'UI.DataField', Value: FirstName, Label: 'Voornaam' },
-    { $Type: 'UI.DataField', Value: LastName,  Label: 'Familienaam' },
+    { $Type: 'UI.DataField', Value: UserName,     Label: 'Gebruikersnaam' },
+    { $Type: 'UI.DataField', Value: FirstName,    Label: 'Voornaam' },
+    { $Type: 'UI.DataField', Value: LastName,     Label: 'Familienaam' },
+    { $Type: 'UI.DataField', Value: NextTripDate, Label: 'Eerstvolgende reis (datum)' },
+    { $Type: 'UI.DataField', Value: NextTripName, Label: 'Eerstvolgende reis' },
     {
       $Type: 'UI.DataFieldForAnnotation',
       Target: '@UI.DataPoint#TravelStatus',
@@ -27,10 +29,12 @@ annotate TeamService.People with @(
     { $Type: 'UI.ReferenceFacet', Label: 'Reistijdlijn', Target: 'Trips/@UI.LineItem' }
   ],
   UI.FieldGroup#PersonInfo: { Label: 'Teamlid details', Data: [
-    { $Type: 'UI.DataField', Value: UserName,  Label: 'Gebruikersnaam' },
-    { $Type: 'UI.DataField', Value: FirstName, Label: 'Voornaam' },
-    { $Type: 'UI.DataField', Value: LastName,  Label: 'Familienaam' },
-    { $Type: 'UI.DataField', Value: OnTravel,  Label: 'Op reis' }
+    { $Type: 'UI.DataField', Value: UserName,     Label: 'Gebruikersnaam' },
+    { $Type: 'UI.DataField', Value: FirstName,    Label: 'Voornaam' },
+    { $Type: 'UI.DataField', Value: LastName,     Label: 'Familienaam' },
+    { $Type: 'UI.DataField', Value: OnTravel,     Label: 'Op reis' },
+    { $Type: 'UI.DataField', Value: NextTripDate, Label: 'Eerstvolgende reis (datum)' },
+    { $Type: 'UI.DataField', Value: NextTripName, Label: 'Eerstvolgende reis' }
   ]}
 );
 // Opmerking: TeamService.Trips is een read-only projectie op TripPinService.Trips.
