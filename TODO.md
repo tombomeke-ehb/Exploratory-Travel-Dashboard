@@ -164,7 +164,7 @@
 
 - [ ] **[Naam]** **[TA §6.3]** React demo-dashboard (`app/dashboard/`) koppelen aan de CAP-services (/travel, /team, /hr) i.p.v. rechtstreeks aan TripPin, zodat login, rollen en teamfiltering ook daar gelden. Mockdata enkel als fallback wanneer de backend onbereikbaar is. Pas `app/dashboard/data.jsx` aan.
 - [ ] **[Naam]** **[TA §6.4]** Beheerscherm voor gebruikersaccounts bovenop AdminService (/admin): accounts aanmaken, rol toekennen, wachtwoord resetten (server-side bcrypt-hash). Alleen voor TravelAdmin.
-- [ ] **[Naam]** **[TA §3.3 + README]** README rechtzetten: tekst vermeldt nog `UserMapping.TeamLeadLoginId`, schema gebruikt `TeamLeadUserName`. README en `db/schema.cds` gelijktrekken.
+- [x] **[Claude]** **[TA §3.3 + README]** README rechtzetten: tekst vermeldt nog `UserMapping.TeamLeadLoginId`, schema gebruikt `TeamLeadUserName`. README en `db/schema.cds` gelijktrekken.
 - [x] **[Claude]** **[TA Bijlage A]** Repo opschonen: `db.sqlite-shm`, `db.sqlite-wal` en `cds-test.log` uit versiebeheer (`.gitignore` + `git rm --cached`).
 
 ### Al in deze TODO, nu gekoppeld aan de TA (afwerken vóór 19 juni)
