@@ -185,7 +185,9 @@ Gebruikers worden opgeslagen in de HANA-tabel `primepath_Users`. Er is geen XSUA
 
 **Uitloggen:** `POST /auth/logout` wist het cookie.
 
-> **Let op voor TeamLead-authenticatie:** Het veld `UserMapping.TeamLeadLoginId` moet overeenkomen met de `username`-kolom uit de `Users`-tabel — **niet** het e-mailadres. Gebruik dus `teamlead` (de gebruikersnaam), niet `teamlead@primepath.be` of een ander e-mailadres. Zie `db/data/primepath-UserMapping.csv` en `db/data/primepath-Users.csv` voor de demo-waarden.
+> **Let op voor TeamLead-authenticatie:** De team-koppeling is puur **TripPin-gebaseerd** (geen BTP-login-IDs of e-mailadressen). In `UserMapping` koppelt `TripPinUserName` (de TripPin-gebruikersnaam van een medewerker) aan `TeamLeadUserName` (de TripPin-gebruikersnaam van zijn/haar Team Lead). Het login-account wordt aan zijn TripPin-identiteit gekoppeld via `Users.tripPinUserName`. Die waarde moet overeenkomen met de `TeamLeadUserName` in `UserMapping`.
+>
+> **Demo-waarden:** het account `teamlead` heeft `tripPinUserName = angelhuffman`; in `UserMapping` staat `angelhuffman` als `TeamLeadUserName` voor de teamleden `russellwhyte`, `scottketchum`, `ronaldmundy` en `javieralfred`. Zie `db/data/primepath-UserMapping.csv` en `db/data/primepath-Users.csv`.
 
 ---
 
