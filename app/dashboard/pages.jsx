@@ -30,6 +30,12 @@ function DashboardPage({ data, extensions, onNavigate, onOpenTrip, onOpenPerson,
   const activeFromCap   = data.kpis?.activeTrips != null;
   const onTravelFromCap = data.kpis?.onTravel    != null;
 
+  // V7: komende reizen binnen 2 weken — CAP-telling met client-side fallback
+  const in14days = new Date(now.getTime() + 14 * 86400000);
+  const upcomingCountLocal = trips.filter(t => { const s = new Date(t.StartsAt); return s > now && s <= in14days; }).length;
+  const kpiUpcoming     = data.kpis?.upcomingTrips ?? upcomingCountLocal;
+  const upcomingFromCap = data.kpis?.upcomingTrips != null;
+
   const airlineCounts = useMemo(() => {
     const m = {};
     trips.forEach(t => { if (t.Airline) m[t.Airline] = (m[t.Airline] || 0) + 1; });
@@ -133,7 +139,7 @@ function DashboardPage({ data, extensions, onNavigate, onOpenTrip, onOpenPerson,
         <KPI icon="plane-takeoff" accent="#0070F2" label="Actieve Reizen" value={kpiActiveTrips} sublabel={activeFromCap ? "via TravelService" : "nu of binnen 30 dagen"} />
         <KPI icon="users" accent="#107E3E" label="Medewerkers Op Reis" value={kpiPeopleOnTrip} sublabel={onTravelFromCap ? "op reis vandaag · TravelService" : `van ${people.length} medewerkers`} />
         <KPI icon="trending-up" accent="#6800B4" label="Meest Gebruikte Airline" value={topAirline.name} sublabel={`${topAirline.n} reizen`} />
-        <KPI icon="building-2" accent="#E9730C" label="Totaal Luchthavens" value={airports.length} sublabel="in systeem" />
+        <KPI icon="calendar-clock" accent="#E9730C" label="Komende Reizen" value={kpiUpcoming} sublabel={upcomingFromCap ? "binnen 2 weken · TravelService" : "binnen 2 weken"} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">

@@ -97,14 +97,16 @@ async function fetchCAP(path, timeoutMs = 6000) {
 // + demo-fallbackwaarden). Geeft null terug als de backend onbereikbaar is, zodat
 // de UI op client-side berekening terugvalt.
 async function loadTravelKpis() {
-  const [active, onTravel] = await Promise.all([
+  const [active, onTravel, upcoming] = await Promise.all([
     fetchCAP("/travel/getActiveTripsCount()"),
     fetchCAP("/travel/getOnTravelCount()"),
+    fetchCAP("/travel/getUpcomingTripsCount()"),
   ]);
-  if (active == null && onTravel == null) return null;
+  if (active == null && onTravel == null && upcoming == null) return null;
   return {
-    activeTrips: active?.value ?? null,   // FV-01
-    onTravel:    onTravel?.value ?? null, // FV-03
+    activeTrips:   active?.value   ?? null,  // FV-01
+    onTravel:      onTravel?.value ?? null,  // FV-03
+    upcomingTrips: upcoming?.value ?? null,  // V7
     source: "CAP",
   };
 }
