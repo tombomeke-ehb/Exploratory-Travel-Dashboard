@@ -45,8 +45,8 @@
 
 ### Ontbrekende FV's — kritiek
 
-- [ ] **[Naam]** **FV-01** KPI-tegel "totaal actieve reizen" zichtbaar op Travel Dashboard startscherm — `getActiveTripsCount` bestaat in `srv/travel-service.js` maar controleer of het ook visueel als tegel getoond wordt in `app/travel-dashboard/webapp/`
-- [ ] **[Naam]** **FV-03** KPI-tegel "medewerkers momenteel op reis" op Travel Dashboard startscherm — definitie bevestigd door Stijn (V7): enkel medewerkers waarvoor geldt `StartsAt ≤ vandaag ≤ EndsAt`
+- [x] **[Tom]** **FV-01** KPI-tegel "totaal actieve reizen" — gerealiseerd in de React demo-dashboard (`app/dashboard/`): de tegel wordt gevoed door `getActiveTripsCount` uit de CAP TravelService (end-to-end geverifieerd → 7), met client-side berekening als fallback.
+- [x] **[Tom]** **FV-03** KPI-tegel "medewerkers momenteel op reis" — idem via `getOnTravelCount` (definitie Stijn V7: `StartsAt ≤ vandaag ≤ EndsAt`; end-to-end geverifieerd → 3).
 - [x] **[Tom]** **FV-22** Eerstvolgende reis per teamlid tonen in teamledenlijst — Team Dashboard toont de statusbadge maar toont het ook de datum en naam van de eerstvolgende reis per teamlid? (`app/team-dashboard/annotations.cds` LineItem) → virtuele velden `NextTripName`/`NextTripDate` op People, berekend in `team-service.js`, getoond in LineItem + detail. *Visuele check in BAS + juni-2026-seed-data nog nodig om echte waarden te zien.*
 - [x] **[Tom]** **FV-26** Filter "In behandeling" als aparte filteroptie in Team Dashboard — bevestigd OK door Stijn (V9): visuele filter volstaat, geen e-mailnotificaties nodig. → Dedicated Reisgoedkeuringen-pagina (TravelExtensions) met `ApprovalStatus`-SelectionField + `SelectionVariant #Pending` ('In behandeling'); pagina in manifest. *Visuele BAS-check nog nodig.*
 
@@ -162,7 +162,7 @@
 
 ### Nieuw (nog niet elders in deze TODO)
 
-- [ ] **[Naam]** **[TA §6.3]** React demo-dashboard (`app/dashboard/`) koppelen aan de CAP-services (/travel, /team, /hr) i.p.v. rechtstreeks aan TripPin, zodat login, rollen en teamfiltering ook daar gelden. Mockdata enkel als fallback wanneer de backend onbereikbaar is. Pas `app/dashboard/data.jsx` aan.
+- [ ] **[Naam]** **[TA §6.3]** React demo-dashboard (`app/dashboard/`) koppelen aan de CAP-services (/travel, /team, /hr) i.p.v. rechtstreeks aan TripPin, zodat login, rollen en teamfiltering ook daar gelden. Mockdata enkel als fallback wanneer de backend onbereikbaar is. Pas `app/dashboard/data.jsx` aan. *(Deels gestart: `fetchCAP`/`loadTravelKpis` koppelen de KPI-tegels al aan de TravelService — zie FV-01/03. Resterend: People/Trips/Airlines/Airports ook via CAP laden i.p.v. rechtstreeks TripPin.)*
 - [ ] **[Naam]** **[TA §6.4]** Beheerscherm voor gebruikersaccounts bovenop AdminService (/admin): accounts aanmaken, rol toekennen, wachtwoord resetten (server-side bcrypt-hash). Alleen voor TravelAdmin.
 - [x] **[Tom]** **[TA §3.3 + README]** README rechtzetten: tekst vermeldt nog `UserMapping.TeamLeadLoginId`, schema gebruikt `TeamLeadUserName`. README en `db/schema.cds` gelijktrekken.
 - [x] **[Tom]** **[TA Bijlage A]** Repo opschonen: `db.sqlite-shm`, `db.sqlite-wal` en `cds-test.log` uit versiebeheer (`.gitignore` + `git rm --cached`).
