@@ -77,8 +77,20 @@ module.exports = cds.service.impl(async function () {
           if (tripResp.Name)        ext.TripName        = tripResp.Name;
           if (tripResp.Budget)      ext.TripBudget      = tripResp.Budget?.Value ?? tripResp.Budget;
           if (tripResp.Description) ext.TripDescription = tripResp.Description;
+        } else {
+          // V5: TripID bestaat niet (meer) in TripPin (verwijderd of hergebruikt)
+          ext.TripName = '(reis niet meer beschikbaar in TripPin)';
+          cds.log('travel-service').warn(
+            `TravelExtension verwijst naar onbekend TripID ${ext.TripID} (mogelijk verwijderd of hergebruikt).`
+          );
         }
-      } catch { /* negeer fouten per extensie */ }
+      } catch (err) {
+        // V5: ophalen van de TripPin-reis mislukte (bijv. 404 of netwerkfout)
+        ext.TripName = '(reis niet meer beschikbaar in TripPin)';
+        cds.log('travel-service').warn(
+          `Kon TripPin-reis voor TripID ${ext.TripID} niet ophalen: ${err.message}`
+        );
+      }
     }));
 
     // Sorteer op StartsAt ascending (FV-05)
