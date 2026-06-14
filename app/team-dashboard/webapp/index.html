@@ -13,11 +13,17 @@
     data-sap-ui-frameOptions="trusted"
     data-sap-ui-oninit="module:sap/ui/core/ComponentSupport">
   </script>
+  <style>
+    html, body, #content { height: 100%; margin: 0; }
+    /* ComponentSupport wikkelt de app in een tussen-div; geef de hele keten hoogte */
+    #content > div, #container { height: 100%; }
+  </style>
 </head>
 <body class="sapUiBody" id="content">
   <div data-sap-ui-component
     data-name="primepath.team"
     data-id="container"
+    data-height="100%"
     data-settings='{"id":"primepath.team"}'
     data-handle-validation="true">
   </div>
