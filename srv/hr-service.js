@@ -10,6 +10,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const cds = require('@sap/cds');
+const { collectAllTrips } = require('./trippin-trips');
 
 // ── In-memory cache voor airline-statistieken ────────────────────────────────
 let _airlineStatsCache = null;
@@ -21,9 +22,20 @@ module.exports = cds.service.impl(async function () {
 
   // ── READ: TripPin doorsturen ───────────────────────────────────────────────
   this.on('READ', 'People',   req => TripPin.run(req.query));
-  this.on('READ', 'Trips',    req => TripPin.run(req.query));
   this.on('READ', 'Airlines', req => TripPin.run(req.query));
   this.on('READ', 'Airports', req => TripPin.run(req.query));
+
+  // Trips: TripPin heeft geen top-level /Trips → aggregeer via People-navigatie
+  this.on('READ', 'Trips', async (req) => {
+    const { trips, byId } = await collectAllTrips(TripPin);
+    const keyParam = req.params?.[req.params.length - 1];
+    const keyId    = (keyParam && typeof keyParam === 'object') ? keyParam.TripId : keyParam;
+    if (keyId !== undefined && keyId !== null) {
+      return byId.get(Number(keyId)) ?? null;
+    }
+    trips.$count = trips.length;
+    return trips;
+  });
 
   // ── FV-27: airline-statistieken voor grafiek ──────────────────────────────
   // Telt vluchten per airline via FlightNumber-prefix in PlanItems.
