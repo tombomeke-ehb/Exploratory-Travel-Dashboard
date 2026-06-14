@@ -65,6 +65,16 @@
           "pattern": "People({key}):?query:",
           "name": "PeopleObjectPage",
           "target": "PeopleObjectPage"
+        },
+        {
+          "pattern": "TravelExtensions:?query:",
+          "name": "TravelExtensionsList",
+          "target": "TravelExtensionsList"
+        },
+        {
+          "pattern": "TravelExtensions({key}):?query:",
+          "name": "TravelExtensionsObjectPage",
+          "target": "TravelExtensionsObjectPage"
         }
       ],
       "targets": {
@@ -116,6 +126,32 @@
           "options": {
             "settings": {
               "entitySet": "People",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "TravelExtensionsList": {
+          "type": "Component",
+          "id": "TravelExtensionsList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "entitySet": "TravelExtensions",
+              "variantManagement": "Page",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "TravelExtensions": { "detail": { "route": "TravelExtensionsObjectPage" } }
+              }
+            }
+          }
+        },
+        "TravelExtensionsObjectPage": {
+          "type": "Component",
+          "id": "TravelExtensionsObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "entitySet": "TravelExtensions",
               "editableHeaderContent": false
             }
           }
