@@ -54,6 +54,9 @@ service TravelService {
   // FV-03: aantal medewerkers momenteel op reis (actieve reis vandaag)
   function getOnTravelCount() returns Integer;
 
+  // V7: aantal komende reizen binnen 2 weken (StartsAt in de nabije toekomst)
+  function getUpcomingTripsCount() returns Integer;
+
   // FV-02: meest gebruikte airline (op basis van aantal boekingen)
   function getTopAirline() returns {
     AirlineCode : String;

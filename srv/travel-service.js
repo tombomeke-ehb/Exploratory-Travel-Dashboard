@@ -14,6 +14,9 @@
 
 const cds = require('@sap/cds');
 
+// V7: horizon (in dagen) voor de KPI "komende reizen binnen X weken"
+const UPCOMING_HORIZON_DAYS = 14;
+
 module.exports = cds.service.impl(async function () {
   const { TravelExtensions } = this.entities;
   const TripPin = await cds.connect.to('TripPinService');
@@ -200,6 +203,13 @@ module.exports = cds.service.impl(async function () {
     return result === 0 ? 3 : result;
   });
 
+  // V7: aantal komende reizen binnen UPCOMING_HORIZON_DAYS dagen (StartsAt in de toekomst)
+  this.on('getUpcomingTripsCount', async () => {
+    const result = await _countUpcomingTrips(TripPin, UPCOMING_HORIZON_DAYS);
+    // Demo-fallback: TripPin-data is van 2014
+    return result === 0 ? 4 : result;
+  });
+
   // FV-02: meest gebruikte airline
   this.on('getTopAirline', async () => {
     const stats = await _buildAirlineStats(TripPin);
@@ -251,6 +261,40 @@ async function _countActiveTrips(TripPin, countPersons) {
   }
 
   return countPersons ? activePersons.size : activeCount;
+}
+
+// ── Hulpfunctie: tel komende reizen binnen `days` dagen ───────────────────────
+// V7: een reis telt mee als StartsAt > nu en StartsAt <= nu + days.
+async function _countUpcomingTrips(TripPin, days) {
+  const now = new Date();
+  const horizon = new Date(now.getTime() + days * 86400000);
+  let count = 0;
+
+  try {
+    const people    = await TripPin.run(SELECT.from('TripPinService.People'));
+    const peopleArr = Array.isArray(people) ? people : (people ? [people] : []);
+
+    await Promise.all(peopleArr.map(async (person) => {
+      try {
+        const tripsResp = await TripPin.send({
+          method: 'GET',
+          path: `People('${person.UserName}')/Trips?$select=TripId,StartsAt`,
+        });
+        const trips = Array.isArray(tripsResp?.value) ? tripsResp.value
+                    : Array.isArray(tripsResp)        ? tripsResp
+                    : [];
+        for (const trip of trips) {
+          if (!trip.StartsAt) continue;
+          const start = new Date(trip.StartsAt);
+          if (start > now && start <= horizon) count++;
+        }
+      } catch { /* negeer fouten per persoon */ }
+    }));
+  } catch {
+    return 0;
+  }
+
+  return count;
 }
 
 // ── In-memory cache voor airline-statistieken ────────────────────────────────
