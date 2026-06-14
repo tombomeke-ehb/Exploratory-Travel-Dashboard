@@ -73,6 +73,42 @@ function initialExtensions(trips) {
   }));
 }
 
+// === CAP backend (TA §6.3) ===
+// De React-dashboard wordt door de CAP-server geserveerd op /dashboard, dus de
+// services staan same-origin op /travel, /team, /hr — geen CORS, de JWT-cookie
+// gaat automatisch mee. Lukt een call niet (backend onbereikbaar of geen rol),
+// dan valt de UI terug op client-side berekening / mockdata.
+async function fetchCAP(path, timeoutMs = 6000) {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeoutMs);
+    const res = await fetch(path, {
+      signal: ctrl.signal,
+      headers: { Accept: "application/json" },
+      credentials: "same-origin",
+    });
+    clearTimeout(t);
+    if (res.ok) return await res.json();
+  } catch (e) { /* backend onbereikbaar of geen toegang → fallback */ }
+  return null;
+}
+
+// FV-01 + FV-03: KPI-tellingen uit de CAP TravelService (autoritatieve definitie
+// + demo-fallbackwaarden). Geeft null terug als de backend onbereikbaar is, zodat
+// de UI op client-side berekening terugvalt.
+async function loadTravelKpis() {
+  const [active, onTravel] = await Promise.all([
+    fetchCAP("/travel/getActiveTripsCount()"),
+    fetchCAP("/travel/getOnTravelCount()"),
+  ]);
+  if (active == null && onTravel == null) return null;
+  return {
+    activeTrips: active?.value ?? null,   // FV-01
+    onTravel:    onTravel?.value ?? null, // FV-03
+    source: "CAP",
+  };
+}
+
 const TRIPPIN_BASE = "https://services.odata.org/V4/TripPinService";
 const TRIPPIN_PROXY = "https://corsproxy.io/?url=";
 
@@ -167,6 +203,11 @@ async function loadAllData() {
   }
 
   data.usingMock = !gotLive;
+
+  // FV-01 + FV-03: autoritatieve KPI-tellingen ophalen uit de CAP TravelService.
+  // null wanneer de backend onbereikbaar is of de gebruiker geen TravelAdmin-rol heeft.
+  data.kpis = await loadTravelKpis();
+
   return data;
 }
 
@@ -228,7 +269,7 @@ function destinationCities(data) {
 
 Object.assign(window, {
   MOCK_PEOPLE, MOCK_TRIPS, MOCK_AIRLINES, MOCK_AIRPORTS,
-  initialExtensions, loadAllData,
+  initialExtensions, loadAllData, fetchCAP, loadTravelKpis,
   formatDateNL, formatDateTimeNL, formatEUR, avatarColor,
   statusBadgeClass, isActiveTrip, isCurrentlyTraveling,
   getTeamUsernames, cityForIata, destinationCities,

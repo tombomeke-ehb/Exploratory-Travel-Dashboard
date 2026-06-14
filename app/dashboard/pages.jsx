@@ -23,6 +23,13 @@ function DashboardPage({ data, extensions, onNavigate, onOpenTrip, onOpenPerson,
   }, [trips]);
   const peopleAvailable = people.length - peopleOnTrip;
 
+  // FV-01 + FV-03: gebruik de autoritatieve CAP-tellingen (data.kpis) indien beschikbaar,
+  // anders de client-side berekening.
+  const kpiActiveTrips  = data.kpis?.activeTrips ?? activeTrips.length;
+  const kpiPeopleOnTrip = data.kpis?.onTravel    ?? peopleOnTrip;
+  const activeFromCap   = data.kpis?.activeTrips != null;
+  const onTravelFromCap = data.kpis?.onTravel    != null;
+
   const airlineCounts = useMemo(() => {
     const m = {};
     trips.forEach(t => { if (t.Airline) m[t.Airline] = (m[t.Airline] || 0) + 1; });
@@ -123,8 +130,8 @@ function DashboardPage({ data, extensions, onNavigate, onOpenTrip, onOpenPerson,
   return (
     <div className="pp-fade-enter p-6 space-y-5">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPI icon="plane-takeoff" accent="#0070F2" label="Actieve Reizen" value={activeTrips.length} sublabel="nu of binnen 30 dagen" />
-        <KPI icon="users" accent="#107E3E" label="Medewerkers Op Reis" value={peopleOnTrip} sublabel={`van ${people.length} medewerkers`} />
+        <KPI icon="plane-takeoff" accent="#0070F2" label="Actieve Reizen" value={kpiActiveTrips} sublabel={activeFromCap ? "via TravelService" : "nu of binnen 30 dagen"} />
+        <KPI icon="users" accent="#107E3E" label="Medewerkers Op Reis" value={kpiPeopleOnTrip} sublabel={onTravelFromCap ? "op reis vandaag · TravelService" : `van ${people.length} medewerkers`} />
         <KPI icon="trending-up" accent="#6800B4" label="Meest Gebruikte Airline" value={topAirline.name} sublabel={`${topAirline.n} reizen`} />
         <KPI icon="building-2" accent="#E9730C" label="Totaal Luchthavens" value={airports.length} sublabel="in systeem" />
       </div>
