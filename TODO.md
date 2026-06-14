@@ -37,7 +37,7 @@
 - [x] **[Ismael]** **[V0.3 → GEDAAN]** Gerealiseerd in `srv/shared.cds`: gedeelde projecties op People/Trips/Airlines/Airports, hergebruikt via `using` in alle drie de services. ~~Oorspronkelijke taak:~~ Servicestructuur herzien volgens feedback Stijn: breng eerst in kaart wat **alle rollen gemeenschappelijk** nodig hebben (People, Trips, Airlines, Airports lezen) en definieer dit **één keer**. Hergebruik dit in de drie services via `using`. Enkel wat echt per rol verschilt (ApprovalStatus-rechten van TravelAdmin vs TeamLead, teamfiltering, HR-stats) leeft in de rol-specifieke service. Pas de CDS `.cds`-bestanden aan zodat de gedeelde entiteiten niet driemaal apart gedefinieerd zijn.
   > *Stijn: "Beter is om eerst in kaart te brengen wat alle rollen moeten kunnen zien of doen, en pas daarna op te splitsen — in overkoepelende (gedeelde) zaken en rol-specifieke zaken. De gedeelde zaken definiëren we één keer en hergebruiken we."*
 
-- [x] **[Claude]** **[V3 → GEDAAN]** TravelAdmin heeft via de projectie al volledige UPDATE-rechten (override werkt op dataniveau). Toegevoegd in `srv/travel-service.js`: een `before UPDATE`-handler die een override van een reeds besliste status (Approved/Rejected) als audit-event logt (wie, welke reis, oud → nieuw), zodat de opvolging traceerbaar is. ~~Oorspronkelijke taak:~~ TravelAdmin override-mogelijkheid op ApprovalStatus toevoegen: als een TeamLead een reis heeft afgekeurd, moet de TravelAdmin dit alsnog kunnen overschrijven. Dit is niet om de TeamLead te betwisten, maar voor opvolging wanneer de lead niet beschikbaar is. Voeg dit toe als extra UPDATE-rechten op `TravelExtensions.ApprovalStatus` voor TravelAdmin in `srv/travel-service.js`.
+- [x] **[Tom]** **[V3 → GEDAAN]** TravelAdmin heeft via de projectie al volledige UPDATE-rechten (override werkt op dataniveau). Toegevoegd in `srv/travel-service.js`: een `before UPDATE`-handler die een override van een reeds besliste status (Approved/Rejected) als audit-event logt (wie, welke reis, oud → nieuw), zodat de opvolging traceerbaar is. ~~Oorspronkelijke taak:~~ TravelAdmin override-mogelijkheid op ApprovalStatus toevoegen: als een TeamLead een reis heeft afgekeurd, moet de TravelAdmin dit alsnog kunnen overschrijven. Dit is niet om de TeamLead te betwisten, maar voor opvolging wanneer de lead niet beschikbaar is. Voeg dit toe als extra UPDATE-rechten op `TravelExtensions.ApprovalStatus` voor TravelAdmin in `srv/travel-service.js`.
   > *Stijn: "Een rol die override-mogelijkheden heeft, niet zozeer om de beslissingen van de teamlead te betwisten maar om de opvolging te verzekeren wanneer de lead niet beschikbaar is."*
 
 - [x] **[Hassan]** **[V6 → GEDAAN]** Gerealiseerd in `db/schema.cds`: UserMapping is puur TripPin-gebaseerd (`TripPinUserName` → `TeamLeadUserName`), teamcheck in `srv/team-service.js` gebruikt dit al. Let op: README vermeldt nog het oude `TeamLeadLoginId` → rechtzetten (zie TA-sectie onderaan). ~~Oorspronkelijke taak:~~ UserMapping vereenvoudigen: de huidige mapping gebruikt BTP login-IDs (e-mailadressen). Stijn raadt aan om **puur met TripPin-data** te werken: maak een lokale mapping die `TripPin UserName` van een medewerker koppelt aan de `TripPin UserName` van zijn/haar TeamLead — los van BTP-logins. Dit maakt de koppeling eenvoudiger en minder afhankelijk van BTP-configuratie. Pas `db/schema.cds` (UserMapping entiteit) en `srv/team-service.js` (teamcheck-logica) aan.
@@ -47,20 +47,20 @@
 
 - [ ] **[Naam]** **FV-01** KPI-tegel "totaal actieve reizen" zichtbaar op Travel Dashboard startscherm — `getActiveTripsCount` bestaat in `srv/travel-service.js` maar controleer of het ook visueel als tegel getoond wordt in `app/travel-dashboard/webapp/`
 - [ ] **[Naam]** **FV-03** KPI-tegel "medewerkers momenteel op reis" op Travel Dashboard startscherm — definitie bevestigd door Stijn (V7): enkel medewerkers waarvoor geldt `StartsAt ≤ vandaag ≤ EndsAt`
-- [x] **[Claude]** **FV-22** Eerstvolgende reis per teamlid tonen in teamledenlijst — Team Dashboard toont de statusbadge maar toont het ook de datum en naam van de eerstvolgende reis per teamlid? (`app/team-dashboard/annotations.cds` LineItem) → virtuele velden `NextTripName`/`NextTripDate` op People, berekend in `team-service.js`, getoond in LineItem + detail. *Visuele check in BAS + juni-2026-seed-data nog nodig om echte waarden te zien.*
-- [x] **[Claude]** **FV-26** Filter "In behandeling" als aparte filteroptie in Team Dashboard — bevestigd OK door Stijn (V9): visuele filter volstaat, geen e-mailnotificaties nodig. → Dedicated Reisgoedkeuringen-pagina (TravelExtensions) met `ApprovalStatus`-SelectionField + `SelectionVariant #Pending` ('In behandeling'); pagina in manifest. *Visuele BAS-check nog nodig.*
+- [x] **[Tom]** **FV-22** Eerstvolgende reis per teamlid tonen in teamledenlijst — Team Dashboard toont de statusbadge maar toont het ook de datum en naam van de eerstvolgende reis per teamlid? (`app/team-dashboard/annotations.cds` LineItem) → virtuele velden `NextTripName`/`NextTripDate` op People, berekend in `team-service.js`, getoond in LineItem + detail. *Visuele check in BAS + juni-2026-seed-data nog nodig om echte waarden te zien.*
+- [x] **[Tom]** **FV-26** Filter "In behandeling" als aparte filteroptie in Team Dashboard — bevestigd OK door Stijn (V9): visuele filter volstaat, geen e-mailnotificaties nodig. → Dedicated Reisgoedkeuringen-pagina (TravelExtensions) met `ApprovalStatus`-SelectionField + `SelectionVariant #Pending` ('In behandeling'); pagina in manifest. *Visuele BAS-check nog nodig.*
 
 ### Security (kritiek voor productie/demo)
 
-- [x] **[Claude]** Harde fout bij opstarten als `JWT_SECRET` ontbreekt of nog de defaultwaarde heeft in productie — voeg toe aan `server.js` en `srv/auth-strategy.js`:
+- [x] **[Tom]** Harde fout bij opstarten als `JWT_SECRET` ontbreekt of nog de defaultwaarde heeft in productie — voeg toe aan `server.js` en `srv/auth-strategy.js`:
   ```js
   if (process.env.NODE_ENV === 'production' &&
       (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'primepath-dev-secret-CHANGE-IN-PRODUCTION')) {
     throw new Error('JWT_SECRET is niet ingesteld of is nog de standaardwaarde!');
   }
   ```
-- [x] **[Claude]** Volledige TripID-eigenaarschap check in TeamLead UPDATE: controleer of het TripID daadwerkelijk toebehoort aan een teamlid van de ingelogde TeamLead (`srv/team-service.js` regels 122–138) — de huidige check verifieert alleen of de TeamLead überhaupt teamleden heeft, niet of dit specifieke trip van hen is
-- [x] **[Claude]** Rate limiting toevoegen op `/auth/login` — installeer `express-rate-limit`, max 10 pogingen per 15 minuten per IP (`server.js` vóór regel 53):
+- [x] **[Tom]** Volledige TripID-eigenaarschap check in TeamLead UPDATE: controleer of het TripID daadwerkelijk toebehoort aan een teamlid van de ingelogde TeamLead (`srv/team-service.js` regels 122–138) — de huidige check verifieert alleen of de TeamLead überhaupt teamleden heeft, niet of dit specifieke trip van hen is
+- [x] **[Tom]** Rate limiting toevoegen op `/auth/login` — installeer `express-rate-limit`, max 10 pogingen per 15 minuten per IP (`server.js` vóór regel 53):
   ```bash
   npm install express-rate-limit
   ```
@@ -164,8 +164,8 @@
 
 - [ ] **[Naam]** **[TA §6.3]** React demo-dashboard (`app/dashboard/`) koppelen aan de CAP-services (/travel, /team, /hr) i.p.v. rechtstreeks aan TripPin, zodat login, rollen en teamfiltering ook daar gelden. Mockdata enkel als fallback wanneer de backend onbereikbaar is. Pas `app/dashboard/data.jsx` aan.
 - [ ] **[Naam]** **[TA §6.4]** Beheerscherm voor gebruikersaccounts bovenop AdminService (/admin): accounts aanmaken, rol toekennen, wachtwoord resetten (server-side bcrypt-hash). Alleen voor TravelAdmin.
-- [x] **[Claude]** **[TA §3.3 + README]** README rechtzetten: tekst vermeldt nog `UserMapping.TeamLeadLoginId`, schema gebruikt `TeamLeadUserName`. README en `db/schema.cds` gelijktrekken.
-- [x] **[Claude]** **[TA Bijlage A]** Repo opschonen: `db.sqlite-shm`, `db.sqlite-wal` en `cds-test.log` uit versiebeheer (`.gitignore` + `git rm --cached`).
+- [x] **[Tom]** **[TA §3.3 + README]** README rechtzetten: tekst vermeldt nog `UserMapping.TeamLeadLoginId`, schema gebruikt `TeamLeadUserName`. README en `db/schema.cds` gelijktrekken.
+- [x] **[Tom]** **[TA Bijlage A]** Repo opschonen: `db.sqlite-shm`, `db.sqlite-wal` en `cds-test.log` uit versiebeheer (`.gitignore` + `git rm --cached`).
 
 ### Al in deze TODO, nu gekoppeld aan de TA (afwerken vóór 19 juni)
 
