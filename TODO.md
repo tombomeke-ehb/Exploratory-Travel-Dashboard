@@ -37,7 +37,7 @@
 - [x] **[Ismael]** **[V0.3 → GEDAAN]** Gerealiseerd in `srv/shared.cds`: gedeelde projecties op People/Trips/Airlines/Airports, hergebruikt via `using` in alle drie de services. ~~Oorspronkelijke taak:~~ Servicestructuur herzien volgens feedback Stijn: breng eerst in kaart wat **alle rollen gemeenschappelijk** nodig hebben (People, Trips, Airlines, Airports lezen) en definieer dit **één keer**. Hergebruik dit in de drie services via `using`. Enkel wat echt per rol verschilt (ApprovalStatus-rechten van TravelAdmin vs TeamLead, teamfiltering, HR-stats) leeft in de rol-specifieke service. Pas de CDS `.cds`-bestanden aan zodat de gedeelde entiteiten niet driemaal apart gedefinieerd zijn.
   > *Stijn: "Beter is om eerst in kaart te brengen wat alle rollen moeten kunnen zien of doen, en pas daarna op te splitsen — in overkoepelende (gedeelde) zaken en rol-specifieke zaken. De gedeelde zaken definiëren we één keer en hergebruiken we."*
 
-- [ ] **[Naam]** **[V3 → IMPLEMENTEREN]** TravelAdmin override-mogelijkheid op ApprovalStatus toevoegen: als een TeamLead een reis heeft afgekeurd, moet de TravelAdmin dit alsnog kunnen overschrijven. Dit is niet om de TeamLead te betwisten, maar voor opvolging wanneer de lead niet beschikbaar is. Voeg dit toe als extra UPDATE-rechten op `TravelExtensions.ApprovalStatus` voor TravelAdmin in `srv/travel-service.js`.
+- [x] **[Tom]** **[V3 → GEDAAN]** TravelAdmin heeft via de projectie al volledige UPDATE-rechten (override werkt op dataniveau). Toegevoegd in `srv/travel-service.js`: een `before UPDATE`-handler die een override van een reeds besliste status (Approved/Rejected) als audit-event logt (wie, welke reis, oud → nieuw), zodat de opvolging traceerbaar is. ~~Oorspronkelijke taak:~~ TravelAdmin override-mogelijkheid op ApprovalStatus toevoegen: als een TeamLead een reis heeft afgekeurd, moet de TravelAdmin dit alsnog kunnen overschrijven. Dit is niet om de TeamLead te betwisten, maar voor opvolging wanneer de lead niet beschikbaar is. Voeg dit toe als extra UPDATE-rechten op `TravelExtensions.ApprovalStatus` voor TravelAdmin in `srv/travel-service.js`.
   > *Stijn: "Een rol die override-mogelijkheden heeft, niet zozeer om de beslissingen van de teamlead te betwisten maar om de opvolging te verzekeren wanneer de lead niet beschikbaar is."*
 
 - [x] **[Hassan]** **[V6 → GEDAAN]** Gerealiseerd in `db/schema.cds`: UserMapping is puur TripPin-gebaseerd (`TripPinUserName` → `TeamLeadUserName`), teamcheck in `srv/team-service.js` gebruikt dit al. Let op: README vermeldt nog het oude `TeamLeadLoginId` → rechtzetten (zie TA-sectie onderaan). ~~Oorspronkelijke taak:~~ UserMapping vereenvoudigen: de huidige mapping gebruikt BTP login-IDs (e-mailadressen). Stijn raadt aan om **puur met TripPin-data** te werken: maak een lokale mapping die `TripPin UserName` van een medewerker koppelt aan de `TripPin UserName` van zijn/haar TeamLead — los van BTP-logins. Dit maakt de koppeling eenvoudiger en minder afhankelijk van BTP-configuratie. Pas `db/schema.cds` (UserMapping entiteit) en `srv/team-service.js` (teamcheck-logica) aan.
@@ -45,22 +45,22 @@
 
 ### Ontbrekende FV's — kritiek
 
-- [ ] **[Naam]** **FV-01** KPI-tegel "totaal actieve reizen" zichtbaar op Travel Dashboard startscherm — `getActiveTripsCount` bestaat in `srv/travel-service.js` maar controleer of het ook visueel als tegel getoond wordt in `app/travel-dashboard/webapp/`
-- [ ] **[Naam]** **FV-03** KPI-tegel "medewerkers momenteel op reis" op Travel Dashboard startscherm — definitie bevestigd door Stijn (V7): enkel medewerkers waarvoor geldt `StartsAt ≤ vandaag ≤ EndsAt`
-- [ ] **[Naam]** **FV-22** Eerstvolgende reis per teamlid tonen in teamledenlijst — Team Dashboard toont de statusbadge maar toont het ook de datum en naam van de eerstvolgende reis per teamlid? (`app/team-dashboard/annotations.cds` LineItem)
-- [ ] **[Naam]** **FV-26** Filter "In behandeling" als aparte filteroptie in Team Dashboard — bevestigd OK door Stijn (V9): visuele filter volstaat, geen e-mailnotificaties nodig. Controleer of de filterknop/preset zichtbaar is.
+- [x] **[Tom]** **FV-01** KPI-tegel "totaal actieve reizen" — gerealiseerd in de React demo-dashboard (`app/dashboard/`): de tegel wordt gevoed door `getActiveTripsCount` uit de CAP TravelService (end-to-end geverifieerd → 7), met client-side berekening als fallback.
+- [x] **[Tom]** **FV-03** KPI-tegel "medewerkers momenteel op reis" — idem via `getOnTravelCount` (definitie Stijn V7: `StartsAt ≤ vandaag ≤ EndsAt`; end-to-end geverifieerd → 3).
+- [x] **[Tom]** **FV-22** Eerstvolgende reis per teamlid tonen in teamledenlijst — Team Dashboard toont de statusbadge maar toont het ook de datum en naam van de eerstvolgende reis per teamlid? (`app/team-dashboard/annotations.cds` LineItem) → virtuele velden `NextTripName`/`NextTripDate` op People, berekend in `team-service.js`, getoond in LineItem + detail. *Visuele check in BAS + juni-2026-seed-data nog nodig om echte waarden te zien.*
+- [x] **[Tom]** **FV-26** Filter "In behandeling" als aparte filteroptie in Team Dashboard — bevestigd OK door Stijn (V9): visuele filter volstaat, geen e-mailnotificaties nodig. → Dedicated Reisgoedkeuringen-pagina (TravelExtensions) met `ApprovalStatus`-SelectionField + `SelectionVariant #Pending` ('In behandeling'); pagina in manifest. *Visuele BAS-check nog nodig.*
 
 ### Security (kritiek voor productie/demo)
 
-- [ ] **[Naam]** Harde fout bij opstarten als `JWT_SECRET` ontbreekt of nog de defaultwaarde heeft in productie — voeg toe aan `server.js` en `srv/auth-strategy.js`:
+- [x] **[Tom]** Harde fout bij opstarten als `JWT_SECRET` ontbreekt of nog de defaultwaarde heeft in productie — voeg toe aan `server.js` en `srv/auth-strategy.js`:
   ```js
   if (process.env.NODE_ENV === 'production' &&
       (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'primepath-dev-secret-CHANGE-IN-PRODUCTION')) {
     throw new Error('JWT_SECRET is niet ingesteld of is nog de standaardwaarde!');
   }
   ```
-- [ ] **[Naam]** Volledige TripID-eigenaarschap check in TeamLead UPDATE: controleer of het TripID daadwerkelijk toebehoort aan een teamlid van de ingelogde TeamLead (`srv/team-service.js` regels 122–138) — de huidige check verifieert alleen of de TeamLead überhaupt teamleden heeft, niet of dit specifieke trip van hen is
-- [ ] **[Naam]** Rate limiting toevoegen op `/auth/login` — installeer `express-rate-limit`, max 10 pogingen per 15 minuten per IP (`server.js` vóór regel 53):
+- [x] **[Tom]** Volledige TripID-eigenaarschap check in TeamLead UPDATE: controleer of het TripID daadwerkelijk toebehoort aan een teamlid van de ingelogde TeamLead (`srv/team-service.js` regels 122–138) — de huidige check verifieert alleen of de TeamLead überhaupt teamleden heeft, niet of dit specifieke trip van hen is
+- [x] **[Tom]** Rate limiting toevoegen op `/auth/login` — installeer `express-rate-limit`, max 10 pogingen per 15 minuten per IP (`server.js` vóór regel 53):
   ```bash
   npm install express-rate-limit
   ```
@@ -71,13 +71,13 @@
 
 ### Klantfeedback Stijn — aanbevolen
 
-- [ ] **[Naam]** **[V7 → EXTRA KPI]** Tweede KPI "komende reizen binnen X weken" toevoegen op Travel Dashboard startscherm — naast de huidige "medewerkers op reis vandaag" ook een tegel voor reizen die binnenkort starten. Kies een zinvolle horizon (bijv. 2 weken). Voeg `getUpcomingTripsCount` toe in `srv/travel-service.js` en toon als extra tegel.
+- [x] **[Tom]** **[V7 → GEDAAN]** Tweede KPI "komende reizen binnen 2 weken" — `getUpcomingTripsCount` toegevoegd in `srv/travel-service.js` (+ `.cds`), en als tegel 'Komende Reizen' getoond in de React-dashboard (gevoed via CAP, client-side fallback). End-to-end geverifieerd → 4.
   > *Stijn: "Je kan ook een KPI voorzien van komende reizen binnen de X aantal weken."*
 
-- [ ] **[Naam]** **[V8 → UITBREIDEN]** Airline-statistieken uitbreiden met zowel **aantal boekingen als totaal budget per airline** — beide zijn nuttig voor HR. Pas `getAirlineStats` in `srv/hr-service.js` aan zodat het ook `TotalBudget` retourneert, en toon beide in de HR-grafiek of als extra kolom.
+- [x] **[Tom]** **[V8 → GEDAAN]** Airline-statistieken uitgebreid met zowel **aantal boekingen als totaal budget per airline** — `getAirlineStats` retourneert nu `{ AirlineCode, Name, TripCount, TotalBudget }` in zowel `srv/hr-service.js` als `srv/travel-service.js` (returntype in de `.cds`-bestanden bijgewerkt). End-to-end geverifieerd op `/travel` en `/hr`.
   > *Stijn: "Beide usecases (aantal vluchten & totaal budget) zijn wel nuttig, we laten de keuze aan jullie over."*
 
-- [ ] **[Naam]** **[V5 → ERROR HANDLING]** Gepaste foutmelding tonen als een TripPin-reis verdwijnt of een TripID hergebruikt wordt — Stijn verwacht dat dit niet zal voorvallen, maar vraagt om een nette foutafhandeling. Voeg error handling toe in `srv/travel-service.js` bij de data-mashup wanneer een TripID in TravelExtensions niet meer overeenkomt met een bestaande TripPin-reis.
+- [x] **[Tom]** **[V5 → GEDAAN]** Gepaste foutmelding bij verdwenen/hergebruikt TripID — in `srv/travel-service.js` toont de mashup nu een duidelijke placeholder ('(reis niet meer beschikbaar in TripPin)') en logt een waarschuwing wanneer een TripID niet (meer) in TripPin bestaat, zonder de lijst te breken.
   > *Stijn: "Opvangen met een gepaste error, moest dit gebeuren. Wij verwachten dat dit niet gebeurt."*
 
 ### Ontbrekende FV's — nice-to-have
@@ -102,7 +102,7 @@
 - [ ] **[Naam]** Logout-knop toevoegen in de dashboards — het endpoint `POST /auth/logout` bestaat al (`server.js` regel 95), maar er is geen knop in de Fiori-apps. Voeg een custom actie of een link toe in de shell-header van elke webapp
 - [ ] **[Naam]** Automatische redirect naar loginpagina bij verlopen sessie (401/403) — voeg een `fetch`-interceptor toe in de webapps die bij een 401-response redirect naar de juiste login-HTML (bijv. `travel-login.html`)
 - [ ] **[Naam]** Auditlog tonen in UI: `modifiedAt` en `modifiedBy` zijn al aanwezig via CAP `managed`-mixin (`db/schema.cds` regel 27) — voeg ze toe aan de ObjectPage van TravelExtensions zodat zichtbaar is wie wanneer de status heeft gewijzigd
-- [ ] **[Naam]** Foutmelding verbeteren bij ongeldige datumparameters in `getTripCountByPeriod` — voeg validatie toe in `srv/hr-service.js`:
+- [x] **[Tom]** Foutmelding verbeteren bij ongeldige datumparameters in `getTripCountByPeriod` — voeg validatie toe in `srv/hr-service.js`:
   ```js
   if (isNaN(new Date(from)) || isNaN(new Date(to))) return req.error(400, 'Ongeldige datumparameters');
   ```
@@ -237,20 +237,20 @@
 
 - [ ] **[Naam]** **[TA §6.3]** React demo-dashboard (`app/dashboard/`) koppelen aan de CAP-services (/travel, /team, /hr) i.p.v. rechtstreeks aan TripPin, zodat login, rollen en teamfiltering ook daar gelden. Mockdata enkel als fallback wanneer de backend onbereikbaar is. Pas `app/dashboard/data.jsx` aan.
 - [ ] **[Naam]** **[TA §6.4]** Beheerscherm voor gebruikersaccounts bovenop AdminService (/admin): accounts aanmaken, rol toekennen, wachtwoord resetten (server-side bcrypt-hash). Alleen voor TravelAdmin.
-- [ ] **[Naam]** **[TA §3.3 + README]** README rechtzetten: tekst vermeldt nog `UserMapping.TeamLeadLoginId`, schema gebruikt `TeamLeadUserName`. README en `db/schema.cds` gelijktrekken.
-- [ ] **[Naam]** **[TA Bijlage A]** Repo opschonen: `db.sqlite-shm`, `db.sqlite-wal` en `cds-test.log` uit versiebeheer (`.gitignore` + `git rm --cached`).
+- [x] **[Tom]** **[TA §3.3 + README]** README rechtzetten: tekst vermeldt nog `UserMapping.TeamLeadLoginId`, schema gebruikt `TeamLeadUserName`. README en `db/schema.cds` gelijktrekken.
+- [x] **[Tom]** **[TA Bijlage A]** Repo opschonen: `db.sqlite-shm`, `db.sqlite-wal` en `cds-test.log` uit versiebeheer (`.gitignore` + `git rm --cached`).
 
 ### Al in deze TODO, nu gekoppeld aan de TA (afwerken vóór 19 juni)
 
-- [ ] **[TA §7.3]** TravelAdmin override op ApprovalStatus (zie 🔴 Klantfeedback V3)
-- [ ] **[TA §7.3]** Volledige TripID-eigenaarschap check TeamLead UPDATE (zie 🔒 Security)
-- [ ] **[TA §8.4]** Harde fout bij ontbrekende/default JWT_SECRET in productie (zie 🔒 Security)
-- [ ] **[TA §8.4]** Rate limiting op /auth/login, max 10 pogingen / 15 min (zie 🔒 Security)
+- [x] **[TA §7.3]** TravelAdmin override op ApprovalStatus (zie 🔴 Klantfeedback V3)
+- [x] **[TA §7.3]** Volledige TripID-eigenaarschap check TeamLead UPDATE (zie 🔒 Security)
+- [x] **[TA §8.4]** Harde fout bij ontbrekende/default JWT_SECRET in productie (zie 🔒 Security)
+- [x] **[TA §8.4]** Rate limiting op /auth/login, max 10 pogingen / 15 min (zie 🔒 Security)
 - [ ] **[TA §7.4 + §10]** Seed-data met juni 2026-datums zodat KPI's en OnTravel-badge echte waarden tonen (zie 🟡 Data)
-- [ ] **[TA §4.3]** getUpcomingTripsCount toevoegen als extra KPI (zie 🟡 Klantfeedback V7)
-- [ ] **[TA §4.3]** getAirlineStats uitbreiden met TotalBudget per airline (zie 🟡 Klantfeedback V8)
-- [ ] **[TA §10]** Nette foutafhandeling bij verdwenen/hergebruikt TripID (zie 🟡 Klantfeedback V5)
-- [ ] **[TA §7.3]** Datumvalidatie in getTripCountByPeriod (zie 🟡 UX-verbeteringen)
+- [x] **[TA §4.3]** getUpcomingTripsCount toevoegen als extra KPI (zie 🟡 Klantfeedback V7)
+- [x] **[TA §4.3]** getAirlineStats uitbreiden met TotalBudget per airline (zie 🟡 Klantfeedback V8)
+- [x] **[TA §10]** Nette foutafhandeling bij verdwenen/hergebruikt TripID (zie 🟡 Klantfeedback V5)
+- [x] **[TA §7.3]** Datumvalidatie in getTripCountByPeriod (zie 🟡 UX-verbeteringen)
 - [ ] **[TA §6.2]** Logout-knop + automatische redirect naar login bij 401 (zie 🟡 UX-verbeteringen)
 - [ ] **[TA §6.2]** Landingspagina met rolbadges i.p.v. rolkeuze (zie 🔴 Klantfeedback V0.1)
 - [ ] **[TA §6.2]** Nederlandse labels in annotations + consistent sap_horizon-thema (zie 🎨 Design/UX)
