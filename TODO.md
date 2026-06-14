@@ -102,7 +102,7 @@
 - [ ] **[Naam]** Logout-knop toevoegen in de dashboards — het endpoint `POST /auth/logout` bestaat al (`server.js` regel 95), maar er is geen knop in de Fiori-apps. Voeg een custom actie of een link toe in de shell-header van elke webapp
 - [ ] **[Naam]** Automatische redirect naar loginpagina bij verlopen sessie (401/403) — voeg een `fetch`-interceptor toe in de webapps die bij een 401-response redirect naar de juiste login-HTML (bijv. `travel-login.html`)
 - [ ] **[Naam]** Auditlog tonen in UI: `modifiedAt` en `modifiedBy` zijn al aanwezig via CAP `managed`-mixin (`db/schema.cds` regel 27) — voeg ze toe aan de ObjectPage van TravelExtensions zodat zichtbaar is wie wanneer de status heeft gewijzigd
-- [ ] **[Naam]** Foutmelding verbeteren bij ongeldige datumparameters in `getTripCountByPeriod` — voeg validatie toe in `srv/hr-service.js`:
+- [x] **[Tom]** Foutmelding verbeteren bij ongeldige datumparameters in `getTripCountByPeriod` — voeg validatie toe in `srv/hr-service.js`:
   ```js
   if (isNaN(new Date(from)) || isNaN(new Date(to))) return req.error(400, 'Ongeldige datumparameters');
   ```
@@ -177,7 +177,7 @@
 - [x] **[TA §4.3]** getUpcomingTripsCount toevoegen als extra KPI (zie 🟡 Klantfeedback V7)
 - [x] **[TA §4.3]** getAirlineStats uitbreiden met TotalBudget per airline (zie 🟡 Klantfeedback V8)
 - [ ] **[TA §10]** Nette foutafhandeling bij verdwenen/hergebruikt TripID (zie 🟡 Klantfeedback V5)
-- [ ] **[TA §7.3]** Datumvalidatie in getTripCountByPeriod (zie 🟡 UX-verbeteringen)
+- [x] **[TA §7.3]** Datumvalidatie in getTripCountByPeriod (zie 🟡 UX-verbeteringen)
 - [ ] **[TA §6.2]** Logout-knop + automatische redirect naar login bij 401 (zie 🟡 UX-verbeteringen)
 - [ ] **[TA §6.2]** Landingspagina met rolbadges i.p.v. rolkeuze (zie 🔴 Klantfeedback V0.1)
 - [ ] **[TA §6.2]** Nederlandse labels in annotations + consistent sap_horizon-thema (zie 🎨 Design/UX)
