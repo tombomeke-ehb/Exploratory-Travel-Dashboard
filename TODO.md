@@ -6,6 +6,16 @@
 
 ---
 
+## 🔎 Audit-status (14 juni 2026 — Ismael)
+
+Code-audit uitgevoerd: TODO gelijkgetrokken met de werkelijke code. Samenvatting:
+
+- **Backend is vrijwel volledig af.** Afgevinkt na verificatie: 🔒 Security (JWT_SECRET-hardfail, rate limiting, TripID-eigenaarschapscheck), V3 (TravelAdmin override), V5 (verdwenen/hergebruikt TripID), FV-22, FV-26, datumvalidatie `getTripCountByPeriod`.
+- **Backend klaar, alleen UI-weergave rest:** V7 (`getUpcomingTripsCount`), V8 (`TotalBudget` per airline), FV-01/FV-03 (KPI-functies bestaan, maar geen zichtbare tegel/niveau-1-startscherm in de Fiori-apps).
+- **Echt nog te bouwen (overwegend Fiori-UI):** KPI-startschermen (🎨 Startscherm), airline-grafiek (FV-02/06), FV-07 (e-mail in People-lijst), FV-18 (boekingsaantal in airline-lijst), FV-20 (stad in airports-lijst), ontbrekende routes (Airlines/Airports in Travel; People/Airlines in HR), thema `sap_horizon`, i18n-labels, logging in lege `catch`-blokken, mock-data juni 2026, README/.gitignore-opschoning.
+
+---
+
 ## ✅ Klaar (niet aanraken)
 
 - [x] Login-flow (JWT-cookie, 3 rollen)
@@ -45,10 +55,10 @@
 
 ### Ontbrekende FV's — kritiek
 
-- [ ] **[Naam]** **FV-01** KPI-tegel "totaal actieve reizen" zichtbaar op Travel Dashboard startscherm — `getActiveTripsCount` bestaat in `srv/travel-service.js` maar controleer of het ook visueel als tegel getoond wordt in `app/travel-dashboard/webapp/`
-- [ ] **[Naam]** **FV-03** KPI-tegel "medewerkers momenteel op reis" op Travel Dashboard startscherm — definitie bevestigd door Stijn (V7): enkel medewerkers waarvoor geldt `StartsAt ≤ vandaag ≤ EndsAt`
-- [ ] **[Naam]** **FV-22** Eerstvolgende reis per teamlid tonen in teamledenlijst — Team Dashboard toont de statusbadge maar toont het ook de datum en naam van de eerstvolgende reis per teamlid? (`app/team-dashboard/annotations.cds` LineItem)
-- [ ] **[Naam]** **FV-26** Filter "In behandeling" als aparte filteroptie in Team Dashboard — bevestigd OK door Stijn (V9): visuele filter volstaat, geen e-mailnotificaties nodig. Controleer of de filterknop/preset zichtbaar is.
+- [ ] **[Naam]** **FV-01 → ALLEEN UI REST** Backend GEDAAN: `getActiveTripsCount` bestaat (`srv/travel-service.js`, demo-fallback 7). **Rest:** de KPI-tegel "totaal actieve reizen" wordt nog NIET visueel getoond in `app/travel-dashboard/webapp/` (geen niveau-1-startscherm in de Fiori-app). Zie 🎨 Startscherm.
+- [ ] **[Naam]** **FV-03 → ALLEEN UI REST** Backend GEDAAN: `getOnTravelCount` bestaat (`StartsAt ≤ vandaag ≤ EndsAt`, demo-fallback 3). **Rest:** KPI-tegel "medewerkers momenteel op reis" nog niet visueel getoond. Zie 🎨 Startscherm.
+- [x] **[Ismael]** **FV-22** Eerstvolgende reis per teamlid tonen in teamledenlijst — GEDAAN: backend vult `NextTripName`/`NextTripDate` (`srv/team-service.js`), beide staan in de `UI.LineItem` van People (`app/team-dashboard/annotations.cds`) naast de statusbadge.
+- [x] **[Ismael]** **FV-26** Filter "In behandeling" als aparte filteroptie in Team Dashboard — GEDAAN: `UI.SelectionVariant #Pending` ('In behandeling', filtert op `ApprovalStatus = Pending`) staat in `app/team-dashboard/annotations.cds` op TravelExtensions. (V9: visuele filter volstaat.)
 
 ### Security (kritiek voor productie/demo)
 
@@ -68,13 +78,13 @@
 
 ### Klantfeedback Stijn — aanbevolen
 
-- [ ] **[Naam]** **[V7 → EXTRA KPI]** Tweede KPI "komende reizen binnen X weken" toevoegen op Travel Dashboard startscherm — naast de huidige "medewerkers op reis vandaag" ook een tegel voor reizen die binnenkort starten. Kies een zinvolle horizon (bijv. 2 weken). Voeg `getUpcomingTripsCount` toe in `srv/travel-service.js` en toon als extra tegel.
+- [ ] **[Naam]** **[V7 → ALLEEN UI REST]** Backend GEDAAN: `getUpcomingTripsCount` bestaat in `srv/travel-service.js` (horizon 14 dagen, demo-fallback 4). **Rest:** toon het resultaat als KPI-tegel op het Travel Dashboard-startscherm (afhankelijk van het startscherm onder 🎨 Startscherm).
   > *Stijn: "Je kan ook een KPI voorzien van komende reizen binnen de X aantal weken."*
 
-- [ ] **[Naam]** **[V8 → UITBREIDEN]** Airline-statistieken uitbreiden met zowel **aantal boekingen als totaal budget per airline** — beide zijn nuttig voor HR. Pas `getAirlineStats` in `srv/hr-service.js` aan zodat het ook `TotalBudget` retourneert, en toon beide in de HR-grafiek of als extra kolom.
+- [ ] **[Naam]** **[V8 → ALLEEN UI REST]** Backend GEDAAN: `getAirlineStats` retourneert nu zowel `TripCount` als `TotalBudget` per airline (`srv/hr-service.js` én `srv/travel-service.js`). **Rest:** toon `TotalBudget` ook in de HR-grafiek of als extra kolom (UI).
   > *Stijn: "Beide usecases (aantal vluchten & totaal budget) zijn wel nuttig, we laten de keuze aan jullie over."*
 
-- [ ] **[Naam]** **[V5 → ERROR HANDLING]** Gepaste foutmelding tonen als een TripPin-reis verdwijnt of een TripID hergebruikt wordt — Stijn verwacht dat dit niet zal voorvallen, maar vraagt om een nette foutafhandeling. Voeg error handling toe in `srv/travel-service.js` bij de data-mashup wanneer een TripID in TravelExtensions niet meer overeenkomt met een bestaande TripPin-reis.
+- [x] **[Ismael]** **[V5 → GEDAAN]** Gerealiseerd in `srv/travel-service.js` (READ TravelExtensions): wanneer een TripID niet meer overeenkomt met een bestaande TripPin-reis, wordt `TripName` op '(reis niet meer beschikbaar in TripPin)' gezet en een waarschuwing gelogd via `cds.log('travel-service').warn(...)` — zowel bij een leeg antwoord als bij een ophaalfout (404/netwerk). ~~Oorspronkelijke taak:~~ Gepaste foutmelding tonen als een TripPin-reis verdwijnt of een TripID hergebruikt wordt.
   > *Stijn: "Opvangen met een gepaste error, moest dit gebeuren. Wij verwachten dat dit niet gebeurt."*
 
 ### Ontbrekende FV's — nice-to-have
@@ -99,10 +109,7 @@
 - [ ] **[Naam]** Logout-knop toevoegen in de dashboards — het endpoint `POST /auth/logout` bestaat al (`server.js` regel 95), maar er is geen knop in de Fiori-apps. Voeg een custom actie of een link toe in de shell-header van elke webapp
 - [ ] **[Naam]** Automatische redirect naar loginpagina bij verlopen sessie (401/403) — voeg een `fetch`-interceptor toe in de webapps die bij een 401-response redirect naar de juiste login-HTML (bijv. `travel-login.html`)
 - [ ] **[Naam]** Auditlog tonen in UI: `modifiedAt` en `modifiedBy` zijn al aanwezig via CAP `managed`-mixin (`db/schema.cds` regel 27) — voeg ze toe aan de ObjectPage van TravelExtensions zodat zichtbaar is wie wanneer de status heeft gewijzigd
-- [ ] **[Naam]** Foutmelding verbeteren bij ongeldige datumparameters in `getTripCountByPeriod` — voeg validatie toe in `srv/hr-service.js`:
-  ```js
-  if (isNaN(new Date(from)) || isNaN(new Date(to))) return req.error(400, 'Ongeldige datumparameters');
-  ```
+- [x] **[Ismael]** Foutmelding verbeteren bij ongeldige datumparameters in `getTripCountByPeriod` — GEDAAN in `srv/hr-service.js`: een opgegeven `from`/`to` die geen geldige datum is, geeft `req.error(400, 'Ongeldige datumparameters: gebruik een geldige datum (ISO 8601).')`.
 
 ### Logging
 
@@ -244,10 +251,10 @@
 - [x] **[TA §8.4]** Harde fout bij ontbrekende/default JWT_SECRET in productie (zie 🔒 Security)
 - [x] **[TA §8.4]** Rate limiting op /auth/login, max 10 pogingen / 15 min (zie 🔒 Security)
 - [ ] **[TA §7.4 + §10]** Seed-data met juni 2026-datums zodat KPI's en OnTravel-badge echte waarden tonen (zie 🟡 Data)
-- [ ] **[TA §4.3]** getUpcomingTripsCount toevoegen als extra KPI (zie 🟡 Klantfeedback V7)
-- [ ] **[TA §4.3]** getAirlineStats uitbreiden met TotalBudget per airline (zie 🟡 Klantfeedback V8)
-- [ ] **[TA §10]** Nette foutafhandeling bij verdwenen/hergebruikt TripID (zie 🟡 Klantfeedback V5)
-- [ ] **[TA §7.3]** Datumvalidatie in getTripCountByPeriod (zie 🟡 UX-verbeteringen)
+- [ ] **[TA §4.3]** getUpcomingTripsCount toevoegen als extra KPI (zie 🟡 Klantfeedback V7) — backend GEDAAN, alleen UI-tegel rest
+- [ ] **[TA §4.3]** getAirlineStats uitbreiden met TotalBudget per airline (zie 🟡 Klantfeedback V8) — backend GEDAAN, alleen UI-weergave rest
+- [x] **[TA §10]** Nette foutafhandeling bij verdwenen/hergebruikt TripID (zie 🟡 Klantfeedback V5)
+- [x] **[TA §7.3]** Datumvalidatie in getTripCountByPeriod (zie 🟡 UX-verbeteringen)
 - [ ] **[TA §6.2]** Logout-knop + automatische redirect naar login bij 401 (zie 🟡 UX-verbeteringen)
 - [ ] **[TA §6.2]** Landingspagina met rolbadges i.p.v. rolkeuze (zie 🔴 Klantfeedback V0.1)
 - [ ] **[TA §6.2]** Nederlandse labels in annotations + consistent sap_horizon-thema (zie 🎨 Design/UX)
