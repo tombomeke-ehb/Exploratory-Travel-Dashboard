@@ -50,7 +50,22 @@ annotate TeamService.Trips with @(
   ]
 );
 annotate TeamService.TravelExtensions with @(
-  UI.HeaderInfo: { TypeName: 'Reisextensie', TypeNamePlural: 'Reisextensies', Title: { Value: TripID } },
+  UI.HeaderInfo: { TypeName: 'Reisgoedkeuring', TypeNamePlural: 'Reisgoedkeuringen', Title: { Value: TripID } },
+  // FV-26: filter op goedkeuringsstatus, met 'In behandeling' als preset
+  UI.SelectionFields: [ ApprovalStatus ],
+  UI.LineItem: [
+    { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
+    { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus' },
+    { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
+    { $Type: 'UI.DataField', Value: InternalNote,   Label: 'Interne notitie' }
+  ],
+  UI.SelectionVariant #Pending: {
+    Text: 'In behandeling',
+    SelectOptions: [{
+      PropertyName: ApprovalStatus,
+      Ranges: [{ Sign: #I, Option: #EQ, Low: 'Pending' }]
+    }]
+  },
   UI.Facets: [{ $Type: 'UI.ReferenceFacet', Label: 'Goedkeuring', Target: '@UI.FieldGroup#Approval' }],
   UI.FieldGroup#Approval: { Label: 'Goedkeuringsstatus', Data: [
     { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus' },

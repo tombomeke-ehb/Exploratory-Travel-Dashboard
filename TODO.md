@@ -48,7 +48,7 @@
 - [ ] **[Naam]** **FV-01** KPI-tegel "totaal actieve reizen" zichtbaar op Travel Dashboard startscherm — `getActiveTripsCount` bestaat in `srv/travel-service.js` maar controleer of het ook visueel als tegel getoond wordt in `app/travel-dashboard/webapp/`
 - [ ] **[Naam]** **FV-03** KPI-tegel "medewerkers momenteel op reis" op Travel Dashboard startscherm — definitie bevestigd door Stijn (V7): enkel medewerkers waarvoor geldt `StartsAt ≤ vandaag ≤ EndsAt`
 - [x] **[Claude]** **FV-22** Eerstvolgende reis per teamlid tonen in teamledenlijst — Team Dashboard toont de statusbadge maar toont het ook de datum en naam van de eerstvolgende reis per teamlid? (`app/team-dashboard/annotations.cds` LineItem) → virtuele velden `NextTripName`/`NextTripDate` op People, berekend in `team-service.js`, getoond in LineItem + detail. *Visuele check in BAS + juni-2026-seed-data nog nodig om echte waarden te zien.*
-- [ ] **[Naam]** **FV-26** Filter "In behandeling" als aparte filteroptie in Team Dashboard — bevestigd OK door Stijn (V9): visuele filter volstaat, geen e-mailnotificaties nodig. Controleer of de filterknop/preset zichtbaar is.
+- [x] **[Claude]** **FV-26** Filter "In behandeling" als aparte filteroptie in Team Dashboard — bevestigd OK door Stijn (V9): visuele filter volstaat, geen e-mailnotificaties nodig. → Dedicated Reisgoedkeuringen-pagina (TravelExtensions) met `ApprovalStatus`-SelectionField + `SelectionVariant #Pending` ('In behandeling'); pagina in manifest. *Visuele BAS-check nog nodig.*
 
 ### Security (kritiek voor productie/demo)
 
