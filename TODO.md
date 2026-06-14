@@ -14,6 +14,16 @@ Code-audit uitgevoerd: TODO gelijkgetrokken met de werkelijke code. Samenvatting
 - **Backend klaar, alleen UI-weergave rest:** V7 (`getUpcomingTripsCount`), V8 (`TotalBudget` per airline), FV-01/FV-03 (KPI-functies bestaan, maar geen zichtbare tegel/niveau-1-startscherm in de Fiori-apps).
 - **Echt nog te bouwen (overwegend Fiori-UI):** KPI-startschermen (🎨 Startscherm), airline-grafiek (FV-02/06), FV-07 (e-mail in People-lijst), FV-18 (boekingsaantal in airline-lijst), FV-20 (stad in airports-lijst), ontbrekende routes (Airlines/Airports in Travel; People/Airlines in HR), thema `sap_horizon`, i18n-labels, logging in lege `catch`-blokken, mock-data juni 2026, README/.gitignore-opschoning.
 
+### 🐞 Bugfixes deze sessie (14 juni 2026 — Ismael) — Fiori-apps werken nu lokaal
+
+De drie dashboards toonden eerst een wit scherm / foutdialoog. Drie blokkerende bugs gevonden en gefixt op `dev`:
+
+- [x] **UI5-CDN-versie** — alle 3 apps laadden UI5 `1.130.0`, die niet (meer) op de CDN staat (HTTP 404) → wit scherm. Naar `1.136.0` gebumpt (PR #44, issue #43).
+- [x] **TripPin heeft geen top-level `Trips`** — HR/Team startten op een Trips-lijst → foutdialoog; Travel-reisvelden bleven leeg. Gedeelde aggregatie via `People('x')/Trips` toegevoegd in `srv/trippin-trips.js` (PR #46, issue #45).
+- [x] **Container-hoogte 0** — apps initialiseerden volledig maar bleven wit; `html/body/#content`, de ComponentSupport-tussen-div én `#container` op `height:100%` gezet (PR #48, issue #47).
+
+> ⚠️ **Nog te doen vóór demo:** deze fixes staan op `dev`, niet op productie. De BTP-URL toont nog de oude (kapotte) versie tot de release `dev → main` + deploy. Lokaal renderen alle 3 de List Reports nu correct met data.
+
 ---
 
 ## ✅ Klaar (niet aanraken)
