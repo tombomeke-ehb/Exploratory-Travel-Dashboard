@@ -77,7 +77,7 @@
 - [x] **[Tom]** **[V8 → GEDAAN]** Airline-statistieken uitgebreid met zowel **aantal boekingen als totaal budget per airline** — `getAirlineStats` retourneert nu `{ AirlineCode, Name, TripCount, TotalBudget }` in zowel `srv/hr-service.js` als `srv/travel-service.js` (returntype in de `.cds`-bestanden bijgewerkt). End-to-end geverifieerd op `/travel` en `/hr`.
   > *Stijn: "Beide usecases (aantal vluchten & totaal budget) zijn wel nuttig, we laten de keuze aan jullie over."*
 
-- [ ] **[Naam]** **[V5 → ERROR HANDLING]** Gepaste foutmelding tonen als een TripPin-reis verdwijnt of een TripID hergebruikt wordt — Stijn verwacht dat dit niet zal voorvallen, maar vraagt om een nette foutafhandeling. Voeg error handling toe in `srv/travel-service.js` bij de data-mashup wanneer een TripID in TravelExtensions niet meer overeenkomt met een bestaande TripPin-reis.
+- [x] **[Tom]** **[V5 → GEDAAN]** Gepaste foutmelding bij verdwenen/hergebruikt TripID — in `srv/travel-service.js` toont de mashup nu een duidelijke placeholder ('(reis niet meer beschikbaar in TripPin)') en logt een waarschuwing wanneer een TripID niet (meer) in TripPin bestaat, zonder de lijst te breken.
   > *Stijn: "Opvangen met een gepaste error, moest dit gebeuren. Wij verwachten dat dit niet gebeurt."*
 
 ### Ontbrekende FV's — nice-to-have
@@ -176,7 +176,7 @@
 - [ ] **[TA §7.4 + §10]** Seed-data met juni 2026-datums zodat KPI's en OnTravel-badge echte waarden tonen (zie 🟡 Data)
 - [x] **[TA §4.3]** getUpcomingTripsCount toevoegen als extra KPI (zie 🟡 Klantfeedback V7)
 - [x] **[TA §4.3]** getAirlineStats uitbreiden met TotalBudget per airline (zie 🟡 Klantfeedback V8)
-- [ ] **[TA §10]** Nette foutafhandeling bij verdwenen/hergebruikt TripID (zie 🟡 Klantfeedback V5)
+- [x] **[TA §10]** Nette foutafhandeling bij verdwenen/hergebruikt TripID (zie 🟡 Klantfeedback V5)
 - [x] **[TA §7.3]** Datumvalidatie in getTripCountByPeriod (zie 🟡 UX-verbeteringen)
 - [ ] **[TA §6.2]** Logout-knop + automatische redirect naar login bij 401 (zie 🟡 UX-verbeteringen)
 - [ ] **[TA §6.2]** Landingspagina met rolbadges i.p.v. rolkeuze (zie 🔴 Klantfeedback V0.1)
