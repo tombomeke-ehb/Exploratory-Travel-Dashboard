@@ -86,58 +86,77 @@ Er is (nog) geen geautomatiseerde testsuite. Valideer wijzigingen daarom met
 
 ---
 
-## 4. Werkwijze — zo itereren we (BELANGRIJK)
+## 4. Branch-model & werkwijze (BELANGRIJK)
 
-We werken issue-gedreven met kleine, traceerbare stappen. **Eén TODO = één issue = één branch = één PR.**
-Volg per TODO-item exact deze stappen:
+We werken issue-gedreven met kleine, traceerbare stappen, en met een vaste branch-structuur:
+
+```
+feature/* ──PR──▶ dev ──release-PR──▶ main
+  (werk)       (integratie)        (stabiel / gedeployed)
+```
+
+- **`main`** — altijd stabiel en deploybaar. Hier komt code **alleen via een release-PR vanuit `dev`**.
+- **`dev`** — integratiebranch. Alle feature-PR's mergen hier eerst, zodat `dev` de "volgende release" is.
+- **`feature/*`** — één branch per TODO-item, vertakt vanaf `dev`.
+
+> **Let op — auto-close van issues:** GitHub sluit een issue via `Closes #N` pas wanneer dat op de
+> **default branch (`main`)** landt. Feature-PR's gaan naar `dev`, dus de issues sluiten pas bij de
+> **release-PR `dev → main`**. Gebruik in feature-PR's gerust `Closes #N`, en **herhaal die regels in
+> de release-PR** zodat de issues effectief sluiten bij de merge naar `main`.
+
+**Eén TODO = één issue = één branch = één PR.** Volg per TODO-item exact deze stappen:
 
 1. **Kies één TODO-item** uit `TODO.md` (begin bij 🔴 Kritiek).
-2. **Maak een GitHub-issue** voor dat item:
+2. **Maak een GitHub-issue:**
    ```bash
    gh issue create --title "<type>: <korte omschrijving>" --label "<label>" --body "..."
    ```
-   Gebruik een passend label (`bug`, `enhancement`, `documentation`, …). Noteer het issuenummer.
-3. **Maak een branch per TODO** vanaf een actuele `main`:
+   Gebruik een passend label (`bug`, `enhancement`, `documentation`, `security`, `chore`, `tech-debt`).
+3. **Maak een branch per TODO vanaf een actuele `dev`:**
    ```bash
-   git checkout main && git pull
+   git checkout dev && git pull
    git checkout -b <type>/<korte-slug>
    ```
 4. **Implementeer met kleine, logische commits** — niet één grote eindcommit.
-   Splits gerust per deelstap (bijv. eerst de code, dan de seed-data, dan de docs).
-   Gebruik [Conventional Commits](https://www.conventionalcommits.org/):
+   Splits per deelstap (bijv. eerst de code, dan de seed-data, dan de docs). Gebruik
+   [Conventional Commits](https://www.conventionalcommits.org/):
    ```
    feat(travel): getUpcomingTripsCount toevoegen
    fix(team): TripID-eigenaarschap controleren bij UPDATE
    docs(readme): UserMapping-veldnaam rechtzetten
-   chore(repo): sqlite-WAL-bestanden uit versiebeheer halen
    ```
-   Eindig commit messages met:
-   ```
-   Co-Authored-By: Claude <noreply@anthropic.com>
-   ```
-5. **Vink het TODO-item af** in `TODO.md` (`[ ]` → `[x]`), vervang `[Naam]` door wie het oppakte,
-   en commit dat als losse `docs(todo): ...`-commit binnen dezelfde branch.
-6. **Push en open een PR** die de issue linkt zodat die automatisch sluit bij merge op `main`:
+   > De Claude-auteursattributie staat uit via `.claude/settings.json` (`attribution`), dus voeg
+   > **geen** `Co-Authored-By`-trailer toe aan commits of PR's.
+5. **Vink het TODO-item af** in `TODO.md` (`[ ]` → `[x]`, en `[Naam]` → wie het oppakte) als losse
+   `docs(todo): …`-commit binnen dezelfde branch.
+6. **Push en open een PR naar `dev`:**
    ```bash
    git push -u origin <branch>
-   gh pr create --title "<zelfde type>: <omschrijving>" \
-     --body "Closes #<issuenummer>
+   gh pr create --base dev --title "<type>: <omschrijving>" --body "Closes #<nr>
 
-   <wat & waarom, kort>"
+   <wat & waarom, kort + validatie>"
    ```
-   > `Closes #N` (of `Fixes #N`) in de PR-body zorgt dat GitHub de issue **automatisch sluit**
-   > zodra de PR op `main` gemerged is.
-7. **Valideer** (`cds compile`, `node --check`, evt. `cds watch`) — pas mergen als het groen is.
-8. **Merge de PR** (merge-commit, zodat de kleine commits zichtbaar blijven):
+7. **Valideer** (`cds compile`, `node --check`, boot-smoketest) — pas mergen als het groen is.
+8. **Merge de PR in `dev`** (merge-commit, zodat de kleine commits zichtbaar blijven) en ruim de branch op:
    ```bash
-   gh pr merge <PR#> --merge
+   gh pr merge <PR#> --merge --delete-branch
    ```
-9. **Ruim op en ga door:**
+9. **Ga door:**
    ```bash
-   git checkout main && git pull
-   git branch -d <branch>        # lokaal opruimen na merge
+   git checkout dev && git pull
    ```
-   Daarna terug naar stap 1 voor het volgende TODO-item.
+   Terug naar stap 1 voor het volgende TODO-item.
+
+### Release: `dev → main`
+Wanneer een set features af en getest is, geef je `dev` vrij naar `main`:
+```bash
+gh pr create --base main --head dev --title "release: <korte omschrijving>" \
+  --body "Closes #<nr1>
+Closes #<nr2>
+..."
+gh pr merge <PR#> --merge
+```
+De merge naar `main` sluit alle vermelde issues automatisch. **Deploy gebeurt vanaf `main`.**
 
 ### Branch-naamgeving
 `feat/…` (nieuwe functionaliteit) · `fix/…` (bugfix) · `docs/…` (documentatie) ·
@@ -172,13 +191,17 @@ Volg per TODO-item exact deze stappen:
   versiebeheer (zie `.gitignore`).
 - **Dev vs prod auth:** lokaal kan dummy-auth gelden; autorisatiechecks slaan `anonymous` over.
   Test rol-specifiek gedrag bewust met een ingelogde gebruiker.
+- **Verouderde lokale `db.sqlite`.** `cds-serve` gebruikt het persistente `db.sqlite`-bestand. Na een
+  schemawijziging (bijv. een nieuwe kolom) is dat bestand verouderd → fouten als
+  `no such column: …` (login geeft dan 500). Oplossing: `npx cds deploy` (regenereert `db.sqlite`
+  met seed-data) of gebruik `cds watch` (in-memory, herdeployt elke start). `db.sqlite` is gitignored.
 
 ---
 
 ## 7. Definition of Done (per TODO)
 
 - [ ] Issue aangemaakt en gelinkt via `Closes #N` in de PR
-- [ ] Eigen branch met kleine, beschrijvende commits
-- [ ] Model compileert (`cds compile`) en JS is syntactisch geldig (`node --check`)
+- [ ] Eigen feature-branch (vanaf `dev`) met kleine, beschrijvende commits
+- [ ] Model compileert (`cds compile`), JS geldig (`node --check`) en boot-smoketest groen
 - [ ] TODO-item afgevinkt in `TODO.md`
-- [ ] PR gemerged op `main`; issue automatisch gesloten
+- [ ] PR gemerged in `dev`; issue sluit automatisch bij de release-PR `dev → main`
