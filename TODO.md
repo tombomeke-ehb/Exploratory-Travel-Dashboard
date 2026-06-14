@@ -74,7 +74,7 @@
 - [ ] **[Naam]** **[V7 → EXTRA KPI]** Tweede KPI "komende reizen binnen X weken" toevoegen op Travel Dashboard startscherm — naast de huidige "medewerkers op reis vandaag" ook een tegel voor reizen die binnenkort starten. Kies een zinvolle horizon (bijv. 2 weken). Voeg `getUpcomingTripsCount` toe in `srv/travel-service.js` en toon als extra tegel.
   > *Stijn: "Je kan ook een KPI voorzien van komende reizen binnen de X aantal weken."*
 
-- [ ] **[Naam]** **[V8 → UITBREIDEN]** Airline-statistieken uitbreiden met zowel **aantal boekingen als totaal budget per airline** — beide zijn nuttig voor HR. Pas `getAirlineStats` in `srv/hr-service.js` aan zodat het ook `TotalBudget` retourneert, en toon beide in de HR-grafiek of als extra kolom.
+- [x] **[Tom]** **[V8 → GEDAAN]** Airline-statistieken uitgebreid met zowel **aantal boekingen als totaal budget per airline** — `getAirlineStats` retourneert nu `{ AirlineCode, Name, TripCount, TotalBudget }` in zowel `srv/hr-service.js` als `srv/travel-service.js` (returntype in de `.cds`-bestanden bijgewerkt). End-to-end geverifieerd op `/travel` en `/hr`.
   > *Stijn: "Beide usecases (aantal vluchten & totaal budget) zijn wel nuttig, we laten de keuze aan jullie over."*
 
 - [ ] **[Naam]** **[V5 → ERROR HANDLING]** Gepaste foutmelding tonen als een TripPin-reis verdwijnt of een TripID hergebruikt wordt — Stijn verwacht dat dit niet zal voorvallen, maar vraagt om een nette foutafhandeling. Voeg error handling toe in `srv/travel-service.js` bij de data-mashup wanneer een TripID in TravelExtensions niet meer overeenkomt met een bestaande TripPin-reis.
@@ -175,7 +175,7 @@
 - [x] **[TA §8.4]** Rate limiting op /auth/login, max 10 pogingen / 15 min (zie 🔒 Security)
 - [ ] **[TA §7.4 + §10]** Seed-data met juni 2026-datums zodat KPI's en OnTravel-badge echte waarden tonen (zie 🟡 Data)
 - [ ] **[TA §4.3]** getUpcomingTripsCount toevoegen als extra KPI (zie 🟡 Klantfeedback V7)
-- [ ] **[TA §4.3]** getAirlineStats uitbreiden met TotalBudget per airline (zie 🟡 Klantfeedback V8)
+- [x] **[TA §4.3]** getAirlineStats uitbreiden met TotalBudget per airline (zie 🟡 Klantfeedback V8)
 - [ ] **[TA §10]** Nette foutafhandeling bij verdwenen/hergebruikt TripID (zie 🟡 Klantfeedback V5)
 - [ ] **[TA §7.3]** Datumvalidatie in getTripCountByPeriod (zie 🟡 UX-verbeteringen)
 - [ ] **[TA §6.2]** Logout-knop + automatische redirect naar login bij 401 (zie 🟡 UX-verbeteringen)
