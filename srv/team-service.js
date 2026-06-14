@@ -14,6 +14,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const cds = require('@sap/cds');
+const { collectAllTrips } = require('./trippin-trips');
 
 module.exports = cds.service.impl(async function () {
   const TripPin = await cds.connect.to('TripPinService');
@@ -55,8 +56,19 @@ module.exports = cds.service.impl(async function () {
 
     return Array.isArray(people) ? peopleArr : peopleArr[0];
   });
-  this.on('READ', 'Trips',    req => TripPin.run(req.query));
   this.on('READ', 'Airlines', req => TripPin.run(req.query));
+
+  // Trips: TripPin heeft geen top-level /Trips → aggregeer via People-navigatie
+  this.on('READ', 'Trips', async (req) => {
+    const { trips, byId } = await collectAllTrips(TripPin);
+    const keyParam = req.params?.[req.params.length - 1];
+    const keyId    = (keyParam && typeof keyParam === 'object') ? keyParam.TripId : keyParam;
+    if (keyId !== undefined && keyId !== null) {
+      return byId.get(Number(keyId)) ?? null;
+    }
+    trips.$count = trips.length;
+    return trips;
+  });
 
   // ── FV-26: aantal openstaande goedkeuringen voor dit team ────────────────
   // Telt enkel Pending-reizen van teamleden die aan deze TeamLead gekoppeld zijn.

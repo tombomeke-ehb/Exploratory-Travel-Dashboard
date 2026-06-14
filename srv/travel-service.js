@@ -13,6 +13,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const cds = require('@sap/cds');
+const { collectAllTrips } = require('./trippin-trips');
 
 // V7: horizon (in dagen) voor de KPI "komende reizen binnen X weken"
 const UPCOMING_HORIZON_DAYS = 14;
@@ -63,35 +64,26 @@ module.exports = cds.service.impl(async function () {
     const extArr = Array.isArray(extensions) ? extensions : (extensions ? [extensions] : []);
     if (extArr.length === 0) return extensions;
 
-    // Haal TripPin-velden op voor elk TripID (StartsAt, Name, Budget, Description)
-    await Promise.all(extArr.map(async (ext) => {
-      try {
-        const tripResp = await TripPin.send({
-          method: 'GET',
-          path: `Trips(${ext.TripID})?$select=TripId,StartsAt,Name,Budget,Description`,
-        });
-        if (tripResp) {
-          // FV-05: vertrekdatum voor sortering
-          if (tripResp.StartsAt) ext.StartsAt = tripResp.StartsAt;
-          // FV-15: TripPin-velden voor detailpagina
-          if (tripResp.Name)        ext.TripName        = tripResp.Name;
-          if (tripResp.Budget)      ext.TripBudget      = tripResp.Budget?.Value ?? tripResp.Budget;
-          if (tripResp.Description) ext.TripDescription = tripResp.Description;
-        } else {
-          // V5: TripID bestaat niet (meer) in TripPin (verwijderd of hergebruikt)
-          ext.TripName = '(reis niet meer beschikbaar in TripPin)';
-          cds.log('travel-service').warn(
-            `TravelExtension verwijst naar onbekend TripID ${ext.TripID} (mogelijk verwijderd of hergebruikt).`
-          );
-        }
-      } catch (err) {
-        // V5: ophalen van de TripPin-reis mislukte (bijv. 404 of netwerkfout)
+    // Reizen zijn in TripPin enkel via People-navigatie bereikbaar (geen top-level
+    // /Trips). We gebruiken daarom de geaggregeerde TripId → reis-map.
+    const { byId } = await collectAllTrips(TripPin);
+    for (const ext of extArr) {
+      const trip = byId.get(Number(ext.TripID));
+      if (trip) {
+        // FV-05: vertrekdatum voor sortering
+        if (trip.StartsAt)        ext.StartsAt        = trip.StartsAt;
+        // FV-15: TripPin-velden voor detailpagina
+        if (trip.Name)            ext.TripName        = trip.Name;
+        if (trip.Budget != null)  ext.TripBudget      = trip.Budget;
+        if (trip.Description)     ext.TripDescription = trip.Description;
+      } else {
+        // V5: TripID bestaat niet (meer) in TripPin (verwijderd of hergebruikt)
         ext.TripName = '(reis niet meer beschikbaar in TripPin)';
         cds.log('travel-service').warn(
-          `Kon TripPin-reis voor TripID ${ext.TripID} niet ophalen: ${err.message}`
+          `TravelExtension verwijst naar onbekend TripID ${ext.TripID} (mogelijk verwijderd of hergebruikt).`
         );
       }
-    }));
+    }
 
     // Sorteer op StartsAt ascending (FV-05)
     extArr.sort((a, b) => {
@@ -103,33 +95,42 @@ module.exports = cds.service.impl(async function () {
     return Array.isArray(extensions) ? extArr : extArr[0];
   });
 
-  // FV-11–16: reizen – data mashup TripPin + TravelExtensions
+  // FV-11–16: reizen – data mashup TripPin (via People-navigatie) + TravelExtensions
   this.on('READ', 'Trips', async (req) => {
-    const trips = await TripPin.run(req.query);
-    if (!trips || trips.length === 0) return trips;
+    const { trips, byId } = await collectAllTrips(TripPin);
 
-    // Normaliseer: TripPin geeft soms een object terug (bij single-record GET)
-    const tripArray = Array.isArray(trips) ? trips : [trips];
-    const tripIds   = tripArray.map(t => t.TripId).filter(id => id !== undefined);
+    // Enkele reis opgevraagd via sleutel (ObjectPage)
+    const keyParam = req.params?.[req.params.length - 1];
+    const keyId    = (keyParam && typeof keyParam === 'object') ? keyParam.TripId : keyParam;
+    if (keyId !== undefined && keyId !== null) {
+      const trip = byId.get(Number(keyId));
+      if (!trip) return null;
+      const ext = await SELECT.one.from(TravelExtensions).where({ TripID: trip.TripId });
+      return {
+        ...trip,
+        ProjectCode:    ext?.ProjectCode    ?? null,
+        ApprovalStatus: ext?.ApprovalStatus ?? 'Pending',
+        InternalNote:   ext?.InternalNote   ?? null,
+      };
+    }
 
-    if (tripIds.length === 0) return trips;
+    if (trips.length === 0) return trips;
 
-    // Haal lokale PrimePath-extensievelden op
+    // Haal lokale PrimePath-extensievelden op en merge
+    const tripIds    = trips.map(t => t.TripId);
     const extensions = await cds.run(
       SELECT.from(TravelExtensions).where({ TripID: { in: tripIds } })
     );
     const extMap = Object.fromEntries(extensions.map(e => [e.TripID, e]));
 
-    // Merge TripPin-data met PrimePath-velden
-    const merged = tripArray.map(trip => ({
+    const merged = trips.map(trip => ({
       ...trip,
       ProjectCode:    extMap[trip.TripId]?.ProjectCode    ?? null,
       ApprovalStatus: extMap[trip.TripId]?.ApprovalStatus ?? 'Pending',
       InternalNote:   extMap[trip.TripId]?.InternalNote   ?? null,
     }));
-
-    // Geef terug in zelfde vorm als input (object of array)
-    return Array.isArray(trips) ? merged : merged[0];
+    merged.$count = merged.length;
+    return merged;
   });
 
   // ══════════════════════════════════════════════════════════════════════════
