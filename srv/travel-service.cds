@@ -61,10 +61,11 @@ service TravelService {
     TripCount   : Integer;
   };
 
-  // FV-06: airlinegebruik voor grafiek (taart- of staafdiagram)
+  // FV-06 + V8: airlinegebruik voor grafiek (aantal boekingen + totaal budget)
   function getAirlineStats() returns array of {
     AirlineCode : String;
     Name        : String;
     TripCount   : Integer;
+    TotalBudget : Decimal;
   };
 }

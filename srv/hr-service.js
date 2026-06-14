@@ -39,6 +39,7 @@ module.exports = cds.service.impl(async function () {
     const knownCodes = new Set(airlineArr.map(a => a.AirlineCode));
 
     const counts = {};
+    const budgets = {};   // V8: totaal reisbudget per airline
 
     try {
       const people    = await TripPin.run(SELECT.from('TripPinService.People'));
@@ -49,13 +50,14 @@ module.exports = cds.service.impl(async function () {
         try {
           const tripsResp = await TripPin.send({
             method: 'GET',
-            path: `People('${person.UserName}')/Trips?$select=TripId`,
+            path: `People('${person.UserName}')/Trips?$select=TripId,Budget`,
           });
           const trips = Array.isArray(tripsResp?.value) ? tripsResp.value
                       : Array.isArray(tripsResp)        ? tripsResp
                       : [];
 
           for (const trip of trips) {
+            const tripAirlines = new Set();
             try {
               const planResp = await TripPin.send({
                 method: 'GET',
@@ -70,10 +72,15 @@ module.exports = cds.service.impl(async function () {
                   const match = item.FlightNumber.match(/^([A-Z]{2})/);
                   if (match && knownCodes.has(match[1])) {
                     counts[match[1]] = (counts[match[1]] || 0) + 1;
+                    tripAirlines.add(match[1]);
                   }
                 }
               }
             } catch { /* negeer PlanItems-fouten per trip */ }
+
+            // V8: reisbudget toekennen aan elke airline in deze reis (set → geen dubbeltelling)
+            const tripBudget = Number(trip.Budget?.Value ?? trip.Budget ?? 0) || 0;
+            tripAirlines.forEach(code => { budgets[code] = (budgets[code] || 0) + tripBudget; });
           }
         } catch { /* negeer fouten per persoon */ }
       }
@@ -81,13 +88,14 @@ module.exports = cds.service.impl(async function () {
 
     let result;
     if (Object.keys(counts).length === 0) {
-      result = airlineArr.map(a => ({ AirlineCode: a.AirlineCode, Name: a.Name, TripCount: 0 }));
+      result = airlineArr.map(a => ({ AirlineCode: a.AirlineCode, Name: a.Name, TripCount: 0, TotalBudget: 0 }));
     } else {
       result = Object.entries(counts)
         .map(([code, count]) => ({
           AirlineCode: code,
           Name:        airlineMap[code] ?? code,
           TripCount:   count,
+          TotalBudget: Math.round(budgets[code] || 0),
         }))
         .sort((a, b) => b.TripCount - a.TripCount);
     }
