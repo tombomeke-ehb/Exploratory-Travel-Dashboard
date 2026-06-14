@@ -71,7 +71,7 @@
 
 ### Klantfeedback Stijn — aanbevolen
 
-- [ ] **[Naam]** **[V7 → EXTRA KPI]** Tweede KPI "komende reizen binnen X weken" toevoegen op Travel Dashboard startscherm — naast de huidige "medewerkers op reis vandaag" ook een tegel voor reizen die binnenkort starten. Kies een zinvolle horizon (bijv. 2 weken). Voeg `getUpcomingTripsCount` toe in `srv/travel-service.js` en toon als extra tegel.
+- [x] **[Tom]** **[V7 → GEDAAN]** Tweede KPI "komende reizen binnen 2 weken" — `getUpcomingTripsCount` toegevoegd in `srv/travel-service.js` (+ `.cds`), en als tegel 'Komende Reizen' getoond in de React-dashboard (gevoed via CAP, client-side fallback). End-to-end geverifieerd → 4.
   > *Stijn: "Je kan ook een KPI voorzien van komende reizen binnen de X aantal weken."*
 
 - [x] **[Tom]** **[V8 → GEDAAN]** Airline-statistieken uitgebreid met zowel **aantal boekingen als totaal budget per airline** — `getAirlineStats` retourneert nu `{ AirlineCode, Name, TripCount, TotalBudget }` in zowel `srv/hr-service.js` als `srv/travel-service.js` (returntype in de `.cds`-bestanden bijgewerkt). End-to-end geverifieerd op `/travel` en `/hr`.
@@ -174,7 +174,7 @@
 - [x] **[TA §8.4]** Harde fout bij ontbrekende/default JWT_SECRET in productie (zie 🔒 Security)
 - [x] **[TA §8.4]** Rate limiting op /auth/login, max 10 pogingen / 15 min (zie 🔒 Security)
 - [ ] **[TA §7.4 + §10]** Seed-data met juni 2026-datums zodat KPI's en OnTravel-badge echte waarden tonen (zie 🟡 Data)
-- [ ] **[TA §4.3]** getUpcomingTripsCount toevoegen als extra KPI (zie 🟡 Klantfeedback V7)
+- [x] **[TA §4.3]** getUpcomingTripsCount toevoegen als extra KPI (zie 🟡 Klantfeedback V7)
 - [x] **[TA §4.3]** getAirlineStats uitbreiden met TotalBudget per airline (zie 🟡 Klantfeedback V8)
 - [ ] **[TA §10]** Nette foutafhandeling bij verdwenen/hergebruikt TripID (zie 🟡 Klantfeedback V5)
 - [ ] **[TA §7.3]** Datumvalidatie in getTripCountByPeriod (zie 🟡 UX-verbeteringen)
