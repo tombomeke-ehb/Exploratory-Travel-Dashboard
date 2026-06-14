@@ -108,6 +108,12 @@ module.exports = cds.service.impl(async function () {
   // ── FV-28: aantal reizen in een periode ───────────────────────────────────
   this.on('getTripCountByPeriod', async (req) => {
     const { from, to } = req.data;
+
+    // Valideer de (optionele) datumparameters: een opgegeven waarde moet een geldige datum zijn.
+    if ((from != null && isNaN(new Date(from))) || (to != null && isNaN(new Date(to)))) {
+      return req.error(400, 'Ongeldige datumparameters: gebruik een geldige datum (ISO 8601).');
+    }
+
     const trips = await TripPin.run(SELECT.from('TripPinService.Trips'));
     const arr   = Array.isArray(trips) ? trips : (trips ? [trips] : []);
 
