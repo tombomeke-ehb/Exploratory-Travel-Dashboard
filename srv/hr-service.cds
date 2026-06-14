@@ -26,11 +26,12 @@ service HRService {
   // ── PrimePath velden (read-only voor HR) ──────────────────────────────────
   @readonly entity TravelExtensions as projection on p.TravelExtensions;
 
-  // ── FV-27: airline-statistieken voor grafiek ──────────────────────────────
+  // ── FV-27 + V8: airline-statistieken (aantal boekingen + totaal budget) ───
   function getAirlineStats() returns array of {
     AirlineCode : String;
     Name        : String;
     TripCount   : Integer;
+    TotalBudget : Decimal;
   };
 
   // ── FV-28: totaal reizen in periode ───────────────────────────────────────
