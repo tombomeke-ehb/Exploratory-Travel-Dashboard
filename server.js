@@ -57,6 +57,7 @@ cds.on('bootstrap', (app) => {
   serveHtml('travel-login.html',   '/travel-login.html')
   serveHtml('team-login.html',     '/team-login.html')
   serveHtml('hr-login.html',       '/hr-login.html')
+  serveHtml('travel-start.html',   '/travel-start.html')
 
   // Unified React dashboard — serve all static files from app/dashboard/
   const dashDir = path.join(__dirname, 'app', 'dashboard')

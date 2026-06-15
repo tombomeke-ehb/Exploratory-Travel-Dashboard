@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PrimePath Travel – Travel Dashboard (overzicht)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: '72', 'SAP72', Arial, sans-serif;
+      background: #f5f6f7;
+      color: #32363a;
+      min-height: 100vh;
+    }
+
+    /* ── Shell header ── */
+    .shell-header {
+      background: #0a6ed1;
+      color: #fff;
+      padding: 0 2rem;
+      height: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 4px rgba(0,0,0,.2);
+    }
+    .shell-header .logo { font-size: 1rem; font-weight: 700; letter-spacing: .5px; }
+    .shell-header .right { display: flex; align-items: center; gap: 1rem; }
+    .shell-header .subtitle { font-size: .75rem; opacity: .85; }
+    .logout-btn {
+      background: rgba(255,255,255,.15);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 4px;
+      padding: .25rem .7rem;
+      font-size: .75rem;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .logout-btn:hover { background: rgba(255,255,255,.28); }
+
+    /* ── Page title ── */
+    .page-title {
+      background: #fff;
+      border-bottom: 1px solid #d9d9d9;
+      padding: 1.25rem 2rem .75rem;
+    }
+    .page-title h1 { font-size: 1.375rem; font-weight: 600; }
+    .page-title p { font-size: .875rem; color: #6a6d70; margin-top: .25rem; }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 1.5rem 2rem 2rem; }
+    .section-label {
+      font-size: .8rem; font-weight: 600; color: #6a6d70;
+      text-transform: uppercase; letter-spacing: .5px;
+      margin: 1.75rem 0 .75rem;
+    }
+    .section-label:first-child { margin-top: 0; }
+
+    /* ── KPI-tegels ── */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+    .kpi {
+      background: #fff;
+      border: 1px solid #d9d9d9;
+      border-left: 4px solid #0a6ed1;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: .35rem;
+      min-height: 7rem;
+    }
+    .kpi.accent-red    { border-left-color: #bb0000; }
+    .kpi.accent-green  { border-left-color: #107e3e; }
+    .kpi.accent-orange { border-left-color: #e9730c; }
+    .kpi .kpi-label {
+      font-size: .8rem; color: #6a6d70; font-weight: 600;
+      display: flex; align-items: center; gap: .4rem;
+    }
+    .kpi .kpi-value { font-size: 2.25rem; font-weight: 300; line-height: 1.1; color: #32363a; }
+    .kpi .kpi-sub { font-size: .75rem; color: #9ca0a4; margin-top: auto; }
+
+    /* ── Navigatiekaarten ── */
+    .nav-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+    .nav-card {
+      background: #fff;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      align-items: center;
+      gap: .85rem;
+      transition: box-shadow .15s, border-color .15s;
+    }
+    .nav-card:hover { box-shadow: 0 4px 16px rgba(10,110,209,.15); border-color: #0a6ed1; }
+    .nav-card .nc-icon {
+      width: 2.5rem; height: 2.5rem; border-radius: 50%;
+      background: #e8f3fc; display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; flex-shrink: 0;
+    }
+    .nav-card .nc-title { font-size: .95rem; font-weight: 600; }
+    .nav-card .nc-sub { font-size: .78rem; color: #6a6d70; }
+    .nav-card .nc-arrow { margin-left: auto; color: #0a6ed1; font-weight: 700; }
+
+    /* ── Airlinegebruik ── */
+    .airline-card {
+      background: #fff;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      padding: 1.25rem;
+    }
+    .airline-row {
+      display: grid;
+      grid-template-columns: 9rem 1fr 5.5rem;
+      align-items: center;
+      gap: .75rem;
+      padding: .4rem 0;
+    }
+    .airline-row + .airline-row { border-top: 1px solid #f0f0f0; }
+    .airline-name { font-size: .85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-track { background: #eef1f4; border-radius: 4px; height: .9rem; overflow: hidden; }
+    .bar-fill { background: #0a6ed1; height: 100%; border-radius: 4px; }
+    .airline-meta { font-size: .78rem; color: #6a6d70; text-align: right; }
+
+    .muted { color: #9ca0a4; font-size: .85rem; }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: .75rem;
+      color: #9ca0a4;
+      border-top: 1px solid #e5e5e5;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="shell-header">
+    <span class="logo">✈ PrimePath Travel</span>
+    <div class="right">
+      <span class="subtitle" id="welcome">Travel Coördinator</span>
+      <button class="logout-btn" id="logoutBtn" type="button">Afmelden</button>
+    </div>
+  </header>
+
+  <div class="page-title">
+    <h1>Travel Dashboard — Overzicht</h1>
+    <p>Live kerncijfers uit TripPin. Klik op een kaart om door te gaan naar de detaillijsten.</p>
+  </div>
+
+  <main>
+    <div class="section-label">Kerncijfers</div>
+    <section class="kpi-row">
+      <div class="kpi accent-orange">
+        <span class="kpi-label">✈ Actieve reizen</span>
+        <span class="kpi-value" id="kpiActive">…</span>
+        <span class="kpi-sub">reizen die nu lopen</span>
+      </div>
+      <div class="kpi accent-red">
+        <span class="kpi-label">👤 Medewerkers op reis</span>
+        <span class="kpi-value" id="kpiOnTravel">…</span>
+        <span class="kpi-sub">momenteel onderweg</span>
+      </div>
+      <div class="kpi accent-green">
+        <span class="kpi-label">📅 Komende reizen</span>
+        <span class="kpi-value" id="kpiUpcoming">…</span>
+        <span class="kpi-sub">binnen 14 dagen</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi-label">🏆 Meest gebruikte airline</span>
+        <span class="kpi-value" id="kpiTopAirline" style="font-size:1.4rem; font-weight:600;">…</span>
+        <span class="kpi-sub" id="kpiTopAirlineSub">op basis van boekingen</span>
+      </div>
+    </section>
+
+    <div class="section-label">Naar de lijsten</div>
+    <section class="nav-row">
+      <a class="nav-card" href="/travel-dashboard/webapp/">
+        <span class="nc-icon">📋</span>
+        <span>
+          <div class="nc-title">Reizen &amp; extensies</div>
+          <div class="nc-sub">Status, projectcode &amp; notities</div>
+        </span>
+        <span class="nc-arrow">→</span>
+      </a>
+      <a class="nav-card" href="/travel-dashboard/webapp/#/People">
+        <span class="nc-icon">👥</span>
+        <span>
+          <div class="nc-title">Medewerkers</div>
+          <div class="nc-sub">Wie is op reis?</div>
+        </span>
+        <span class="nc-arrow">→</span>
+      </a>
+      <a class="nav-card" href="/travel-dashboard/webapp/#/Airlines">
+        <span class="nc-icon">🛫</span>
+        <span>
+          <div class="nc-title">Airlines</div>
+          <div class="nc-sub">Maatschappijen</div>
+        </span>
+        <span class="nc-arrow">→</span>
+      </a>
+      <a class="nav-card" href="/travel-dashboard/webapp/#/Airports">
+        <span class="nc-icon">🏢</span>
+        <span>
+          <div class="nc-title">Luchthavens</div>
+          <div class="nc-sub">Airports</div>
+        </span>
+        <span class="nc-arrow">→</span>
+      </a>
+    </section>
+
+    <div class="section-label">Airlinegebruik (top 5)</div>
+    <section class="airline-card" id="airlineCard">
+      <div class="muted" id="airlineLoading">Laden…</div>
+    </section>
+  </main>
+
+  <footer>
+    EhB Cloud Integration &nbsp;·&nbsp; In samenwerking met Flexso &nbsp;·&nbsp; Demo: 19 juni 2026
+  </footer>
+
+  <script>
+    // Roept een unbound OData V4-functie op de Travel-service aan.
+    // Bij 401/403 (geen/verlopen sessie) → terug naar de loginpagina.
+    async function odata (fn) {
+      const res = await fetch('/travel/' + fn, {
+        credentials: 'include',
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.status === 401 || res.status === 403) {
+        window.location.href = '/travel-login.html';
+        throw new Error('unauthorized');
+      }
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    }
+
+    function setText (id, value) { document.getElementById(id).textContent = value; }
+
+    // Primitieve functie-imports geven { value: <n> } terug.
+    async function loadCount (fn, id) {
+      try { const d = await odata(fn); setText(id, d.value ?? '—'); }
+      catch (e) { setText(id, '—'); }
+    }
+
+    async function loadTopAirline () {
+      try {
+        const d = await odata('getTopAirline()');
+        const name = d.Name || d.AirlineCode || '—';
+        setText('kpiTopAirline', name);
+        if (d.TripCount != null) setText('kpiTopAirlineSub', d.TripCount + ' boekingen');
+      } catch (e) { setText('kpiTopAirline', '—'); }
+    }
+
+    async function loadAirlineStats () {
+      const card = document.getElementById('airlineCard');
+      try {
+        const d = await odata('getAirlineStats()');
+        const rows = (d.value || []).slice().sort((a, b) => (b.TripCount || 0) - (a.TripCount || 0)).slice(0, 5);
+        if (!rows.length) { card.innerHTML = '<div class="muted">Geen airlinegegevens beschikbaar.</div>'; return; }
+        const max = Math.max.apply(null, rows.map(r => r.TripCount || 0).concat([1]));
+        const eur = new Intl.NumberFormat('nl-BE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+        card.innerHTML = rows.map(r => {
+          const pct = Math.round(((r.TripCount || 0) / max) * 100);
+          const budget = r.TotalBudget != null ? eur.format(r.TotalBudget) : '';
+          const name = (r.Name || r.AirlineCode || '—');
+          return '<div class="airline-row">'
+            + '<div class="airline-name" title="' + name + '">' + name + '</div>'
+            + '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div>'
+            + '<div class="airline-meta">' + (r.TripCount || 0) + ' · ' + budget + '</div>'
+            + '</div>';
+        }).join('');
+      } catch (e) {
+        card.innerHTML = '<div class="muted">Kon airlinegegevens niet laden.</div>';
+      }
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try { await fetch('/auth/logout', { method: 'POST', credentials: 'include' }); } catch (e) {}
+      window.location.href = '/';
+    });
+
+    loadCount('getActiveTripsCount()',   'kpiActive');
+    loadCount('getOnTravelCount()',      'kpiOnTravel');
+    loadCount('getUpcomingTripsCount()', 'kpiUpcoming');
+    loadTopAirline();
+    loadAirlineStats();
+  </script>
+</body>
+</html>
