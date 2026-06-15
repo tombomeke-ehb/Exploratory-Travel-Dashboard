@@ -133,7 +133,7 @@ De drie dashboards toonden eerst een wit scherm / foutdialoog. Drie blokkerende 
 
 ### Thema & visuele identiteit (FA §9.1 · TA §6.1)
 
-- [ ] **[Naam]** `sap_horizon`-thema instellen in **alle 3 apps** — voeg `"theme": "sap_horizon"` toe aan `sap.ui5` → `contentDensities` of als bootstrap-parameter in `manifest.json` van `app/travel-dashboard/webapp/`, `app/team-dashboard/webapp/` en `app/hr-dashboard/webapp/`. Horizon is het huidige standaardthema per SAP Fiori Design Guidelines (Morning Horizon / `sap_horizon`).
+- [x] **[Tom]** `sap_horizon`-thema staat in **alle 3 apps** (bootstrap-parameter `data-sap-ui-theme="sap_horizon"` in elke `webapp/index.html`). Daar bovenop nu een PrimePath-merk-overlay (`webapp/css/primepath.css`) die de Horizon CSS-variabelen naar de huisstijlkleuren zet.
 - [ ] **[Naam]** Controleer in BAS-preview of het `sap_horizon`-thema daadwerkelijk geladen wordt (afgeronde hoeken, nieuwe kleurpalet) — open de app lokaal via `cds watch` en kijk in het netwerktabblad of `sap_horizon` als thema-parameter meekomt.
 
 ### List Report floorplan — verplichte annotaties (officieel CAP/Fiori Elements)
@@ -200,7 +200,7 @@ De drie dashboards toonden eerst een wit scherm / foutdialoog. Drie blokkerende 
 > De huidige UI is de standaard SAP Fiori Elements-stijl. Voor een indrukwekkende demo bij EhB en Flexso verdient de presentatielaag aandacht.
 
 - [ ] **[Naam]** Landingspagina (`app/index.html`) visueel verbeteren — voeg logo, kleuraccenten of een hero-sectie toe die aansluit bij PrimePath Travel branding. **Combineer dit met de V0.1-fix** (rolbadges ipv rolselectie)
-- [ ] **[Naam]** Fiori-thema aanpassen per dashboard — overweeg `sap_fiori_3` (blauw, professioneel) of `sap_horizon` (moderner) consistent in te stellen via `manifest.json` (`"theme": "sap_horizon"`) in alle 3 apps
+- [x] **[Tom]** Fiori-thema consistent: alle 3 apps draaien op `sap_horizon` + een gedeelde PrimePath-merk-overlay (`webapp/css/primepath.css`, geregistreerd via `sap.ui5.resources.css`). Merkkleuren brand `#0070F2` / hover `#0058C4` op brand/accent, nadruk-knoppen, links/selectie en de shellbalk. _Visuele eindcontrole nog in de browser._
 - [ ] **[Naam]** Kolomlabels en veldnamen vertalen naar het Nederlands in de annotations (`app/travel-dashboard/annotations.cds`, `app/team-dashboard/annotations.cds`, `app/hr-dashboard/annotations.cds`) — nu staan er nog Engelstalige labels als `TripID`, `ApprovalStatus`, etc.
 - [ ] **[Naam]** KPI-tegels visueel opwaarderen in Travel Dashboard — gebruik `@UI.HeaderInfo` met subtitle die het totaal dynamisch toont en zorg dat de tegel een icoontje heeft (bijv. `sap-icon://travel-expense`)
 - [ ] **[Naam]** Lege-state melding toevoegen als er geen reizen zijn — Fiori Elements toont standaard een leeg scherm; voeg `@UI.MessagePage` toe of pas de `noDataText` aan in `manifest.json`
