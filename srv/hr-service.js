@@ -73,7 +73,9 @@ module.exports = cds.service.impl(async function () {
             try {
               const planResp = await TripPin.send({
                 method: 'GET',
-                path: `People('${person.UserName}')/Trips(${trip.TripId})/PlanItems?$select=FlightNumber`,
+                // Geen $select=FlightNumber: dat veld bestaat enkel op het Flight-subtype,
+                // niet op het PlanItem-basistype -> TripPin geeft anders een 'property not found'-fout.
+                path: `People('${person.UserName}')/Trips(${trip.TripId})/PlanItems`,
               });
               const items = Array.isArray(planResp?.value) ? planResp.value
                           : Array.isArray(planResp)        ? planResp
