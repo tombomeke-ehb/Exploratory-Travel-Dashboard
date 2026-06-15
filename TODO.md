@@ -65,8 +65,8 @@ De drie dashboards toonden eerst een wit scherm / foutdialoog. Drie blokkerende 
 
 ### Ontbrekende FV's — kritiek
 
-- [ ] **[Naam]** **FV-01 → ALLEEN UI REST** Backend GEDAAN: `getActiveTripsCount` bestaat (`srv/travel-service.js`, demo-fallback 7). **Rest:** de KPI-tegel "totaal actieve reizen" wordt nog NIET visueel getoond in `app/travel-dashboard/webapp/` (geen niveau-1-startscherm in de Fiori-app). Zie 🎨 Startscherm.
-- [ ] **[Naam]** **FV-03 → ALLEEN UI REST** Backend GEDAAN: `getOnTravelCount` bestaat (`StartsAt ≤ vandaag ≤ EndsAt`, demo-fallback 3). **Rest:** KPI-tegel "medewerkers momenteel op reis" nog niet visueel getoond. Zie 🎨 Startscherm.
+- [x] **[Tom]** **FV-01 → GEDAAN** Backend bestond al (`getActiveTripsCount`, demo-fallback 7); KPI-tegel "actieve reizen" nu zichtbaar op het niveau-1-startscherm `app/travel-start.html`.
+- [x] **[Tom]** **FV-03 → GEDAAN** Backend bestond al (`getOnTravelCount`, demo-fallback 3); KPI-tegel "medewerkers op reis" nu zichtbaar op `app/travel-start.html`.
 - [x] **[Ismael]** **FV-22** Eerstvolgende reis per teamlid tonen in teamledenlijst — GEDAAN: backend vult `NextTripName`/`NextTripDate` (`srv/team-service.js`), beide staan in de `UI.LineItem` van People (`app/team-dashboard/annotations.cds`) naast de statusbadge.
 - [x] **[Ismael]** **FV-26** Filter "In behandeling" als aparte filteroptie in Team Dashboard — GEDAAN: `UI.SelectionVariant #Pending` ('In behandeling', filtert op `ApprovalStatus = Pending`) staat in `app/team-dashboard/annotations.cds` op TravelExtensions. (V9: visuele filter volstaat.)
 
@@ -88,7 +88,7 @@ De drie dashboards toonden eerst een wit scherm / foutdialoog. Drie blokkerende 
 
 ### Klantfeedback Stijn — aanbevolen
 
-- [ ] **[Naam]** **[V7 → ALLEEN UI REST]** Backend GEDAAN: `getUpcomingTripsCount` bestaat in `srv/travel-service.js` (horizon 14 dagen, demo-fallback 4). **Rest:** toon het resultaat als KPI-tegel op het Travel Dashboard-startscherm (afhankelijk van het startscherm onder 🎨 Startscherm).
+- [x] **[Tom]** **[V7 → GEDAAN]** Backend bestond al (`getUpcomingTripsCount`, horizon 14 dagen, demo-fallback 4); getoond als KPI-tegel "komende reizen" op `app/travel-start.html`.
   > *Stijn: "Je kan ook een KPI voorzien van komende reizen binnen de X aantal weken."*
 
 - [ ] **[Naam]** **[V8 → ALLEEN UI REST]** Backend GEDAAN: `getAirlineStats` retourneert nu zowel `TripCount` als `TotalBudget` per airline (`srv/hr-service.js` én `srv/travel-service.js`). **Rest:** toon `TotalBudget` ook in de HR-grafiek of als extra kolom (UI).
@@ -189,7 +189,7 @@ De drie dashboards toonden eerst een wit scherm / foutdialoog. Drie blokkerende 
 
 > FA §9.2 definieert expliciet drie navigatieniveaus: (1) startscherm, (2) lijstscherm, (3) detailpagina. De huidige apps openen direct op niveau 2 (List Report). KPI's en de "aankomende reizen"-sectie bestaan alleen in het React demo-dashboard, niet in de officiële Fiori-apps.
 
-- [ ] **[Naam]** **[KRITIEK]** Startscherm toevoegen in Travel Dashboard met KPI-tegels — dit is het niveau-1-scherm zoals FA §9.2 vereist. Opties: (a) gebruik een custom `index.html` met drie `sap.m.GenericTile`-elementen voor FV-01/FV-03/FV-07, of (b) maak een aparte Fiori Elements-app als "overzichtspagina" met KPI-tags via `@UI.KPIAnnotation`. KPI-tags zijn beschikbaar in List Reports voor OData V4 (zie: [KPI Tags in SAP Fiori Elements List Report](https://community.sap.com/t5/technology-blog-posts-by-sap/kpi-tags-in-sap-fiori-elements-list-report-odata-v4-beyond-analytical/ba-p/14298306)).
+- [x] **[Tom]** **[KRITIEK → GEDAAN]** Niveau-1-startscherm toegevoegd via optie (a): `app/travel-start.html` met KPI-tegels (actieve reizen FV-01, op reis FV-03, komende reizen V7), een "meest gebruikte airline"-tegel (FV-02), een airlinegebruik-sectie (FV-06/V8) en navigatiekaarten naar de List Reports (niveau 2). Live data via de bestaande CAP-functies; geserveerd door `server.js` + `mta.yaml`; login-redirect wijst ernaartoe. 401/403 → terug naar `travel-login.html`.
 - [ ] **[Naam]** Startscherm toevoegen in Team Dashboard met overzicht openstaande goedkeuringen (FV-26/getPendingCount-tegel) — TeamLead moet bij inloggen direct zien hoeveel aanvragen wachten.
 - [ ] **[Naam]** Startscherm toevoegen in HR Dashboard met airline-stats overzicht (FV-02/FV-06 grafiek) en datumfilter voor reisperiodes.
 
