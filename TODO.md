@@ -165,8 +165,8 @@ De drie dashboards toonden eerst een wit scherm / foutdialoog. Drie blokkerende 
 
 > Officieel CAP-advies: gebruik `@title` (mapt naar `@Common.Label`) in CDS-modellen i.p.v. hardcoded strings in annotaties. De CDS Language Server waarschuwt voor niet-geïnternationaliseerde labels.
 
-- [ ] **[Naam]** Alle hardcoded Engelstalige `Label`-waarden in annotaties vervangen door `{i18n>sleutelNaam}` verwijzingen — maak per app een `i18n/i18n.properties` bestand in de webapp-map met Nederlandse vertalingen. Minimaal voor: `TripID` → `Reis-ID`, `ApprovalStatus` → `Goedkeuringsstatus`, `InternalNote` → `Interne opmerking`, `ProjectCode` → `Projectcode`, `StartsAt` → `Vertrekdatum`, `OnTravel` → `Op reis`.
-- [ ] **[Naam]** `@Common.Label` toevoegen via `@title`-annotaties in `srv/shared.cds` voor alle gedeelde entiteitsattributen — zo worden labels automatisch overgeërfd in alle 3 services zonder herhaling.
+- [x] **[Tom]** **Bewuste keuze: geen `{i18n>}`-sleutels.** De demo is Nederlandstalig; `{i18n>}` levert alleen meerwaarde bij meertaligheid en riskeert "rauwe sleutel"-weergave bij een ontbrekende key. We centraliseren de labels in plaats daarvan via literal Nederlandse `@title` (zie volgende punt) — het officiële CAP-advies. De annotatie-`Label`-strings zijn bovendien al Nederlands.
+- [x] **[Tom]** `@Common.Label` via `@title`-annotaties toegevoegd in `srv/shared.cds` voor alle gedeelde attributen (People/Trips/Airlines/Airports). Alle 3 services erven nu dezelfde Nederlandse labels zonder herhaling; filterbalk/value-help/object page krijgen consistente NL-labels.
 
 ### Draft-ondersteuning voor bewerkbare entiteiten (officieel CAP-vereiste)
 
@@ -201,7 +201,7 @@ De drie dashboards toonden eerst een wit scherm / foutdialoog. Drie blokkerende 
 
 - [ ] **[Naam]** Landingspagina (`app/index.html`) visueel verbeteren — voeg logo, kleuraccenten of een hero-sectie toe die aansluit bij PrimePath Travel branding. **Combineer dit met de V0.1-fix** (rolbadges ipv rolselectie)
 - [x] **[Tom]** Fiori-thema consistent: alle 3 apps draaien op `sap_horizon` + een gedeelde PrimePath-merk-overlay (`webapp/css/primepath.css`, geregistreerd via `sap.ui5.resources.css`). Merkkleuren brand `#0070F2` / hover `#0058C4` op brand/accent, nadruk-knoppen, links/selectie en de shellbalk. _Visuele eindcontrole nog in de browser._
-- [ ] **[Naam]** Kolomlabels en veldnamen vertalen naar het Nederlands in de annotations (`app/travel-dashboard/annotations.cds`, `app/team-dashboard/annotations.cds`, `app/hr-dashboard/annotations.cds`) — nu staan er nog Engelstalige labels als `TripID`, `ApprovalStatus`, etc.
+- [x] **[Tom]** Kolomlabels/veldnamen zijn Nederlands: de annotatie-`Label`-strings waren al NL, en de gedeelde entiteiten hebben nu centrale Nederlandse `@title`-labels in `srv/shared.cds`. (Resterende Engelse termen zijn eigennamen/codes: `Trip ID`, `IATA-code`, `ICAO-code`, `Budget`.)
 - [ ] **[Naam]** KPI-tegels visueel opwaarderen in Travel Dashboard — gebruik `@UI.HeaderInfo` met subtitle die het totaal dynamisch toont en zorg dat de tegel een icoontje heeft (bijv. `sap-icon://travel-expense`)
 - [ ] **[Naam]** Lege-state melding toevoegen als er geen reizen zijn — Fiori Elements toont standaard een leeg scherm; voeg `@UI.MessagePage` toe of pas de `noDataText` aan in `manifest.json`
 - [ ] **[Naam]** Loginpagina's (`app/travel-login.html`, `app/team-login.html`, `app/hr-login.html`) uniform stylen — controleer of alle drie er hetzelfde uitzien en of het PrimePath Travel-logo/naam consistent staat
