@@ -29,8 +29,16 @@ async function collectAllTrips(TripPin) {
   const byId  = new Map();
 
   try {
-    const people    = await TripPin.run(SELECT.from('TripPinService.People'));
-    const peopleArr = Array.isArray(people) ? people : (people ? [people] : []);
+    // TripPin levert max 8 People per pagina en CAP volgt de @odata.nextLink niet,
+    // dus doorlopen we alle pagina's via $skip. Anders missen we de reizen van
+    // alle medewerkers voorbij de eerste pagina.
+    const peopleArr = [];
+    for (let skip = 0; skip < 500; skip += 8) {
+      const page = await TripPin.run(SELECT.from('TripPinService.People').limit(8, skip));
+      const arr  = Array.isArray(page) ? page : (page ? [page] : []);
+      peopleArr.push(...arr);
+      if (arr.length < 8) break;   // onvolledige pagina = laatste pagina
+    }
 
     await Promise.all(peopleArr.map(async (person) => {
       try {
