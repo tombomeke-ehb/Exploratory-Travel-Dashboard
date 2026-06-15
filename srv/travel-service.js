@@ -46,7 +46,8 @@ module.exports = cds.service.impl(async function () {
           if (!t.StartsAt || !t.EndsAt) return false;
           return new Date(t.StartsAt) <= now && new Date(t.EndsAt) >= now;
         });
-      } catch {
+      } catch (err) {
+        cds.log('travel-service').warn(`OnTravel-status van '${person.UserName}' kon niet bepaald worden:`, err.message);
         person.OnTravel = false;
       }
     }));
@@ -267,9 +268,12 @@ async function _countActiveTrips(TripPin, countPersons) {
             activePersons.add(person.UserName);
           }
         }
-      } catch { /* negeer fouten per persoon */ }
+      } catch (err) {
+        cds.log('travel-service').warn(`Reizen van '${person.UserName}' niet opgehaald (actieve telling):`, err.message);
+      }
     }));
-  } catch {
+  } catch (err) {
+    cds.log('travel-service').warn('Tellen van actieve reizen mislukt; val terug op 0:', err.message);
     return 0;
   }
 
@@ -301,9 +305,12 @@ async function _countUpcomingTrips(TripPin, days) {
           const start = new Date(trip.StartsAt);
           if (start > now && start <= horizon) count++;
         }
-      } catch { /* negeer fouten per persoon */ }
+      } catch (err) {
+        cds.log('travel-service').warn(`Reizen van '${person.UserName}' niet opgehaald (komende telling):`, err.message);
+      }
     }));
-  } catch {
+  } catch (err) {
+    cds.log('travel-service').warn('Tellen van komende reizen mislukt; val terug op 0:', err.message);
     return 0;
   }
 
@@ -375,20 +382,20 @@ async function _buildAirlineStats(TripPin) {
                 }
               }
             }
-          } catch {
-            // Negeer PlanItems-fouten per trip
+          } catch (err) {
+            cds.log('travel-service').warn(`PlanItems van reis ${trip.TripId} ('${person.UserName}') niet opgehaald:`, err.message);
           }
 
           // V8: ken het reisbudget toe aan elke airline in deze reis (set → geen dubbeltelling)
           const tripBudget = Number(trip.Budget?.Value ?? trip.Budget ?? 0) || 0;
           tripAirlines.forEach(code => { budgets[code] = (budgets[code] || 0) + tripBudget; });
         }
-      } catch {
-        // Negeer fouten per persoon
+      } catch (err) {
+        cds.log('travel-service').warn(`Airline-stats van '${person.UserName}' niet opgehaald:`, err.message);
       }
     }
-  } catch {
-    // Fallback als People-ophalen mislukt
+  } catch (err) {
+    cds.log('travel-service').warn('Airline-stats: ophalen van People mislukt; val terug op lege telling:', err.message);
   }
 
   // Als er geen vluchten gevonden zijn (bijv. TripPin heeft verouderde data),

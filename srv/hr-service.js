@@ -88,15 +88,21 @@ module.exports = cds.service.impl(async function () {
                   }
                 }
               }
-            } catch { /* negeer PlanItems-fouten per trip */ }
+            } catch (err) {
+              cds.log('hr-service').warn(`PlanItems van reis ${trip.TripId} ('${person.UserName}') niet opgehaald:`, err.message);
+            }
 
             // V8: reisbudget toekennen aan elke airline in deze reis (set → geen dubbeltelling)
             const tripBudget = Number(trip.Budget?.Value ?? trip.Budget ?? 0) || 0;
             tripAirlines.forEach(code => { budgets[code] = (budgets[code] || 0) + tripBudget; });
           }
-        } catch { /* negeer fouten per persoon */ }
+        } catch (err) {
+          cds.log('hr-service').warn(`Airline-stats van '${person.UserName}' niet opgehaald:`, err.message);
+        }
       }
-    } catch { /* fallback */ }
+    } catch (err) {
+      cds.log('hr-service').warn('Airline-stats: ophalen van People mislukt; val terug op lege telling:', err.message);
+    }
 
     let result;
     if (Object.keys(counts).length === 0) {
