@@ -91,7 +91,7 @@ De drie dashboards toonden eerst een wit scherm / foutdialoog. Drie blokkerende 
 - [x] **[Tom]** **[V7 → GEDAAN]** Backend bestond al (`getUpcomingTripsCount`, horizon 14 dagen, demo-fallback 4); getoond als KPI-tegel "komende reizen" op `app/travel-start.html`.
   > *Stijn: "Je kan ook een KPI voorzien van komende reizen binnen de X aantal weken."*
 
-- [ ] **[Naam]** **[V8 → ALLEEN UI REST]** Backend GEDAAN: `getAirlineStats` retourneert nu zowel `TripCount` als `TotalBudget` per airline (`srv/hr-service.js` én `srv/travel-service.js`). **Rest:** toon `TotalBudget` ook in de HR-grafiek of als extra kolom (UI).
+- [x] **[Tom]** **[V8 → GEDAAN]** `getAirlineStats` retourneert `TripCount` én `TotalBudget`; het totale budget per airline wordt nu getoond in de airlinegebruik-sectie op `travel-start.html` én `hr-start.html` (naast het aantal boekingen).
   > *Stijn: "Beide usecases (aantal vluchten & totaal budget) zijn wel nuttig, we laten de keuze aan jullie over."*
 
 - [x] **[Ismael]** **[V5 → GEDAAN]** Gerealiseerd in `srv/travel-service.js` (READ TravelExtensions): wanneer een TripID niet meer overeenkomt met een bestaande TripPin-reis, wordt `TripName` op '(reis niet meer beschikbaar in TripPin)' gezet en een waarschuwing gelogd via `cds.log('travel-service').warn(...)` — zowel bij een leeg antwoord als bij een ophaalfout (404/netwerk). ~~Oorspronkelijke taak:~~ Gepaste foutmelding tonen als een TripPin-reis verdwijnt of een TripID hergebruikt wordt.
@@ -99,7 +99,7 @@ De drie dashboards toonden eerst een wit scherm / foutdialoog. Drie blokkerende 
 
 ### Ontbrekende FV's — nice-to-have
 
-- [ ] **[Naam]** **FV-02 / FV-06** Airline-grafiek (taart- of staafdiagram) op Travel Dashboard startscherm — `getAirlineStats` bestaat maar wordt het ook als grafiek gerenderd in de Travel Dashboard UI?
+- [x] **[Tom]** **FV-02 / FV-06 → GEDAAN** `getAirlineStats` wordt nu als staafvisualisatie (top 5, met boekingen + budget) gerenderd op `travel-start.html` én `hr-start.html`.
 - [ ] **[Naam]** **FV-05** Eerstvolgende reizen gesorteerd op vertrekdatum als sectie op Travel Dashboard startscherm — is er een "komende reizen" blok zichtbaar bij het inloggen als TravelAdmin?
 - [ ] **[Naam]** **FV-07** E-mailadres tonen in medewerkerslijst Travel Dashboard — het `Emails`-veld uit TripPin People is niet zichtbaar in de LineItem (`app/travel-dashboard/annotations.cds`)
 - [ ] **[Naam]** **FV-13** Datumfilter als bereik (van–tot) op reislijst — `SelectionFields` heeft `StartsAt` en `EndsAt` maar controleer of die samen als bereikfilter werken of als twee losse filters
@@ -111,7 +111,7 @@ De drie dashboards toonden eerst een wit scherm / foutdialoog. Drie blokkerende 
 
 - [ ] **[Naam]** Mock-reisdata toevoegen met datums in **juni 2026** zodat KPI-tegels echte waarden tonen en de statusbadge werkt — update `db/data/primepath-TravelExtensions.csv` met 5–10 rijen met `StartsAt`/`EndsAt` in 2026
 - [ ] **[Naam]** Statusbadge 'Op reis'/'Beschikbaar' werkend maken — afhankelijk van bovenstaande mock-data (de logica staat al in `srv/travel-service.js` en `srv/team-service.js`)
-- [ ] **[Naam]** HR-grafiek testen: laadt `getAirlineStats` correct? Worden airlines getoond? (`srv/hr-service.js`)
+- [x] **[Tom]** HR-grafiek getest: `getAirlineStats` laadt correct (integratietest als `hrviewer`: 8 airlines geretourneerd) en wordt getoond op `hr-start.html`.
 - [ ] **[Naam]** Landingspagina (`app/index.html`) testen in productie-URL
 
 ### UX-verbeteringen
@@ -190,8 +190,8 @@ De drie dashboards toonden eerst een wit scherm / foutdialoog. Drie blokkerende 
 > FA §9.2 definieert expliciet drie navigatieniveaus: (1) startscherm, (2) lijstscherm, (3) detailpagina. De huidige apps openen direct op niveau 2 (List Report). KPI's en de "aankomende reizen"-sectie bestaan alleen in het React demo-dashboard, niet in de officiële Fiori-apps.
 
 - [x] **[Tom]** **[KRITIEK → GEDAAN]** Niveau-1-startscherm toegevoegd via optie (a): `app/travel-start.html` met KPI-tegels (actieve reizen FV-01, op reis FV-03, komende reizen V7), een "meest gebruikte airline"-tegel (FV-02), een airlinegebruik-sectie (FV-06/V8) en navigatiekaarten naar de List Reports (niveau 2). Live data via de bestaande CAP-functies; geserveerd door `server.js` + `mta.yaml`; login-redirect wijst ernaartoe. 401/403 → terug naar `travel-login.html`.
-- [ ] **[Naam]** Startscherm toevoegen in Team Dashboard met overzicht openstaande goedkeuringen (FV-26/getPendingCount-tegel) — TeamLead moet bij inloggen direct zien hoeveel aanvragen wachten.
-- [ ] **[Naam]** Startscherm toevoegen in HR Dashboard met airline-stats overzicht (FV-02/FV-06 grafiek) en datumfilter voor reisperiodes.
+- [x] **[Tom]** Startscherm Team Dashboard toegevoegd (`app/team-start.html`): KPI openstaande goedkeuringen (`getPendingCount`) + teamleden op reis/beschikbaar (uit `/team/People`), met navigatiekaarten naar goedkeuringen/teamleden/reizen. Login-redirect wijst ernaartoe.
+- [x] **[Tom]** Startscherm HR Dashboard toegevoegd (`app/hr-start.html`): airline-stats overzicht (`getAirlineStats`) als top-5 staafvisualisatie met budget, plus KPI's (aantal airlines, totaal boekingen, meest gebruikte airline). Datumfilter voor reisperiodes blijft op de Trips-lijst (FV-28).
 
 ---
 
