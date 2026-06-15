@@ -13,7 +13,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const cds = require('@sap/cds');
-const { collectAllTrips } = require('./trippin-trips');
+const { collectAllTrips, collectTripsForPerson } = require('./trippin-trips');
 
 // V7: horizon (in dagen) voor de KPI "komende reizen binnen X weken"
 const UPCOMING_HORIZON_DAYS = 14;
@@ -115,16 +115,22 @@ module.exports = cds.service.impl(async function () {
       };
     }
 
-    if (trips.length === 0) return trips;
+    // People('x')/Trips navigatie -> enkel de reizen van die persoon
+    const personParam = req.params?.find(p => p && typeof p === 'object' && p.UserName !== undefined);
+    const baseTrips   = personParam?.UserName
+      ? await collectTripsForPerson(TripPin, personParam.UserName)
+      : trips;
+
+    if (baseTrips.length === 0) return baseTrips;
 
     // Haal lokale PrimePath-extensievelden op en merge
-    const tripIds    = trips.map(t => t.TripId);
+    const tripIds    = baseTrips.map(t => t.TripId);
     const extensions = await cds.run(
       SELECT.from(TravelExtensions).where({ TripID: { in: tripIds } })
     );
     const extMap = Object.fromEntries(extensions.map(e => [e.TripID, e]));
 
-    const merged = trips.map(trip => ({
+    const merged = baseTrips.map(trip => ({
       ...trip,
       ProjectCode:    extMap[trip.TripId]?.ProjectCode    ?? null,
       ApprovalStatus: extMap[trip.TripId]?.ApprovalStatus ?? 'Pending',
