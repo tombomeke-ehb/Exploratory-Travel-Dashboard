@@ -39,8 +39,8 @@ Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser gete
 - [ ] **[Naam]** **Sleutels/IDs zichtbaar in de URL** (bijv. `#/People('keithpinckney')`, `#/Trips(5007)`) — Toms opmerking dat de URL's niet netjes zijn en data tonen. Dit is **standaard Fiori Elements-gedrag**: de entiteitssleutel staat in de hash voor deep-linking/bookmarks. Het is een client-side `#`-fragment (wordt niet naar de server gestuurd → geen server-side lek/logging) en de sleutels zijn identifiers (TripPin-username, reis-ID), geen gevoelige gegevens. Verbergen kan **niet** zonder Fiori Elements te verlaten (freestyle UI5). **Aanbeveling: accepteren als normaal SAP-gedrag** (laag/geen prioriteit); eventueel benoemen in de demo.
 
 ### 🎨 UX / navigatie
-- [ ] **[Naam]** **Geen weg terug** vanuit de Fiori-apps: geen logout- of "terug naar overzicht"-knop in de shell-header, en vanaf een Object Page (`#/People('...')`) is er geen back-navigatie zichtbaar. Voeg een shell-header met logout + link naar het startscherm toe in alle 3 apps (linkt aan de logout/401-redirect-TODO's onder 🟡 UX-verbeteringen en TA §6.2).
-- [ ] **[Naam]** **"Start"-knop in Team `#/TravelExtensions` doet ogenschijnlijk niets** — onderzoeken of dit de filterbalk-knop "Go/Start" is (data is al geladen via `initialLoad`) of een echte bug.
+- [x] **[Tom]** **Weg terug + logout → GEDAAN.** Vaste PrimePath-balk (`position: fixed`) met **← Overzicht** (naar het rol-startscherm) en **Afmelden** (`POST /auth/logout` → landingspagina) toegevoegd aan elke `webapp/index.html` (travel/team/hr). Geen layout/hoogte-impact. (Binnen de app werkt browser-/FE-back tussen lijst en Object Page sowieso.)
+- [x] **[Tom]** **"Start"-knop Team → geen bug.** Dit is de standaard Fiori-filterbalkknop "Go" (in NL UI5 "Start"): hij past de filters toe. Omdat de lijst al via `initialLoad` geladen is, verandert er visueel niets bij ongewijzigde filters. Verwacht gedrag.
 
 ### 🟡 Performance
 - [ ] **[Naam]** **Airlinegebruik / "meest gebruikte airline" laadt traag** op de startschermen. `getAirlineStats` en `getTopAirline` doen veel sequentiële remote TripPin-calls (People → Trips → PlanItems). Optimaliseren: (a) op `travel-start.html` de top-airline afleiden uit `getAirlineStats` i.p.v. een aparte `getTopAirline`-call (scheelt een zware call), (b) de in-memory cache pre-warmen bij boot, (c) sample verkleinen of calls parallelliseren.
@@ -145,7 +145,7 @@ Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser gete
 
 ### UX-verbeteringen
 
-- [ ] **[Naam]** Logout-knop toevoegen in de dashboards — het endpoint `POST /auth/logout` bestaat al (`server.js` regel 95), maar er is geen knop in de Fiori-apps. Voeg een custom actie of een link toe in de shell-header van elke webapp
+- [x] **[Tom]** Logout-knop toegevoegd in alle 3 Fiori-apps (de "Afmelden"-knop in de PrimePath-balk in `webapp/index.html`; roept `POST /auth/logout` aan en gaat naar de landingspagina).
 - [ ] **[Naam]** Automatische redirect naar loginpagina bij verlopen sessie (401/403) — voeg een `fetch`-interceptor toe in de webapps die bij een 401-response redirect naar de juiste login-HTML (bijv. `travel-login.html`)
 - [ ] **[Naam]** Auditlog tonen in UI: `modifiedAt` en `modifiedBy` zijn al aanwezig via CAP `managed`-mixin (`db/schema.cds` regel 27) — voeg ze toe aan de ObjectPage van TravelExtensions zodat zichtbaar is wie wanneer de status heeft gewijzigd
 - [x] **[Ismael]** Foutmelding verbeteren bij ongeldige datumparameters in `getTripCountByPeriod` — GEDAAN in `srv/hr-service.js`: een opgegeven `from`/`to` die geen geldige datum is, geeft `req.error(400, 'Ongeldige datumparameters: gebruik een geldige datum (ISO 8601).')`.
