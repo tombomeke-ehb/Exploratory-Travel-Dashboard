@@ -26,6 +26,34 @@ De drie dashboards toonden eerst een wit scherm / foutdialoog. Drie blokkerende 
 
 ---
 
+## 🔎 Bevindingen browsertest (15 juni 2026 — Tom)
+
+Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser getest. Bevindingen, op prioriteit:
+
+### 🔴 Kritiek voor demo
+- [ ] **[Naam]** **TeamLead kan goedkeuringen niet aanpassen in de UI.** De backend staat UPDATE van `ApprovalStatus` voor eigen teamleden toe (`srv/team-service.js`), maar de Fiori Elements V4 Object Page biedt geen bewerk-flow → een `Pending`-aanvraag kan niet op `Approved`/`Rejected` gezet worden. Dit is hét kernproces van het Team Dashboard. Oplossing: `@odata.draft.enabled` op `TravelExtensions` (zie 🎨 Draft-sectie) óf een editable Object Page / custom actie + `srv.before('PATCH', ...)`-validatie. **Vereist vóór de demo.**
+- [ ] **[Naam]** **Trips Object Page laadt niets** (bijv. `#/Trips(5007)`). De detailpagina van een reis blijft leeg. Onderzoeken: key-lookup in de Trips READ-handler (`collectAllTrips` → `byId.get(Number(keyId))`) en of de sample-grootte de reis uitsluit (`srv/trippin-trips.js`, `srv/travel-service.js`, `srv/hr-service.js`).
+
+### 🔒 Security
+- [ ] **[Naam]** **Statische UI-routes + startpagina's zijn zonder login bereikbaar** (HTTP 200), terwijl de data wél beschermd is (401). Geldt voor álle apps: `/travel-dashboard/webapp/*`, `/team-dashboard/webapp/*`, `/hr-dashboard/webapp/*` en `travel-/team-/hr-start.html`. Voeg een auth-gate toe in `server.js` (JWT-cookie-check vóór deze statische routes) die niet-ingelogde gebruikers naar de juiste `*-login.html` redirect. De data is veilig, maar de UI-schil hoort óók achter login.
+
+### 🎨 UX / navigatie
+- [ ] **[Naam]** **Geen weg terug** vanuit de Fiori-apps: geen logout- of "terug naar overzicht"-knop in de shell-header, en vanaf een Object Page (`#/People('...')`) is er geen back-navigatie zichtbaar. Voeg een shell-header met logout + link naar het startscherm toe in alle 3 apps (linkt aan de logout/401-redirect-TODO's onder 🟡 UX-verbeteringen en TA §6.2).
+- [ ] **[Naam]** **"Start"-knop in Team `#/TravelExtensions` doet ogenschijnlijk niets** — onderzoeken of dit de filterbalk-knop "Go/Start" is (data is al geladen via `initialLoad`) of een echte bug.
+
+### 🟡 Performance
+- [ ] **[Naam]** **Airlinegebruik / "meest gebruikte airline" laadt traag** op de startschermen. `getAirlineStats` en `getTopAirline` doen veel sequentiële remote TripPin-calls (People → Trips → PlanItems). Optimaliseren: (a) op `travel-start.html` de top-airline afleiden uit `getAirlineStats` i.p.v. een aparte `getTopAirline`-call (scheelt een zware call), (b) de in-memory cache pre-warmen bij boot, (c) sample verkleinen of calls parallelliseren.
+
+### 🟢 Ruis (geen actie vereist — ter info)
+> Deze console-meldingen zijn normaal voor een ongebouwde, standalone SAPUI5-app in dev en breken niets:
+> - `Component-preload.js` 404 / MIME-mismatch → geen preload-bundle in dev; UI5 laadt losse modules. `cds build` genereert dit voor productie.
+> - `i18n_nl.properties` / `i18n_en.properties` 404 → UI5 zoekt taal-specifieke bundles en valt terug op `i18n.properties`. Optioneel te stillen met lege taalbestanden.
+> - `/sap/bc/lrep/flex/...` 404 → geen flexibility/variant-backend (standalone). Onschadelijk.
+> - `S/CUBE is not yet supported`, MDC `PropertyInfoValidator`-warnings, `No cards available` → bekende SAPUI5-ruis.
+> - `GET /travel/$metadata - Network error` → waarschijnlijk transient (trage remote / eerste load); de app laadt verder. In het oog houden.
+
+---
+
 ## ✅ Klaar (niet aanraken)
 
 - [x] Login-flow (JWT-cookie, 3 rollen)
