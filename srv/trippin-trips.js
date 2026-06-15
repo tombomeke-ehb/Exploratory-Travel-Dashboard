@@ -79,4 +79,31 @@ async function collectAllTrips(TripPin) {
   return _cache;
 }
 
-module.exports = { collectAllTrips };
+// Haal de reizen van ÉÉN persoon op (voor de People('x')/Trips-navigatie op de
+// medewerker-detailpagina). Zelfde vorm als collectAllTrips' reisobjecten.
+async function collectTripsForPerson(TripPin, userName) {
+  try {
+    const resp = await TripPin.send({
+      method: 'GET',
+      path: `People('${userName}')/Trips?$select=TripId,Name,Budget,Description,StartsAt,EndsAt`,
+    });
+    const arr = Array.isArray(resp?.value) ? resp.value
+              : Array.isArray(resp)        ? resp
+              : [];
+    return arr.map(t => ({
+      TripId:      t.TripId,
+      Name:        t.Name ?? null,
+      Budget:      t.Budget?.Value ?? t.Budget ?? null,
+      Description: t.Description ?? null,
+      StartsAt:    t.StartsAt ?? null,
+      EndsAt:      t.EndsAt ?? null,
+    }));
+  } catch (err) {
+    cds.log('trippin-trips').warn(
+      `Kon trips van '${userName}' niet ophalen (navigatie): ${err.message}`
+    );
+    return [];
+  }
+}
+
+module.exports = { collectAllTrips, collectTripsForPerson };

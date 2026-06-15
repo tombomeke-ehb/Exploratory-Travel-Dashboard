@@ -10,7 +10,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const cds = require('@sap/cds');
-const { collectAllTrips } = require('./trippin-trips');
+const { collectAllTrips, collectTripsForPerson } = require('./trippin-trips');
 
 // ── In-memory cache voor airline-statistieken ────────────────────────────────
 let _airlineStatsCache = null;
@@ -32,6 +32,11 @@ module.exports = cds.service.impl(async function () {
     const keyId    = (keyParam && typeof keyParam === 'object') ? keyParam.TripId : keyParam;
     if (keyId !== undefined && keyId !== null) {
       return byId.get(Number(keyId)) ?? null;
+    }
+    // People('x')/Trips navigatie -> enkel de reizen van die persoon
+    const personParam = req.params?.find(p => p && typeof p === 'object' && p.UserName !== undefined);
+    if (personParam?.UserName) {
+      return await collectTripsForPerson(TripPin, personParam.UserName);
     }
     trips.$count = trips.length;
     return trips;
