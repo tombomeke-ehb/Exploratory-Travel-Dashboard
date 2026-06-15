@@ -104,8 +104,8 @@ De drie dashboards toonden eerst een wit scherm / foutdialoog. Drie blokkerende 
 - [ ] **[Naam]** **FV-07** E-mailadres tonen in medewerkerslijst Travel Dashboard — het `Emails`-veld uit TripPin People is niet zichtbaar in de LineItem (`app/travel-dashboard/annotations.cds`)
 - [ ] **[Naam]** **FV-13** Datumfilter als bereik (van–tot) op reislijst — `SelectionFields` heeft `StartsAt` en `EndsAt` maar controleer of die samen als bereikfilter werken of als twee losse filters
 - [ ] **[Naam]** **FV-18** Gebruikstelling (aantal boekingen) tonen in airlinelijst — de lijst toont nu alleen `AirlineCode` en `Name`, niet het aantal boekingen per airline
-- [ ] **[Naam]** **FV-20** Stad tonen in luchthavenslijst — controleer of `Location.City` zichtbaar is in de airports annotations; TripPin Airports heeft een genest `Location`-object
-- [ ] **[Naam]** **FV-29** People-lijst bereikbaar vanuit HR Dashboard — `HRService.People` is geannoteerd maar is de lijst ook als navigatiepunt opgenomen naast Trips en Airlines?
+- [ ] **[Naam]** **FV-20 → UITGESTELD (niet triviaal)** Stad tonen in luchthavenslijst kan **niet** via een directe annotatie `Location.City.Name`: CAP slaat het geneste TripPin-`Location`-complextype dan plat (`Location_City_Name`/`Location_Address`) bij de remote → `502 Could not find property 'Location_Address'`. Vereist een **virtueel scalair veld** `City` op de Airports-projectie + een custom `READ`-handler die `Location.City.Name` overneemt (zoals OnTravel/TripName). Onderzocht door Tom; bewust niet in de quick-wins-PR meegenomen om de Airports-lijst niet te breken.
+- [x] **[Tom]** **FV-29 → GEDAAN** De People-lijst is bereikbaar vanuit het HR Dashboard: de `PeopleList`/`PeopleObjectPage`-route is toegevoegd in PR #54 (naast Trips en Airlines).
 
 ### Data & functionaliteit
 
@@ -123,7 +123,7 @@ De drie dashboards toonden eerst een wit scherm / foutdialoog. Drie blokkerende 
 
 ### Logging
 
-- [ ] **[Naam]** Logging toevoegen in lege `catch`-blokken in alle services — minstens `cds.log('service').warn(err)` zodat fouten traceerbaar zijn via `cf logs` (`srv/travel-service.js` regels 45, 78, 219, 290–296; `srv/team-service.js` regels 41, 82; `srv/hr-service.js` regels 76–80)
+- [x] **[Tom]** Logging toegevoegd in de stille `catch`-blokken van `srv/travel-service.js` (OnTravel-status, actieve/komende telling, airline-stats) en `srv/hr-service.js` (PlanItems, per persoon, fallback): elk `catch (err)` logt nu `cds.log('<service>').warn(...)` zodat fouten traceerbaar zijn via `cf logs`, met behoud van de bestaande fallback. (`team-service.js`/`trippin-trips.js` logden al.)
 
 ---
 
@@ -246,8 +246,8 @@ De drie dashboards toonden eerst een wit scherm / foutdialoog. Drie blokkerende 
 
 - [x] **[Tom]** **[TA §6.3 → VERVALLEN]** Het React demo-dashboard (`app/dashboard/`) is **verwijderd** (hardgecodeerde mockup, niet het beoogde eindproduct). De drie Fiori Elements-apps zijn de frontend; het koppelen van een los React-dashboard aan CAP is daarmee niet meer van toepassing.
 - [ ] **[Naam]** **[TA §6.4]** Beheerscherm voor gebruikersaccounts bovenop AdminService (/admin): accounts aanmaken, rol toekennen, wachtwoord resetten (server-side bcrypt-hash). Alleen voor TravelAdmin.
-- [ ] **[Naam]** **[TA §3.3 + README]** README rechtzetten: tekst vermeldt nog `UserMapping.TeamLeadLoginId`, schema gebruikt `TeamLeadUserName`. README en `db/schema.cds` gelijktrekken.
-- [ ] **[Naam]** **[TA Bijlage A]** Repo opschonen: `db.sqlite-shm`, `db.sqlite-wal` en `cds-test.log` uit versiebeheer (`.gitignore` + `git rm --cached`).
+- [x] **[Tom]** **[TA §3.3 + README → REEDS IN ORDE]** README gebruikt al `TeamLeadUserName` (geen `TeamLeadLoginId` meer); README en `db/schema.cds` lopen gelijk. Geverifieerd, niets te wijzigen.
+- [x] **[Tom]** **[TA Bijlage A → REEDS IN ORDE]** `.gitignore` negeert al `*.sqlite`, `*.sqlite-shm`, `*.sqlite-wal` en `*.log`; `git ls-files` toont geen getrackte sqlite-/log-bestanden. Niets te verwijderen uit versiebeheer.
 
 ### Al in deze TODO, nu gekoppeld aan de TA (afwerken vóór 19 juni)
 
