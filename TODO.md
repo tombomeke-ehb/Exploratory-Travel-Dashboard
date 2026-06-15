@@ -140,11 +140,11 @@ De drie dashboards toonden eerst een wit scherm / foutdialoog. Drie blokkerende 
 
 > Volgens de officiële CAP-documentatie zijn `UI.LineItem` en `UI.SelectionFields` de minimumvereisten voor een werkend List Report. `UI.HeaderInfo` is verplicht voor de Object Page.
 
-- [ ] **[Naam]** **Airlines-route ontbreekt in Travel Dashboard** — `app/travel-dashboard/webapp/manifest.json` heeft geen route naar een Airlines-lijstpagina. Voeg toe: `AirlinesList` en `AirlinesObjectPage` met bijbehorende `UI.LineItem`-annotatie in `app/travel-dashboard/annotations.cds`.
-- [ ] **[Naam]** **Airports-route ontbreekt in Travel Dashboard** — zelfde probleem: voeg `AirportsList` en `AirportsObjectPage` toe aan `manifest.json` en zorg voor `UI.LineItem`-annotatie.
-- [ ] **[Naam]** **People-route ontbreekt in HR Dashboard** — `app/hr-dashboard/webapp/manifest.json` heeft geen `PeopleList`/`PeopleObjectPage`. `HRService.People` is geannoteerd in `app/hr-dashboard/annotations.cds` maar de route ontbreekt. Toevoegen aan `manifest.json`.
-- [ ] **[Naam]** **Airlines-route ontbreekt in HR Dashboard** — idem: voeg `AirlinesList`/`AirlinesObjectPage` toe aan HR Dashboard `manifest.json`.
-- [ ] **[Naam]** Elke List Report-entiteit moet een `@UI.PresentationVariant` hebben met expliciete `SortOrder` — controleer `app/team-dashboard/annotations.cds` en `app/hr-dashboard/annotations.cds`: hebben People, Trips en Airlines een `PresentationVariant` met sortering? Travel Dashboard heeft dit al voor TravelExtensions, maar de overige ontbreken.
+- [x] **[Tom]** **Airlines-route in Travel Dashboard** — `AirlinesList`/`AirlinesObjectPage` toegevoegd aan `app/travel-dashboard/webapp/manifest.json` (annotatie bestond al).
+- [x] **[Tom]** **Airports-route in Travel Dashboard** — `AirportsList`/`AirportsObjectPage` toegevoegd aan `manifest.json`.
+- [x] **[Tom]** **People-route in HR Dashboard** — `PeopleList`/`PeopleObjectPage` toegevoegd aan `app/hr-dashboard/webapp/manifest.json`.
+- [x] **[Tom]** **Airlines-route in HR Dashboard** — `AirlinesList`/`AirlinesObjectPage` toegevoegd aan HR Dashboard `manifest.json`.
+- [x] **[Tom]** `@UI.PresentationVariant` met expliciete `SortOrder` toegevoegd op de nieuw-gerouteerde entiteiten: Travel Airlines/Airports (op `Name`) en HR People (op `LastName`)/Airlines (op `Name`). _Resterend (los): HR Trips en Travel People/Trips hebben nog geen expliciete PresentationVariant._
 
 ### Object Page floorplan — verplichte annotaties (officieel)
 
