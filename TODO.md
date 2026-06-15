@@ -244,7 +244,7 @@ De drie dashboards toonden eerst een wit scherm / foutdialoog. Drie blokkerende 
 
 ### Nieuw (nog niet elders in deze TODO)
 
-- [ ] **[Naam]** **[TA §6.3]** React demo-dashboard (`app/dashboard/`) koppelen aan de CAP-services (/travel, /team, /hr) i.p.v. rechtstreeks aan TripPin, zodat login, rollen en teamfiltering ook daar gelden. Mockdata enkel als fallback wanneer de backend onbereikbaar is. Pas `app/dashboard/data.jsx` aan.
+- [x] **[Tom]** **[TA §6.3 → VERVALLEN]** Het React demo-dashboard (`app/dashboard/`) is **verwijderd** (hardgecodeerde mockup, niet het beoogde eindproduct). De drie Fiori Elements-apps zijn de frontend; het koppelen van een los React-dashboard aan CAP is daarmee niet meer van toepassing.
 - [ ] **[Naam]** **[TA §6.4]** Beheerscherm voor gebruikersaccounts bovenop AdminService (/admin): accounts aanmaken, rol toekennen, wachtwoord resetten (server-side bcrypt-hash). Alleen voor TravelAdmin.
 - [ ] **[Naam]** **[TA §3.3 + README]** README rechtzetten: tekst vermeldt nog `UserMapping.TeamLeadLoginId`, schema gebruikt `TeamLeadUserName`. README en `db/schema.cds` gelijktrekken.
 - [ ] **[Naam]** **[TA Bijlage A]** Repo opschonen: `db.sqlite-shm`, `db.sqlite-wal` en `cds-test.log` uit versiebeheer (`.gitignore` + `git rm --cached`).
