@@ -1,5 +1,6 @@
 // Fiori Annotations - HR Dashboard
 annotate HRService.Airlines with @(
+  UI.PresentationVariant: { SortOrder: [{ Property: Name, Descending: false }], Visualizations: ['@UI.LineItem'] },
   UI.HeaderInfo: { TypeName: 'Airline', TypeNamePlural: 'Airlines', Title: { Value: Name }, Description: { Value: AirlineCode } },
   UI.SelectionFields: [ AirlineCode ],
   UI.LineItem: [
@@ -19,6 +20,7 @@ annotate HRService.Trips with @(
   ]
 );
 annotate HRService.People with @(
+  UI.PresentationVariant: { SortOrder: [{ Property: LastName, Descending: false }], Visualizations: ['@UI.LineItem'] },
   UI.HeaderInfo: { TypeName: 'Medewerker', TypeNamePlural: 'Medewerkers', Title: { Value: LastName }, Description: { Value: UserName } },
   UI.SelectionFields: [ LastName ],
   UI.LineItem: [

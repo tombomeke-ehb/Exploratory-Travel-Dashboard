@@ -110,6 +110,7 @@ annotate TravelService.People with @(
   ]}
 );
 annotate TravelService.Airlines with @(
+  UI.PresentationVariant: { SortOrder: [{ Property: Name, Descending: false }], Visualizations: ['@UI.LineItem'] },
   UI.HeaderInfo: { TypeName: 'Airline', TypeNamePlural: 'Airlines', Title: { Value: Name }, Description: { Value: AirlineCode } },
   UI.SelectionFields: [ AirlineCode ],
   UI.LineItem: [
@@ -123,6 +124,7 @@ annotate TravelService.Airlines with @(
   ]}
 );
 annotate TravelService.Airports with @(
+  UI.PresentationVariant: { SortOrder: [{ Property: Name, Descending: false }], Visualizations: ['@UI.LineItem'] },
   UI.HeaderInfo: { TypeName: 'Luchthaven', TypeNamePlural: 'Luchthavens', Title: { Value: Name }, Description: { Value: IataCode } },
   UI.SelectionFields: [ IcaoCode, IataCode ],
   UI.LineItem: [
