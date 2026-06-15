@@ -34,7 +34,12 @@ service TeamService {
 
   // ── TravelExtensions: lezen voor iedereen ─────────────────────────────────
   // Schrijven enkel ApprovalStatus – afgedwongen in team-service.js
-  entity TravelExtensions as projection on p.TravelExtensions;
+  // FV-24: Goedkeuren/Afkeuren als bound actions (één klik op de Object Page).
+  // De teamcheck (eigen teamlid?) zit in srv/team-service.js (_assertTeamOwnership).
+  entity TravelExtensions as projection on p.TravelExtensions actions {
+    action goedkeuren() returns TravelExtensions;
+    action afkeuren()  returns TravelExtensions;
+  };
 
   // ── UserMapping: read-only (teamleden opzoeken) ───────────────────────────
   @readonly entity UserMapping as projection on p.UserMapping;
