@@ -58,6 +58,8 @@ cds.on('bootstrap', (app) => {
   serveHtml('team-login.html',     '/team-login.html')
   serveHtml('hr-login.html',       '/hr-login.html')
   serveHtml('travel-start.html',   '/travel-start.html')
+  serveHtml('team-start.html',     '/team-start.html')
+  serveHtml('hr-start.html',       '/hr-start.html')
 
   // ── JSON body-parser voor auth-endpoints ──────────────────────────────────
   app.use('/auth', express.json())

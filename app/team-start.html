@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PrimePath Travel – Team Dashboard (overzicht)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: '72', 'SAP72', Arial, sans-serif;
+      background: #f5f6f7;
+      color: #32363a;
+      min-height: 100vh;
+    }
+    .shell-header {
+      background: #0a6ed1;
+      color: #fff;
+      padding: 0 2rem;
+      height: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 4px rgba(0,0,0,.2);
+    }
+    .shell-header .logo { font-size: 1rem; font-weight: 700; letter-spacing: .5px; }
+    .shell-header .right { display: flex; align-items: center; gap: 1rem; }
+    .shell-header .subtitle { font-size: .75rem; opacity: .85; }
+    .logout-btn {
+      background: rgba(255,255,255,.15);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 4px;
+      padding: .25rem .7rem;
+      font-size: .75rem;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .logout-btn:hover { background: rgba(255,255,255,.28); }
+
+    .page-title {
+      background: #fff;
+      border-bottom: 1px solid #d9d9d9;
+      padding: 1.25rem 2rem .75rem;
+    }
+    .page-title h1 { font-size: 1.375rem; font-weight: 600; }
+    .page-title p { font-size: .875rem; color: #6a6d70; margin-top: .25rem; }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 1.5rem 2rem 2rem; }
+    .section-label {
+      font-size: .8rem; font-weight: 600; color: #6a6d70;
+      text-transform: uppercase; letter-spacing: .5px;
+      margin: 1.75rem 0 .75rem;
+    }
+    .section-label:first-child { margin-top: 0; }
+
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+    .kpi {
+      background: #fff;
+      border: 1px solid #d9d9d9;
+      border-left: 4px solid #0a6ed1;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: .35rem;
+      min-height: 7rem;
+    }
+    .kpi.accent-red    { border-left-color: #bb0000; }
+    .kpi.accent-green  { border-left-color: #107e3e; }
+    .kpi.accent-orange { border-left-color: #e9730c; }
+    .kpi .kpi-label {
+      font-size: .8rem; color: #6a6d70; font-weight: 600;
+      display: flex; align-items: center; gap: .4rem;
+    }
+    .kpi .kpi-value { font-size: 2.25rem; font-weight: 300; line-height: 1.1; color: #32363a; }
+    .kpi .kpi-sub { font-size: .75rem; color: #9ca0a4; margin-top: auto; }
+
+    .nav-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+    .nav-card {
+      background: #fff;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      align-items: center;
+      gap: .85rem;
+      transition: box-shadow .15s, border-color .15s;
+    }
+    .nav-card:hover { box-shadow: 0 4px 16px rgba(10,110,209,.15); border-color: #0a6ed1; }
+    .nav-card .nc-icon {
+      width: 2.5rem; height: 2.5rem; border-radius: 50%;
+      background: #e8f3fc; display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; flex-shrink: 0;
+    }
+    .nav-card .nc-title { font-size: .95rem; font-weight: 600; }
+    .nav-card .nc-sub { font-size: .78rem; color: #6a6d70; }
+    .nav-card .nc-arrow { margin-left: auto; color: #0a6ed1; font-weight: 700; }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: .75rem;
+      color: #9ca0a4;
+      border-top: 1px solid #e5e5e5;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="shell-header">
+    <span class="logo">✈ PrimePath Travel</span>
+    <div class="right">
+      <span class="subtitle">Team Lead</span>
+      <button class="logout-btn" id="logoutBtn" type="button">Afmelden</button>
+    </div>
+  </header>
+
+  <div class="page-title">
+    <h1>Team Dashboard — Overzicht</h1>
+    <p>Openstaande goedkeuringen en de beschikbaarheid van je team. Klik door om te beheren.</p>
+  </div>
+
+  <main>
+    <div class="section-label">Kerncijfers</div>
+    <section class="kpi-row">
+      <div class="kpi accent-orange">
+        <span class="kpi-label">📝 Openstaande goedkeuringen</span>
+        <span class="kpi-value" id="kpiPending">…</span>
+        <span class="kpi-sub">wachten op jouw beslissing</span>
+      </div>
+      <div class="kpi accent-red">
+        <span class="kpi-label">✈ Teamleden op reis</span>
+        <span class="kpi-value" id="kpiOnTravel">…</span>
+        <span class="kpi-sub">momenteel onderweg</span>
+      </div>
+      <div class="kpi accent-green">
+        <span class="kpi-label">👤 Teamleden beschikbaar</span>
+        <span class="kpi-value" id="kpiAvailable">…</span>
+        <span class="kpi-sub">vandaag beschikbaar</span>
+      </div>
+    </section>
+
+    <div class="section-label">Beheren</div>
+    <section class="nav-row">
+      <a class="nav-card" href="/team-dashboard/webapp/#/TravelExtensions">
+        <span class="nc-icon">📝</span>
+        <span>
+          <div class="nc-title">Reisgoedkeuringen</div>
+          <div class="nc-sub">Goedkeuren / afkeuren</div>
+        </span>
+        <span class="nc-arrow">→</span>
+      </a>
+      <a class="nav-card" href="/team-dashboard/webapp/#/People">
+        <span class="nc-icon">👥</span>
+        <span>
+          <div class="nc-title">Teamleden</div>
+          <div class="nc-sub">Status &amp; eerstvolgende reis</div>
+        </span>
+        <span class="nc-arrow">→</span>
+      </a>
+      <a class="nav-card" href="/team-dashboard/webapp/">
+        <span class="nc-icon">🧳</span>
+        <span>
+          <div class="nc-title">Reizen</div>
+          <div class="nc-sub">Reisoverzicht</div>
+        </span>
+        <span class="nc-arrow">→</span>
+      </a>
+    </section>
+  </main>
+
+  <footer>
+    EhB Cloud Integration &nbsp;·&nbsp; In samenwerking met Flexso &nbsp;·&nbsp; Demo: 19 juni 2026
+  </footer>
+
+  <script>
+    // Roept een OData-resource/functie op de Team-service aan; 401/403 → loginpagina.
+    async function odata (resource) {
+      const res = await fetch('/team/' + resource, {
+        credentials: 'include',
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.status === 401 || res.status === 403) {
+        window.location.href = '/team-login.html';
+        throw new Error('unauthorized');
+      }
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    }
+
+    function setText (id, value) { document.getElementById(id).textContent = value; }
+
+    async function loadPending () {
+      try { const d = await odata('getPendingCount()'); setText('kpiPending', d.value ?? '—'); }
+      catch (e) { setText('kpiPending', '—'); }
+    }
+
+    async function loadTeam () {
+      try {
+        const d = await odata('People');
+        const people = d.value || [];
+        const onTravel = people.filter(p => p.OnTravel === true).length;
+        setText('kpiOnTravel', onTravel);
+        setText('kpiAvailable', Math.max(people.length - onTravel, 0));
+      } catch (e) {
+        setText('kpiOnTravel', '—');
+        setText('kpiAvailable', '—');
+      }
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try { await fetch('/auth/logout', { method: 'POST', credentials: 'include' }); } catch (e) {}
+      window.location.href = '/';
+    });
+
+    loadPending();
+    loadTeam();
+  </script>
+</body>
+</html>
