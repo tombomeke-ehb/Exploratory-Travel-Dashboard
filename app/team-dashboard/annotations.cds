@@ -51,6 +51,11 @@ annotate TeamService.Trips with @(
 );
 annotate TeamService.TravelExtensions with @(
   UI.HeaderInfo: { TypeName: 'Reisgoedkeuring', TypeNamePlural: 'Reisgoedkeuringen', Title: { Value: TripID } },
+  // FV-24: Goedkeuren/Afkeuren-knoppen op de Object Page (groen/rood via Criticality)
+  UI.Identification: [
+    { $Type: 'UI.DataFieldForAction', Action: 'TeamService.goedkeuren', Label: 'Goedkeuren', Criticality: #Positive },
+    { $Type: 'UI.DataFieldForAction', Action: 'TeamService.afkeuren',  Label: 'Afkeuren',  Criticality: #Negative }
+  ],
   // FV-26: filter op goedkeuringsstatus, met 'In behandeling' als preset
   UI.SelectionFields: [ ApprovalStatus ],
   UI.LineItem: [
