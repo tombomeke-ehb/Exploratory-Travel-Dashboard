@@ -47,7 +47,14 @@ annotate TeamService.Trips with @(
     { $Type: 'UI.DataField', Value: Name,     Label: 'Naam' },
     { $Type: 'UI.DataField', Value: StartsAt, Label: 'Vertrek' },
     { $Type: 'UI.DataField', Value: EndsAt,   Label: 'Aankomst' }
-  ]
+  ],
+  UI.Facets: [{ $Type: 'UI.ReferenceFacet', Label: 'Reisgegevens', Target: '@UI.FieldGroup#TripInfo' }],
+  UI.FieldGroup#TripInfo: { Label: 'Reisgegevens', Data: [
+    { $Type: 'UI.DataField', Value: TripId,   Label: 'Trip ID' },
+    { $Type: 'UI.DataField', Value: Name,     Label: 'Naam' },
+    { $Type: 'UI.DataField', Value: StartsAt, Label: 'Vertrek' },
+    { $Type: 'UI.DataField', Value: EndsAt,   Label: 'Aankomst' }
+  ]}
 );
 annotate TeamService.TravelExtensions with @(
   UI.HeaderInfo: { TypeName: 'Reisgoedkeuring', TypeNamePlural: 'Reisgoedkeuringen', Title: { Value: TripID } },
