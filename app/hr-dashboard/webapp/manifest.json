@@ -44,6 +44,11 @@
         "settings": { "bundleName": "primepath.hr.i18n.i18n" }
       }
     },
+    "resources": {
+      "css": [
+        { "uri": "css/primepath.css" }
+      ]
+    },
     "routing": {
       "routes": [
         {

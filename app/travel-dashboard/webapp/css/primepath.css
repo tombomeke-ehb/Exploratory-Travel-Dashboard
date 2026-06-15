@@ -1,0 +1,35 @@
+/* ─────────────────────────────────────────────────────────────────────────
+ * PrimePath Travel — merk-overlay bovenop het SAP Horizon-thema (niveau 2).
+ *
+ * We overschrijven hier uitsluitend de Horizon CSS-variabelen (kleuren), geen
+ * layout. Zo krijgen de Fiori Elements-apps de PrimePath-huisstijl zonder de
+ * SAP UI Theme Designer-tool. Geladen via sap.ui5.resources.css in manifest.json.
+ *
+ * Merkkleuren (afgeleid van het React-dashboard):
+ *   brand  #0070F2   hover  #0058C4
+ * ───────────────────────────────────────────────────────────────────────── */
+:root {
+  /* Merk- en accentkleur */
+  --sapBrandColor: #0070F2;
+  --sapHighlightColor: #0070F2;
+
+  /* Nadruk-knoppen (de primaire actie, bv. "Create"/"Save") */
+  --sapButton_Emphasized_Background: #0070F2;
+  --sapButton_Emphasized_BorderColor: #0070F2;
+  --sapButton_Emphasized_Hover_Background: #0058C4;
+  --sapButton_Emphasized_Hover_BorderColor: #0058C4;
+  --sapButton_Emphasized_Active_Background: #0058C4;
+  --sapButton_Emphasized_Active_BorderColor: #0058C4;
+  --sapButton_Emphasized_TextColor: #ffffff;
+
+  /* Links, actieve en geselecteerde elementen */
+  --sapLink_TextColor: #0070F2;
+  --sapLink_Hover_Color: #0058C4;
+  --sapActiveColor: #0058C4;
+  --sapSelectedColor: #0070F2;
+  --sapContent_FocusColor: #0058C4;
+
+  /* Titel-/shellbalk in PrimePath-blauw (alleen de zekere variabelen) */
+  --sapShell_Background: #0070F2;
+  --sapShell_TextColor: #ffffff;
+}
