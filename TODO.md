@@ -158,13 +158,8 @@ De drie dashboards toonden eerst een wit scherm / foutdialoog. Drie blokkerende 
 
 > Fiori Elements rendert automatisch semantische kleuren op basis van `Criticality`-waarden: 1 = rood (fout), 2 = oranje (waarschuwing), 3 = groen (succes). Dit is de officiële methode voor statusweergave per SAP Design Guidelines.
 
-- [ ] **[Naam]** `Criticality`-mapping toevoegen op `ApprovalStatus` in de annotations — voeg een virtueel veld `ApprovalStatusCriticality` toe (of gebruik een inline CDS-mapping) en annoteer:
-  - `Pending` → `2` (oranje / waarschuwing)
-  - `Approved` → `3` (groen / succes)
-  - `Rejected` → `1` (rood / fout)
-  
-  Annoteer vervolgens het `ApprovalStatus`-veld in `UI.LineItem` met `Criticality: ApprovalStatusCriticality` of gebruik een static `$edmJson` expressie. Pas aan in `app/travel-dashboard/annotations.cds` en `app/team-dashboard/annotations.cds`.
-- [ ] **[Naam]** `UI.DataFieldForAnnotation` met `DataPointQualifier` gebruiken voor de `ApprovalStatus`-kolom in de lijst — dit geeft een gekleurde badge in plaats van platte tekst. Hogere visuele impact voor de demo.
+- [x] **[Tom]** `Criticality`-mapping toegevoegd op `ApprovalStatus` via een inline `$edmJson`-expressie (Approved=3 groen, Rejected=1 rood, Pending=2 oranje) in zowel `UI.LineItem` als de Object Page `FieldGroup` van `app/travel-dashboard/annotations.cds` en `app/team-dashboard/annotations.cds`. ~~Oorspronkelijke taak:~~ voeg een virtueel veld `ApprovalStatusCriticality` toe (of gebruik een inline CDS-mapping) met Pending→2, Approved→3, Rejected→1.
+- [x] **[Tom]** Gekleurde badge i.p.v. platte tekst gerealiseerd: het `ApprovalStatus`-`DataField` mét `Criticality` rendert in Fiori Elements als gekleurde `ObjectStatus`-badge (met semantisch icoon) in de lijst. (`UI.DataFieldForAnnotation` met aparte `DataPoint` is daardoor niet nodig.)
 
 ### i18n labels & internationalisatie (officieel CAP-advies)
 

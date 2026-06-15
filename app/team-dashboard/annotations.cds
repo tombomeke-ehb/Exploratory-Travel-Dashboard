@@ -55,7 +55,11 @@ annotate TeamService.TravelExtensions with @(
   UI.SelectionFields: [ ApprovalStatus ],
   UI.LineItem: [
     { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
-    { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus' },
+    // Gekleurde statusbadge: Approved=3 groen, Rejected=1 rood, Pending=2 oranje
+    { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
+        { $Eq: [{ $Path: 'ApprovalStatus' }, 'Approved'] }, 3,
+        { $If: [{ $Eq: [{ $Path: 'ApprovalStatus' }, 'Rejected'] }, 1, 2] }
+    ]}} },
     { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
     { $Type: 'UI.DataField', Value: InternalNote,   Label: 'Interne notitie' }
   ],
@@ -68,7 +72,10 @@ annotate TeamService.TravelExtensions with @(
   },
   UI.Facets: [{ $Type: 'UI.ReferenceFacet', Label: 'Goedkeuring', Target: '@UI.FieldGroup#Approval' }],
   UI.FieldGroup#Approval: { Label: 'Goedkeuringsstatus', Data: [
-    { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus' },
+    { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
+        { $Eq: [{ $Path: 'ApprovalStatus' }, 'Approved'] }, 3,
+        { $If: [{ $Eq: [{ $Path: 'ApprovalStatus' }, 'Rejected'] }, 1, 2] }
+    ]}} },
     { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
     { $Type: 'UI.DataField', Value: InternalNote,   Label: 'Interne notitie' }
   ]}
