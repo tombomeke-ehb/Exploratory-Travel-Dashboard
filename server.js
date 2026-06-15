@@ -59,13 +59,6 @@ cds.on('bootstrap', (app) => {
   serveHtml('hr-login.html',       '/hr-login.html')
   serveHtml('travel-start.html',   '/travel-start.html')
 
-  // Unified React dashboard — serve all static files from app/dashboard/
-  const dashDir = path.join(__dirname, 'app', 'dashboard')
-  if (fs.existsSync(dashDir)) {
-    app.use('/dashboard', express.static(dashDir))
-    app.get('/dashboard', (_req, res) => res.sendFile(path.join(dashDir, 'index.html')))
-  }
-
   // ── JSON body-parser voor auth-endpoints ──────────────────────────────────
   app.use('/auth', express.json())
 

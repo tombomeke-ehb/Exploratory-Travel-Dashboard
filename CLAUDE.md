@@ -34,7 +34,6 @@ app/                     Fiori Elements-apps (annotations) + login-/landingspagi
   travel-dashboard/      Travel Coördinator
   team-dashboard/        Team Lead
   hr-dashboard/          HR / Administratie
-  dashboard/             React demo-dashboard
   index.html             Landingspagina (rolbadges)
 db/
   schema.cds             TravelExtensions, UserMapping, Users
