@@ -4,6 +4,20 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HR Dashboard – PrimePath Travel</title>
+  <script>
+    // TA §6.2: bij een 401/403 tijdens gebruik (verlopen sessie) -> terug naar login.
+    // UI5 gebruikt XMLHttpRequest, niet fetch; daarom patchen we XHR (additief).
+    (function () {
+      var LOGIN = '/hr-login.html';
+      var open = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function () {
+        this.addEventListener('load', function () {
+          if (this.status === 401 || this.status === 403) window.location.replace(LOGIN);
+        });
+        return open.apply(this, arguments);
+      };
+    })();
+  </script>
   <script id="sap-ui-bootstrap"
     src="https://sapui5.hana.ondemand.com/1.136.0/resources/sap-ui-core.js"
     data-sap-ui-theme="sap_horizon"
