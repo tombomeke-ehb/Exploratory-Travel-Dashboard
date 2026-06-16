@@ -146,7 +146,7 @@ Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser gete
 ### UX-verbeteringen
 
 - [x] **[Tom]** Logout-knop toegevoegd in alle 3 Fiori-apps (de "Afmelden"-knop in de PrimePath-balk in `webapp/index.html`; roept `POST /auth/logout` aan en gaat naar de landingspagina).
-- [ ] **[Naam]** Automatische redirect naar loginpagina bij verlopen sessie (401/403) — voeg een `fetch`-interceptor toe in de webapps die bij een 401-response redirect naar de juiste login-HTML (bijv. `travel-login.html`)
+- [x] **[Tom]** Automatische redirect naar login bij verlopen sessie (401/403) — GEDAAN: XHR-interceptor in elke `webapp/index.html` (UI5 gebruikt XMLHttpRequest, geen `fetch`) redirect bij een 401/403-respons naar de juiste `*-login.html`. Complementair aan de server-side auth-gate.
 - [x] **[Tom]** Auditlog in UI: `modifiedAt`/`modifiedBy`/`createdAt`/`createdBy` toegevoegd als "Wijzigingshistoriek"-facet op de TravelExtensions Object Page in Travel én Team — zichtbaar wie wanneer de status wijzigde.
 - [x] **[Ismael]** Foutmelding verbeteren bij ongeldige datumparameters in `getTripCountByPeriod` — GEDAAN in `srv/hr-service.js`: een opgegeven `from`/`to` die geen geldige datum is, geeft `req.error(400, 'Ongeldige datumparameters: gebruik een geldige datum (ISO 8601).')`.
 
@@ -181,7 +181,7 @@ Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser gete
 
 - [x] **[Tom]** Elke Object Page heeft een `@UI.HeaderInfo` met `TypeName`/`TypeNamePlural`/`Title` — geverifieerd voor alle entiteiten in alle 3 apps (Travel, Team, HR).
 - [x] **[Tom]** `@UI.Facets` op de TravelExtensions Object Page met aparte secties: (1) reisgegevens (TripPin), (2) PrimePath interne velden incl. goedkeuringsstatus, (3) **wijzigingshistoriek** (`modifiedAt`/`modifiedBy`/`createdAt`/`createdBy`). Reeds als losse FieldGroup-facetten.
-- [ ] **[Naam]** `@UI.Identification` annotatie toevoegen op TravelExtensions — verplicht voor acties op de ObjectPage-toolbar (bijv. een toekomstige "Override"-actie voor TravelAdmin). Voeg toe in `app/travel-dashboard/annotations.cds`.
+- [x] **[Tom]** `@UI.Identification` met `DataFieldForAction` is aanwezig op **Team** `TravelExtensions` (de Goedkeuren/Afkeuren-knoppen). Op **Travel** is er nog geen actie (TravelAdmin-edit = de openstaande draft-beslissing), dus daar wordt `UI.Identification` pas toegevoegd zodra die actie bestaat — anders zou het een lege toolbar zijn.
 
 ### Semantische kleuren & Criticality (officieel Fiori-patroon)
 
@@ -206,13 +206,13 @@ Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser gete
 
 ### SelectionVariant — standaard actieve filters (officieel Fiori-patroon)
 
-- [ ] **[Naam]** `@UI.SelectionVariant #Pending` in Team Dashboard al aanwezig — verifieer of de filtervariant ook correct wordt opgepakt als de app opent (defaultFilterValues werken alleen als de SelectionVariant als `initialLoad: true` is ingesteld in `manifest.json` onder `settings`).
+- [x] **[Tom]** `@UI.SelectionVariant #Pending` (Team) geverifieerd: de variant is aanwezig en `initialLoad` staat aan, maar een bare `SelectionVariant` wordt in FE V4 **niet automatisch als default-filter toegepast** (dat vereist een `SelectionPresentationVariant`-default). Conform de V9-beslissing ("visuele filter volstaat") laten we het een **beschikbare filter** i.p.v. een opgedrongen default — bewuste keuze.
 - [x] **[Tom]** **`@UI.SelectionVariant #Upcoming` → niet haalbaar.** `StartsAt` op `TravelExtensions` is een **virtueel** veld (ingevuld vanuit TripPin in de READ-handler), dus er kan niet op gefilterd worden in de DB-query — een SelectionVariant erop zou falen/geen effect hebben. Een echte server-side filter zou een persistente datumkolom vereisen (en die is er niet, want reisdatums leven in TripPin).
 
 ### Shell-header logout & 401-redirect (TA §6.2)
 
-- [ ] **[Naam]** Logout-knop in shell-header van alle 3 Fiori-apps — per TA §6.2 hoort de logout in de shell-header, niet als losse paginalink. Gebruik een `sap.ui.core.CustomPlugin` of de `shellPlugin` extensie in `manifest.json` (`sap.ui5.extends.extensions`).
-- [ ] **[Naam]** Automatische 401-redirect per TA §6.2 — voeg een AJAX-fouthandler toe (`$.ajaxSetup` of `fetch`-interceptor) in een controller-extensie die bij elke 401-respons redirect naar de juiste `*-login.html`. Bestand aanmaken in `app/travel-dashboard/webapp/ext/` (en hetzelfde voor team/hr).
+- [x] **[Tom]** Logout in alle 3 apps — GEDAAN via de vaste PrimePath-balk (← Overzicht / Afmelden) in `webapp/index.html`. _Bewuste afwijking van de shellPlugin-aanpak: een standalone FE V4-app heeft geen FLP-shell; een lichte vaste balk is robuuster en risicoloos (geen layout-/hoogte-impact)._
+- [x] **[Tom]** Automatische 401-redirect per TA §6.2 — GEDAAN via een XHR-interceptor in elke `webapp/index.html` (redirect naar de juiste `*-login.html` bij 401/403). Lichter en betrouwbaarder dan een per-controller-extensie, en vangt álle UI5-requests af.
 
 ### Startscherm (Niveau 1) — FA §9.2 drie navigatieniveaus
 
