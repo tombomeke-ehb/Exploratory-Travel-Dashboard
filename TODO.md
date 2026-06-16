@@ -55,6 +55,28 @@ Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser gete
 
 ---
 
+## 🔍 Controle tegen FA/TA v4 (16 juni 2026 — Ismael) — wat nog ontbreekt
+
+Volledige controle van de Functionele Analyse (FV01–FV30) en de Technische Analyse tegen de werkelijke, **lokaal geteste** code. Hieronder enkel **wat nog ontbreekt of afwijkt** van de documenten; het werkende deel is bevestigd en staat in de secties hieronder.
+
+### 🔴 Beslissing nodig vóór demo
+- [ ] **[Naam]** **FA-scope vs FV-lijst** — FA v4 lijst **FV-10, FV-12, FV-16 en FV-19** nog als vereisten, maar ze staan buiten scope (zie 🔵 Buiten scope). Risico: de FA belooft wat de demo niet toont. Kies: (a) opnemen in FA §6.2 met motivering, of (b) expliciet als fase-2-keuze benoemen in de presentatie.
+
+### 🟡 Functioneel — ontbreekt of gedeeltelijk
+- [ ] **[Naam]** **FV-11** — De reizenlijst in Travel toont **geen Aankomst/bestemming**. De geroute lijst is Reisextensies (Vertrek + status); de volledige Trips-lijst (Vertrek/Aankomst) is **niet als route** opgenomen in `app/travel-dashboard/webapp/manifest.json`. Beslis: Trips-lijst toevoegen of Reisextensies-`LineItem` uitbreiden met `EndsAt`.
+- [ ] **[Naam]** **FV-13** — **Datumbereik-filter ontbreekt** in de Travel-lijst: `UI.SelectionFields` van TravelExtensions bevat enkel `ApprovalStatus`, geen datum. Voeg `StartsAt`/`EndsAt` toe als (bereik)filter in `app/travel-dashboard/annotations.cds`.
+- [ ] **[Naam]** **FV-04 / FV-21** — **Centrale zoekbalk** ontbreekt: FA vraagt één centrale zoekbalk (medewerker/luchthaven/airline); nu is er enkel zoeken **per lijst** (Fiori-standaard). Beslis: aanvaarden + in de demo benoemen, of als bewuste afwijking documenteren in de FA.
+
+### 🟡 Technisch (TA) — beschreven maar ontbreekt
+- [ ] **[Naam]** **TA §6.3** — **React demo-dashboard `/dashboard` bestaat niet**: `app/dashboard/` is leeg in de repo, terwijl de TA het in detail beschrijft (incl. Bijlage A). Bouwen (gekoppeld aan /travel·/team·/hr) of uit de TA verwijderen.
+- [ ] **[Naam]** **TA §6.4** — **Beheerscherm gebruikersaccounts ontbreekt**: de `AdminService` (`/admin`) werkt (HTTP 200), maar er is **geen UI-scherm** om accounts te beheren. Bouwen of TA bijstellen.
+- [ ] **[Naam]** **TA §7.4** — **Seed-data juni 2026 ontbreekt**: daardoor toont de OnTravel-badge altijd 'Beschikbaar' en vallen de KPI's terug op fallbackwaarden. Voeg 5–10 TravelExtensions-rijen met 2026-datums toe (gekoppeld aan reizen die via People/Trips bestaan).
+- [ ] **[Naam]** **TA §6.2** — **Logout in shell-header**: TA beschrijft een uitlogknop in de Fiori shell-header; nu is er een eigen vaste PrimePath-balk (werkt wél). Aanvaarden of tekst/implementatie gelijktrekken.
+
+> Bevestigd **werkend** bij deze controle (geen actie nodig): FV-01/02/03/05/06/07/08/09/14/15/17/18/20 (Travel), FV-22 t/m FV-26 (Team), FV-27 t/m FV-30 (HR), de 4 services incl. `/admin`, JWT-auth + auth-gate + rate-limiting + JWT_SECRET-hardfail, `sap_horizon`, NL-labels en 401-redirect.
+
+---
+
 ## ✅ Klaar (niet aanraken)
 
 - [x] Login-flow (JWT-cookie, 3 rollen)
