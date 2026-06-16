@@ -79,9 +79,21 @@ async function collectAllTrips(TripPin) {
     );
   }
 
-  _cache = { trips, byId, owners };
-  _cacheTime = Date.now();
-  return _cache;
+  const result = { trips, byId, owners };
+
+  // Cache-poisoning vermijden: een leeg resultaat komt zo goed als altijd door een
+  // trage/onbereikbare TripPin (geen reizen opgehaald). Dat NIET cachen, anders
+  // toont de hele app 5 minuten lang de fallback. Bij leeg: niet cachen → de
+  // volgende call probeert opnieuw. Enkel een niet-leeg resultaat wordt gecachet.
+  if (trips.length > 0) {
+    _cache = result;
+    _cacheTime = Date.now();
+  } else {
+    cds.log('trippin-trips').warn(
+      'Geen reizen opgehaald (TripPin leeg of traag?) — resultaat niet gecachet; volgende aanvraag probeert opnieuw.'
+    );
+  }
+  return result;
 }
 
 // Haal de reizen van ÉÉN persoon op (voor de People('x')/Trips-navigatie op de
