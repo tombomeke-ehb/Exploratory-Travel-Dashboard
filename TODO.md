@@ -63,7 +63,7 @@ Volledige controle van de Functionele Analyse (FV01–FV30) en de Technische Ana
 - [ ] **[Naam]** **FA-scope vs FV-lijst** — FA v4 lijst **FV-10, FV-12, FV-16 en FV-19** nog als vereisten, maar ze staan buiten scope (zie 🔵 Buiten scope). Risico: de FA belooft wat de demo niet toont. Kies: (a) opnemen in FA §6.2 met motivering, of (b) expliciet als fase-2-keuze benoemen in de presentatie.
 
 ### 🟡 Functioneel — ontbreekt of gedeeltelijk
-- [ ] **[Naam]** **FV-11** — De reizenlijst in Travel toont **geen Aankomst/bestemming**. De geroute lijst is Reisextensies (Vertrek + status); de volledige Trips-lijst (Vertrek/Aankomst) is **niet als route** opgenomen in `app/travel-dashboard/webapp/manifest.json`. Beslis: Trips-lijst toevoegen of Reisextensies-`LineItem` uitbreiden met `EndsAt`.
+- [x] **[Ismael]** **FV-11** — Aankomstdatum toegevoegd: virtueel veld `EndsAt` op TravelExtensions, gevuld uit de gecachte reisdata en getoond als 'Aankomstdatum' in de Reisextensies-`LineItem` + detail-FieldGroup. **Bestemming (land/stad) blijft buiten scope**: TripPin heeft geen Destination op reisniveau (zie FV-12, 🔵 Buiten scope).
 - [ ] **[Naam]** **FV-13** — **Datumbereik-filter ontbreekt** in de Travel-lijst: `UI.SelectionFields` van TravelExtensions bevat enkel `ApprovalStatus`, geen datum. Voeg `StartsAt`/`EndsAt` toe als (bereik)filter in `app/travel-dashboard/annotations.cds`.
 - [ ] **[Naam]** **FV-04 / FV-21** — **Centrale zoekbalk** ontbreekt: FA vraagt één centrale zoekbalk (medewerker/luchthaven/airline); nu is er enkel zoeken **per lijst** (Fiori-standaard). Beslis: aanvaarden + in de demo benoemen, of als bewuste afwijking documenteren in de FA.
 
