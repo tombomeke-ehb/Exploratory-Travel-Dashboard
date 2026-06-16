@@ -37,9 +37,14 @@
       position: fixed; top: 8px; right: 12px; z-index: 2000;
       display: flex; align-items: center; gap: 8px;
       font-family: '72', 'Segoe UI', Arial, sans-serif;
+      background: rgba(255,255,255,.92);
+      padding: 5px 7px; border-radius: 8px;
+      box-shadow: 0 1px 6px rgba(0,0,0,.18);
+      opacity: 0; transition: opacity .25s ease;   /* verschijnt pas als UI5 klaar is (BUG-02) */
     }
+    .pp-shell.pp-ready { opacity: 1; }
     .pp-shell a, .pp-shell button {
-      font-size: 12px; font-weight: 600; line-height: 1;
+      font-size: 12px; font-weight: 600; line-height: 1; white-space: nowrap;
       padding: 7px 12px; border-radius: 6px; cursor: pointer;
       text-decoration: none; border: 1px solid transparent;
     }
@@ -56,6 +61,16 @@
   </div>
   <script>
     function ppLogout(){ fetch('/auth/logout',{method:'POST',credentials:'include'}).finally(function(){ location.href='/'; }); }
+    // BUG-02: toon de balk pas wanneer UI5 klaar is, zodat hij niet over het laadscherm zweeft.
+    (function () {
+      function reveal(){ var s = document.querySelector('.pp-shell'); if (s) s.classList.add('pp-ready'); }
+      var n = 0, t = setInterval(function () {
+        if (window.sap && sap.ui && typeof sap.ui.getCore === 'function') {
+          clearInterval(t);
+          try { sap.ui.getCore().attachInit(reveal); } catch (e) { reveal(); }
+        } else if (++n > 120) { clearInterval(t); reveal(); }   // fallback ~12s
+      }, 100);
+    })();
   </script>
   <div data-sap-ui-component
     data-name="primepath.travel"
