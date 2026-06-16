@@ -49,7 +49,8 @@ annotate TravelService.TravelExtensions with @(
   ],
   UI.Facets: [
     { $Type: 'UI.ReferenceFacet', Label: 'Reisgegevens (TripPin)', Target: '@UI.FieldGroup#TripPinInfo' },
-    { $Type: 'UI.ReferenceFacet', Label: 'PrimePath Interne Velden', Target: '@UI.FieldGroup#PrimePath' }
+    { $Type: 'UI.ReferenceFacet', Label: 'PrimePath Interne Velden', Target: '@UI.FieldGroup#PrimePath' },
+    { $Type: 'UI.ReferenceFacet', Label: 'Wijzigingshistoriek', Target: '@UI.FieldGroup#Audit' }
   ],
   UI.FieldGroup#TripPinInfo: { Label: 'Reisgegevens (TripPin)', Data: [
     { $Type: 'UI.DataField', Value: TripName,        Label: 'Reisnaam' },
@@ -65,6 +66,12 @@ annotate TravelService.TravelExtensions with @(
         { $If: [{ $Eq: [{ $Path: 'ApprovalStatus' }, 'Rejected'] }, 1, 2] }
     ]}} },
     { $Type: 'UI.DataField', Value: InternalNote,   Label: 'Interne notitie' }
+  ]},
+  UI.FieldGroup#Audit: { Label: 'Wijzigingshistoriek', Data: [
+    { $Type: 'UI.DataField', Value: modifiedAt, Label: 'Laatst gewijzigd op' },
+    { $Type: 'UI.DataField', Value: modifiedBy, Label: 'Laatst gewijzigd door' },
+    { $Type: 'UI.DataField', Value: createdAt,  Label: 'Aangemaakt op' },
+    { $Type: 'UI.DataField', Value: createdBy,  Label: 'Aangemaakt door' }
   ]}
 );
 annotate TravelService.TravelExtensions with {

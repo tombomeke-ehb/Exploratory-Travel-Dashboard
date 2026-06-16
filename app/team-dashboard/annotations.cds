@@ -82,7 +82,10 @@ annotate TeamService.TravelExtensions with @(
       Ranges: [{ Sign: #I, Option: #EQ, Low: 'Pending' }]
     }]
   },
-  UI.Facets: [{ $Type: 'UI.ReferenceFacet', Label: 'Goedkeuring', Target: '@UI.FieldGroup#Approval' }],
+  UI.Facets: [
+    { $Type: 'UI.ReferenceFacet', Label: 'Goedkeuring', Target: '@UI.FieldGroup#Approval' },
+    { $Type: 'UI.ReferenceFacet', Label: 'Wijzigingshistoriek', Target: '@UI.FieldGroup#Audit' }
+  ],
   UI.FieldGroup#Approval: { Label: 'Goedkeuringsstatus', Data: [
     { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
         { $Eq: [{ $Path: 'ApprovalStatus' }, 'Approved'] }, 3,
@@ -90,6 +93,12 @@ annotate TeamService.TravelExtensions with @(
     ]}} },
     { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
     { $Type: 'UI.DataField', Value: InternalNote,   Label: 'Interne notitie' }
+  ]},
+  UI.FieldGroup#Audit: { Label: 'Wijzigingshistoriek', Data: [
+    { $Type: 'UI.DataField', Value: modifiedAt, Label: 'Laatst gewijzigd op' },
+    { $Type: 'UI.DataField', Value: modifiedBy, Label: 'Laatst gewijzigd door' },
+    { $Type: 'UI.DataField', Value: createdAt,  Label: 'Aangemaakt op' },
+    { $Type: 'UI.DataField', Value: createdBy,  Label: 'Aangemaakt door' }
   ]}
 );
 annotate TeamService.TravelExtensions with {
