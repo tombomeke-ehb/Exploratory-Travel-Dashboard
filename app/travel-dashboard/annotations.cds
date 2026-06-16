@@ -141,12 +141,14 @@ annotate TravelService.Airports with @(
   UI.LineItem: [
     { $Type: 'UI.DataField', Value: IcaoCode, Label: 'ICAO-code' },
     { $Type: 'UI.DataField', Value: IataCode, Label: 'IATA-code' },
-    { $Type: 'UI.DataField', Value: Name,     Label: 'Naam' }
+    { $Type: 'UI.DataField', Value: Name,     Label: 'Naam' },
+    { $Type: 'UI.DataField', Value: City,     Label: 'Stad' }
   ],
   UI.Facets: [{ $Type: 'UI.ReferenceFacet', Label: 'Luchthaven details', Target: '@UI.FieldGroup#AirportInfo' }],
   UI.FieldGroup#AirportInfo: { Label: 'Luchthavens', Data: [
     { $Type: 'UI.DataField', Value: IcaoCode, Label: 'ICAO-code' },
     { $Type: 'UI.DataField', Value: IataCode, Label: 'IATA-code' },
-    { $Type: 'UI.DataField', Value: Name,     Label: 'Naam' }
+    { $Type: 'UI.DataField', Value: Name,     Label: 'Naam' },
+    { $Type: 'UI.DataField', Value: City,     Label: 'Stad' }
   ]}
 );

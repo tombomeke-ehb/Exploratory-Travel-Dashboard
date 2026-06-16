@@ -72,7 +72,19 @@ module.exports = cds.service.impl(async function () {
     }
     return Array.isArray(airlines) ? arr : arr[0];
   });
-  this.on('READ', 'Airports', req => TripPin.run(req.query));
+  // FV-20: verrijk de luchthavens met de stad uit het geneste Location.City.Name.
+  // Graceful: faalt de stad-map, dan blijft de lijst werken met lege City.
+  this.on('READ', 'Airports', async (req) => {
+    const airports = await TripPin.run(req.query);
+    const arr = Array.isArray(airports) ? airports : (airports ? [airports] : []);
+    try {
+      const cities = await _airportCities(TripPin);
+      arr.forEach(a => { a.City = cities[a.IcaoCode] ?? null; });
+    } catch (err) {
+      cds.log('travel-service').warn('Airport-steden niet gemerged:', err.message);
+    }
+    return Array.isArray(airports) ? arr : arr[0];
+  });
 
   // FV-05 + FV-15: TravelExtensions met StartsAt, TripName, TripBudget, TripDescription uit TripPin
   this.on('READ', 'TravelExtensions', async (req) => {
@@ -260,6 +272,7 @@ module.exports = cds.service.impl(async function () {
   // Pre-warm de caches bij boot (niet-blokkerend) zodat het eerste verzoek snel is.
   collectAllTrips(TripPin).catch(() => {});
   _buildAirlineStats(TripPin).catch(() => {});
+  _airportCities(TripPin).catch(() => {});
 });
 
 // ── Hulpfunctie: tel actieve reizen of personen op reis ──────────────────────
@@ -296,6 +309,30 @@ async function _countUpcomingTrips(TripPin, days) {
 let _airlineStatsCache = null;
 let _airlineStatsCacheTime = 0;
 const CACHE_TTL = 5 * 60 * 1000;
+
+// ── In-memory cache voor luchthaven-steden (IcaoCode -> stad) ─────────────────
+let _airportCityCache = null;
+let _airportCityCacheTime = 0;
+
+// FV-20: bouw een IcaoCode->stad-map via raw TripPin-calls. We gebruiken send()
+// (i.p.v. de projectie) omdat de raw OData-respons het geneste Location-object
+// bevat zonder CAP's platgeslagen 'Location_City_Name' (die TripPin niet kent).
+// TripPin levert max 8 luchthavens per pagina -> doorlopen via $skip.
+async function _airportCities(TripPin) {
+  if (_airportCityCache && (Date.now() - _airportCityCacheTime < CACHE_TTL)) {
+    return _airportCityCache;
+  }
+  const map = {};
+  for (let skip = 0; skip < 500; skip += 8) {
+    const resp = await TripPin.send({ method: 'GET', path: `Airports?$skip=${skip}` });
+    const arr  = Array.isArray(resp?.value) ? resp.value : (Array.isArray(resp) ? resp : []);
+    arr.forEach(a => { if (a.IcaoCode) map[a.IcaoCode] = a.Location?.City?.Name ?? null; });
+    if (arr.length < 8) break;
+  }
+  _airportCityCache = map;
+  _airportCityCacheTime = Date.now();
+  return map;
+}
 
 // ── Hulpfunctie: bouw airline-statistieken op uit TripPin-data ────────────────
 // FA v4 §7.3 FV-27: telt vluchten per airline via FlightNumber-prefix.

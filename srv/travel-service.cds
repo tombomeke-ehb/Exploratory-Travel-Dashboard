@@ -32,7 +32,10 @@ service TravelService {
     *,
     virtual null as TripCount : Integer   // FV-18: aantal boekingen (uit airline-stats)
   };
-  @readonly entity Airports as projection on shared.Airports;
+  @readonly entity Airports as projection on shared.Airports {
+    *,
+    virtual null as City : String   // FV-20: stad (uit het geneste Location.City.Name)
+  };
 
   // ── Eigen PrimePath-velden (volledig CRUD voor TravelAdmin) ───────────────
   // FA v4 §7.4: ProjectCode, ApprovalStatus, InternalNote
