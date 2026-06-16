@@ -139,8 +139,9 @@ module.exports = cds.service.impl(async function () {
       return req.error(400, 'Ongeldige datumparameters: gebruik een geldige datum (ISO 8601).');
     }
 
-    const trips = await TripPin.run(SELECT.from('TripPinService.Trips'));
-    const arr   = Array.isArray(trips) ? trips : (trips ? [trips] : []);
+    // TripPin heeft geen top-level Trips-entiteitset: gebruik de gedeelde
+    // aggregatie (reizen via People-navigatie), net als de Trips-READ-handler.
+    const { trips: arr } = await collectAllTrips(TripPin);
 
     const fromDate = from ? new Date(from) : null;
     const toDate   = to   ? new Date(to)   : null;
