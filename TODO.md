@@ -138,8 +138,8 @@ Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser gete
 
 ### Data & functionaliteit
 
-- [ ] **[Naam]** Mock-reisdata toevoegen met datums in **juni 2026** zodat KPI-tegels echte waarden tonen en de statusbadge werkt — update `db/data/primepath-TravelExtensions.csv` met 5–10 rijen met `StartsAt`/`EndsAt` in 2026
-- [ ] **[Naam]** Statusbadge 'Op reis'/'Beschikbaar' werkend maken — afhankelijk van bovenstaande mock-data (de logica staat al in `srv/travel-service.js` en `srv/team-service.js`)
+- [x] **[Tom → NIET HAALBAAR]** Mock-reisdata met juni-2026-datums kan niet via `primepath-TravelExtensions.csv`: die tabel bevat **geen reisdatums** (alleen TripID + PrimePath-velden). `StartsAt`/`EndsAt` komen uit de **externe, onveranderlijke TripPin-bron (2014)**. Vandaar de bewuste KPI-fallbacks. (Alternatief zou een eigen reizen-entiteit vereisen i.p.v. TripPin — buiten scope.)
+- [x] **[Tom]** Statusbadge-logica ('Op reis'/'Beschikbaar') is correct en aanwezig (`srv/travel-service.js`/`srv/team-service.js`); ze toont in de demo "Beschikbaar" omdat er geen actuele reizen in de 2014-data zijn (verwacht, zie hierboven).
 - [x] **[Tom]** HR-grafiek getest: `getAirlineStats` laadt correct (integratietest als `hrviewer`: 8 airlines geretourneerd) en wordt getoond op `hr-start.html`.
 - [ ] **[Naam]** Landingspagina (`app/index.html`) testen in productie-URL
 
@@ -284,14 +284,14 @@ Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser gete
 - [x] **[TA §7.3]** Volledige TripID-eigenaarschap check TeamLead UPDATE (zie 🔒 Security)
 - [x] **[TA §8.4]** Harde fout bij ontbrekende/default JWT_SECRET in productie (zie 🔒 Security)
 - [x] **[TA §8.4]** Rate limiting op /auth/login, max 10 pogingen / 15 min (zie 🔒 Security)
-- [ ] **[TA §7.4 + §10]** Seed-data met juni 2026-datums zodat KPI's en OnTravel-badge echte waarden tonen (zie 🟡 Data)
-- [ ] **[TA §4.3]** getUpcomingTripsCount toevoegen als extra KPI (zie 🟡 Klantfeedback V7) — backend GEDAAN, alleen UI-tegel rest
-- [ ] **[TA §4.3]** getAirlineStats uitbreiden met TotalBudget per airline (zie 🟡 Klantfeedback V8) — backend GEDAAN, alleen UI-weergave rest
+- [x] **[TA §7.4 + §10 → NIET HAALBAAR]** Seed-data met juni 2026-datums kan niet: reisdatums leven in de **externe, onveranderlijke TripPin-bron (2014)**; `TravelExtensions` heeft geen eigen datumkolom (StartsAt is virtueel). Daarom bewuste **KPI-fallbacks** (7/3/4) en lege OnTravel/NextTrip. Gedocumenteerd in `TESTPLAN.md` §7.
+- [x] **[TA §4.3]** getUpcomingTripsCount als KPI-tegel — GEDAAN op `travel-start.html` (zie V7).
+- [x] **[TA §4.3]** getAirlineStats `TotalBudget` zichtbaar — GEDAAN op de startschermen (airlinegebruik) en in de airlinelijst (zie V8/FV-18).
 - [x] **[TA §10]** Nette foutafhandeling bij verdwenen/hergebruikt TripID (zie 🟡 Klantfeedback V5)
 - [x] **[TA §7.3]** Datumvalidatie in getTripCountByPeriod (zie 🟡 UX-verbeteringen)
-- [ ] **[TA §6.2]** Logout-knop + automatische redirect naar login bij 401 (zie 🟡 UX-verbeteringen)
-- [ ] **[TA §6.2]** Landingspagina met rolbadges i.p.v. rolkeuze (zie 🔴 Klantfeedback V0.1)
-- [ ] **[TA §6.2]** Nederlandse labels in annotations + consistent sap_horizon-thema (zie 🎨 Design/UX)
+- [~] **[TA §6.2]** Logout-knop GEDAAN (Overzicht/Afmelden-balk in alle 3 apps) + auth-gate redirect bij ongeauthenticeerde toegang. **Nog open:** automatische redirect bij een 401 die **tijdens** het gebruik van de FE-app optreedt (sessie verloopt) — vereist een UI5-fouthandler/controller-extensie (zie 🟡 UX-verbeteringen / §6.2).
+- [x] **[TA §6.2]** Landingspagina met rolbadges i.p.v. rolkeuze — GEDAAN (V0.1).
+- [x] **[TA §6.2]** Nederlandse labels in annotations + consistent `sap_horizon`-thema — GEDAAN (centrale `@title` in shared.cds + sap_horizon + PrimePath-overlay).
 
 ---
 
