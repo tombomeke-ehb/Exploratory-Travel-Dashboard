@@ -43,27 +43,28 @@ module.exports = cds.service.impl(async function () {
     const peopleArr = Array.isArray(people) ? people : (people ? [people] : []);
     if (peopleArr.length === 0) return people;
 
+    // OnTravel-badge: vroeger deed dit één remote call per persoon (~N round-trips
+    // per lijst-load = traag). We leiden de status nu af uit de gecachte reisdata
+    // (collectAllTrips: trips + owners-map) → 1 (gecachte) aggregatie i.p.v. N calls.
     const now = new Date();
-    await Promise.all(peopleArr.map(async (person) => {
+    const onTravelUsers = new Set();
+    try {
+      const { trips, owners } = await collectAllTrips(TripPin);
+      for (const t of trips) {
+        if (!t.StartsAt || !t.EndsAt) continue;
+        if (new Date(t.StartsAt) <= now && new Date(t.EndsAt) >= now) {
+          (owners.get(t.TripId) ?? []).forEach(u => onTravelUsers.add(u));
+        }
+      }
+    } catch (err) {
+      cds.log('travel-service').warn('OnTravel-status kon niet bepaald worden:', err.message);
+    }
+
+    for (const person of peopleArr) {
       // FV-07: eerste e-mailadres als scalair veld voor de lijst
       person.Email = Array.isArray(person.Emails) ? (person.Emails[0] ?? null) : (person.Emails ?? null);
-      try {
-        const tripsResp = await TripPin.send({
-          method: 'GET',
-          path: `People('${person.UserName}')/Trips?$select=TripId,StartsAt,EndsAt`,
-        });
-        const trips = Array.isArray(tripsResp?.value) ? tripsResp.value
-                    : Array.isArray(tripsResp)        ? tripsResp
-                    : [];
-        person.OnTravel = trips.some(t => {
-          if (!t.StartsAt || !t.EndsAt) return false;
-          return new Date(t.StartsAt) <= now && new Date(t.EndsAt) >= now;
-        });
-      } catch (err) {
-        cds.log('travel-service').warn(`OnTravel-status van '${person.UserName}' kon niet bepaald worden:`, err.message);
-        person.OnTravel = false;
-      }
-    }));
+      person.OnTravel = onTravelUsers.has(person.UserName);
+    }
 
     return Array.isArray(people) ? peopleArr : peopleArr[0];
   });
