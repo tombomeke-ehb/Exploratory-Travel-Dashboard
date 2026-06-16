@@ -181,7 +181,7 @@ Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser gete
 
 - [x] **[Tom]** Elke Object Page heeft een `@UI.HeaderInfo` met `TypeName`/`TypeNamePlural`/`Title` — geverifieerd voor alle entiteiten in alle 3 apps (Travel, Team, HR).
 - [x] **[Tom]** `@UI.Facets` op de TravelExtensions Object Page met aparte secties: (1) reisgegevens (TripPin), (2) PrimePath interne velden incl. goedkeuringsstatus, (3) **wijzigingshistoriek** (`modifiedAt`/`modifiedBy`/`createdAt`/`createdBy`). Reeds als losse FieldGroup-facetten.
-- [x] **[Tom]** `@UI.Identification` met `DataFieldForAction` is aanwezig op **Team** `TravelExtensions` (de Goedkeuren/Afkeuren-knoppen). Op **Travel** is er nog geen actie (TravelAdmin-edit = de openstaande draft-beslissing), dus daar wordt `UI.Identification` pas toegevoegd zodra die actie bestaat — anders zou het een lege toolbar zijn.
+- [x] **[Tom]** `@UI.Identification` met `DataFieldForAction` aanwezig op **Team** `TravelExtensions` (Goedkeuren/Afkeuren) én op **Travel** `TravelExtensions` (de **Bewerken**-knop, FV-17 — zie BUG-03).
 
 ### Semantische kleuren & Criticality (officieel Fiori-patroon)
 
@@ -201,8 +201,8 @@ Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser gete
 
 > Officieel CAP-standpunt: "We raden aan altijd Draft te gebruiken wanneer de applicatie data-invoer door eindgebruikers vereist." Voor OData V4 met Fiori Elements is `@odata.draft.enabled` de standaardmethode voor bewerkbare entiteiten. Zonder draft zijn inline-bewerkingen niet mogelijk in Fiori Elements V4.
 
-- [x] **[Tom]** **Draft-beslissing gedocumenteerd (bewuste afwijking).** `@odata.draft.enabled` is **niet** ingeschakeld op `TravelExtensions`: de custom READ-handler vult virtuele TripPin-velden in, waarmee draft (shadow-entiteit + query-unie) zou conflicteren. Vastgelegd als comment in `srv/travel-service.cds`. **Gevolg:** de TeamLead wijzigt de status via bound actions (goedkeuren/afkeuren, werkt); **UI-bewerking van de vrije velden (ProjectCode/InternalNote) door de TravelAdmin is nog niet mogelijk** → openstaande team-beslissing: óf draft inschakelen (met grondige browsertest van de custom READ), óf een aparte edit-actie bouwen.
-- [x] **[Tom]** Validatie zit al in `srv.before(['CREATE','UPDATE'], 'TravelExtensions', …)` (ProjectCode `PROJ-`, ApprovalStatus-enum, InternalNote max 500). Bij een eventuele latere draft-inschakeling draait dit ook op draftActivate; geen aparte `before('PATCH')` nodig nu.
+- [x] **[Tom]** **Draft bewust niet gebruikt — bewerken via een actie i.p.v. (FV-17, BUG-03 opgelost).** `@odata.draft.enabled` botst met de custom READ-handler (virtuele TripPin-velden). In plaats daarvan bewerkt de TravelAdmin de PrimePath-velden via een **bound action `bewerk`** (ProjectCode/ApprovalStatus/InternalNote), die FE als dialoog rendert. Lege velden blijven ongemoeid. Getest via API: geldig → 200 (`modifiedBy=traveladmin`), foute waarden → 400, partiële wijziging behoudt de rest.
+- [x] **[Tom]** Validatie zit in `srv.before(['CREATE','UPDATE'], 'TravelExtensions', …)` (ProjectCode `PROJ-`, ApprovalStatus-enum, InternalNote max 500) en wordt **hergebruikt** door de `bewerk`-actie (die via `this.update` door dezelfde handler loopt) — geen duplicatie.
 
 ### SelectionVariant — standaard actieve filters (officieel Fiori-patroon)
 

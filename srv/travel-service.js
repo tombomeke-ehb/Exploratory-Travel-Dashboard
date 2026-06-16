@@ -231,6 +231,29 @@ module.exports = cds.service.impl(async function () {
   });
 
   // ══════════════════════════════════════════════════════════════════════════
+  // FV-17 – TravelAdmin bewerkt de PrimePath-velden via een dialoog-actie
+  // ══════════════════════════════════════════════════════════════════════════
+  // FE V4 vereist draft voor inline-edit, wat botst met de virtuele velden in de
+  // READ-handler. Daarom een bound action die FE als dialoog rendert. We routeren
+  // via this.update zodat de before('UPDATE')-validatie + audit + managed-velden
+  // (modifiedBy/At) hergebruikt worden. Lege velden laten we ongemoeid.
+  this.on('bewerk', 'TravelExtensions', async (req) => {
+    const keyParam = req.params?.[req.params.length - 1];
+    const tripId = (keyParam && typeof keyParam === 'object') ? keyParam.TripID : keyParam;
+    if (tripId === undefined || tripId === null) return req.error(400, 'Geen reis geselecteerd.');
+
+    const { ProjectCode, ApprovalStatus, InternalNote } = req.data;
+    const patch = {};
+    if (ProjectCode    !== undefined && ProjectCode    !== '') patch.ProjectCode    = ProjectCode;
+    if (ApprovalStatus !== undefined && ApprovalStatus !== '') patch.ApprovalStatus = ApprovalStatus;
+    if (InternalNote   !== undefined && InternalNote   !== '') patch.InternalNote   = InternalNote;
+    if (Object.keys(patch).length === 0) return req.error(400, 'Geef minstens één veld op om te wijzigen.');
+
+    await this.update('TravelExtensions', { TripID: tripId }).with(patch);   // before('UPDATE') valideert + logt
+    return await this.read('TravelExtensions', { TripID: tripId });
+  });
+
+  // ══════════════════════════════════════════════════════════════════════════
   // KPI-functies – dashboard (FA v4 §7.1, FV-01 t/m FV-06)
   // ══════════════════════════════════════════════════════════════════════════
 

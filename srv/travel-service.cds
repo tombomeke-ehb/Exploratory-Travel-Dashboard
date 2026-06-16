@@ -48,16 +48,23 @@ service TravelService {
   // FV-05: StartsAt als virtueel veld voor sortering (ingevuld vanuit TripPin)
   // FV-15: TripName, TripBudget, TripDescription als virtuele TripPin-velden
   // Bewust GEEN @odata.draft.enabled: de custom READ-handler vult hieronder
-  // virtuele TripPin-velden in; draft (met zijn shadow-entiteit en query-unie)
-  // zou daarmee conflicteren. Statuswijziging door de TeamLead gebeurt via bound
-  // actions (goedkeuren/afkeuren). UI-bewerking van de vrije velden door de
-  // TravelAdmin is een openstaande team-beslissing (zie TODO 'Draft').
+  // virtuele TripPin-velden in; draft (shadow-entiteit + query-unie) zou daarmee
+  // conflicteren. UI-bewerking gebeurt daarom via bound actions i.p.v. inline-edit:
+  // de TeamLead via goedkeuren/afkeuren (team-service), de TravelAdmin via de
+  // 'bewerk'-actie hieronder (FV-17) — beide hergebruiken de before('UPDATE')-validatie.
   entity TravelExtensions as projection on p.TravelExtensions {
     *,
     virtual null as StartsAt        : DateTime,
     virtual null as TripName        : String,
     virtual null as TripBudget      : Decimal,
     virtual null as TripDescription : String
+  } actions {
+    // FV-17: TravelAdmin bewerkt de PrimePath-velden via een dialoog (lege velden = ongewijzigd).
+    action bewerk(
+      ProjectCode    : String,
+      ApprovalStatus : p.ApprovalStatus,
+      InternalNote   : String
+    ) returns TravelExtensions;
   };
 
   // FA v4 §10.3: beheer van team-koppelingen

@@ -76,6 +76,7 @@ Open **http://localhost:4004**.
 - [ ] **Airlines** bereikbaar (`#/Airlines`): kolom **Boekingen** (AA toont 4) en gesorteerd op naam (FV-18).
 - [ ] **Luchthavens** bereikbaar (`#/Airports`): kolom **Stad** gevuld (SFO → San Francisco, JFK → New York City) (FV-20).
 - [ ] Open een TravelExtension → detailpagina heeft secties **Reisgegevens (TripPin)**, **PrimePath interne velden** en **Wijzigingshistoriek** (`modifiedAt`/`modifiedBy`/`createdAt`/`createdBy`).
+- [ ] **Bewerken** (FV-17): klik de **Bewerken**-knop op de detailpagina → dialoog → wijzig bv. ProjectCode/Status/Notitie → opslaan → de wijziging is zichtbaar en `modifiedBy` toont `traveladmin`. (Lege velden blijven ongemoeid; foute ProjectCode → foutmelding.)
 - [ ] **← Overzicht** brengt terug naar het startscherm; **Afmelden** logt uit naar `/`.
 
 ## 4. Team Dashboard — `teamlead` / `Lead1234!`
@@ -216,7 +217,7 @@ curl -s -c hr.jar     -X POST $BASE/auth/login -H "Content-Type: application/jso
 
 ## 12. Bekende beperkingen & openstaande keuzes
 
-- **TravelAdmin kan PrimePath-velden niet in de UI bewerken** — FE V4 vereist daarvoor draft, wat botst met de custom READ-handler (virtuele velden). Bewuste keuze; de TeamLead-statuswijziging werkt wél via acties. Backend-validatie/PATCH werkt (zie §9). _Team-beslissing: draft inschakelen (met test) of een edit-actie bouwen._
+- **TravelAdmin bewerkt PrimePath-velden via de "Bewerken"-actie** (niet via inline draft-edit). FE V4-draft botst met de custom READ-handler (virtuele velden), dus we gebruiken een bound action `bewerk` die als dialoog opent (ProjectCode/ApprovalStatus/InternalNote; lege velden blijven ongemoeid). _Let op: de dialoog is niet voorgevuld met de huidige waarden — typ enkel de velden die je wil wijzigen._
 - **Geen juni-2026-data** — reisdatums leven in de onveranderlijke TripPin-bron (2014); vandaar de KPI-fallbacks.
 - **Airline-stats sampling** — indicatieve aantallen (performance-keuze).
 - **Nog te doen door het team:** BTP-deploy + `cf logs`, mobiele/BAS-check, landingspagina visueel opwaarderen, eventueel een admin-gebruikersbeheerscherm (TA §6.4). Zie `TODO.md`.

@@ -35,6 +35,10 @@ annotate TravelService.TravelExtensions with @(
     Visualizations: ['@UI.LineItem']
   },
   UI.HeaderInfo: { TypeName: 'Reisextensie', TypeNamePlural: 'Reisextensies', Title: { Value: TripID } },
+  // FV-17: "Bewerken"-knop op de Object Page-toolbar -> opent een dialoog (bound action)
+  UI.Identification: [
+    { $Type: 'UI.DataFieldForAction', Action: 'TravelService.bewerk', Label: 'Bewerken' }
+  ],
   UI.SelectionFields: [ ApprovalStatus ],
   UI.LineItem: [
     { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
