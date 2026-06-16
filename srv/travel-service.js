@@ -58,7 +58,20 @@ module.exports = cds.service.impl(async function () {
   });
 
   // FV-18–21: airlines en luchthavens
-  this.on('READ', 'Airlines', req => TripPin.run(req.query));
+  // FV-18: verrijk de airlines met het aantal boekingen uit de (gecachte) airline-stats.
+  // Graceful: faalt de stats-call, dan blijft de lijst werken met TripCount 0.
+  this.on('READ', 'Airlines', async (req) => {
+    const airlines = await TripPin.run(req.query);
+    const arr = Array.isArray(airlines) ? airlines : (airlines ? [airlines] : []);
+    try {
+      const stats  = await _buildAirlineStats(TripPin);
+      const byCode = Object.fromEntries(stats.map(s => [s.AirlineCode, s.TripCount]));
+      arr.forEach(a => { a.TripCount = byCode[a.AirlineCode] ?? 0; });
+    } catch (err) {
+      cds.log('travel-service').warn('Airline-boekingen niet gemerged:', err.message);
+    }
+    return Array.isArray(airlines) ? arr : arr[0];
+  });
   this.on('READ', 'Airports', req => TripPin.run(req.query));
 
   // FV-05 + FV-15: TravelExtensions met StartsAt, TripName, TripBudget, TripDescription uit TripPin

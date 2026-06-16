@@ -28,7 +28,10 @@ service TravelService {
     Trips: redirected to Trips
   };
   @readonly entity Trips    as projection on shared.Trips;
-  @readonly entity Airlines as projection on shared.Airlines;
+  @readonly entity Airlines as projection on shared.Airlines {
+    *,
+    virtual null as TripCount : Integer   // FV-18: aantal boekingen (uit airline-stats)
+  };
   @readonly entity Airports as projection on shared.Airports;
 
   // ── Eigen PrimePath-velden (volledig CRUD voor TravelAdmin) ───────────────
