@@ -148,6 +148,9 @@ module.exports = cds.service.impl(async function () {
   // Zelfde teamcheck als de UPDATE; zet de status direct op Approved/Rejected.
   this.on('goedkeuren', 'TravelExtensions', req => _setApprovalStatus(req, 'Approved', TripPin));
   this.on('afkeuren',  'TravelExtensions', req => _setApprovalStatus(req, 'Rejected', TripPin));
+
+  // Pre-warm de gedeelde reizen-cache bij boot (niet-blokkerend).
+  collectAllTrips(TripPin).catch(() => {});
 });
 
 // ── Hulpfuncties ─────────────────────────────────────────────────────────────

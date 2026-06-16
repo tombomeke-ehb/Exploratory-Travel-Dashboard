@@ -63,7 +63,9 @@ module.exports = cds.service.impl(async function () {
       const peopleArr = Array.isArray(people) ? people : (people ? [people] : []);
       const SAMPLE_SIZE = Math.min(peopleArr.length, 8);
 
-      for (const person of peopleArr.slice(0, SAMPLE_SIZE)) {
+      // Parallel over de gesamplede personen én hun reizen: scheelt veel tijd
+      // t.o.v. sequentiële remote-calls (de PlanItems-traversal is de bottleneck).
+      await Promise.all(peopleArr.slice(0, SAMPLE_SIZE).map(async (person) => {
         try {
           const tripsResp = await TripPin.send({
             method: 'GET',
@@ -73,7 +75,7 @@ module.exports = cds.service.impl(async function () {
                       : Array.isArray(tripsResp)        ? tripsResp
                       : [];
 
-          for (const trip of trips) {
+          await Promise.all(trips.map(async (trip) => {
             const tripAirlines = new Set();
             try {
               const planResp = await TripPin.send({
@@ -102,11 +104,11 @@ module.exports = cds.service.impl(async function () {
             // V8: reisbudget toekennen aan elke airline in deze reis (set → geen dubbeltelling)
             const tripBudget = Number(trip.Budget?.Value ?? trip.Budget ?? 0) || 0;
             tripAirlines.forEach(code => { budgets[code] = (budgets[code] || 0) + tripBudget; });
-          }
+          }));
         } catch (err) {
           cds.log('hr-service').warn(`Airline-stats van '${person.UserName}' niet opgehaald:`, err.message);
         }
-      }
+      }));
     } catch (err) {
       cds.log('hr-service').warn('Airline-stats: ophalen van People mislukt; val terug op lege telling:', err.message);
     }
@@ -154,4 +156,8 @@ module.exports = cds.service.impl(async function () {
       return true;
     }).length;
   });
+
+  // Pre-warm de caches bij boot (niet-blokkerend) zodat het eerste verzoek snel is.
+  collectAllTrips(TripPin).catch(() => {});
+  this.send('getAirlineStats').catch(() => {});
 });

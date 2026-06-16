@@ -241,6 +241,10 @@ module.exports = cds.service.impl(async function () {
   this.on('getAirlineStats', async () => {
     return _buildAirlineStats(TripPin);
   });
+
+  // Pre-warm de caches bij boot (niet-blokkerend) zodat het eerste verzoek snel is.
+  collectAllTrips(TripPin).catch(() => {});
+  _buildAirlineStats(TripPin).catch(() => {});
 });
 
 // ── Hulpfunctie: tel actieve reizen of personen op reis ──────────────────────
@@ -248,42 +252,17 @@ module.exports = cds.service.impl(async function () {
 // FV-03: countPersons=true  → tel unieke personen met een actieve trip
 async function _countActiveTrips(TripPin, countPersons) {
   const now = new Date();
-  let activeCount = 0;
-  const activePersons = new Set();
+  // Hergebruik de gedeelde, gecachte reizenlijst i.p.v. een eigen traversal.
+  const { trips, owners } = await collectAllTrips(TripPin);
+  const active = trips.filter(t =>
+    t.StartsAt && t.EndsAt &&
+    new Date(t.StartsAt) <= now && new Date(t.EndsAt) >= now);
 
-  try {
-    const people    = await TripPin.run(SELECT.from('TripPinService.People'));
-    const peopleArr = Array.isArray(people) ? people : (people ? [people] : []);
+  if (!countPersons) return active.length;
 
-    await Promise.all(peopleArr.map(async (person) => {
-      try {
-        const tripsResp = await TripPin.send({
-          method: 'GET',
-          path: `People('${person.UserName}')/Trips?$select=TripId,StartsAt,EndsAt`,
-        });
-        const trips = Array.isArray(tripsResp?.value) ? tripsResp.value
-                    : Array.isArray(tripsResp)        ? tripsResp
-                    : [];
-
-        for (const trip of trips) {
-          if (!trip.StartsAt || !trip.EndsAt) continue;
-          const start = new Date(trip.StartsAt);
-          const end   = new Date(trip.EndsAt);
-          if (start <= now && end >= now) {
-            activeCount++;
-            activePersons.add(person.UserName);
-          }
-        }
-      } catch (err) {
-        cds.log('travel-service').warn(`Reizen van '${person.UserName}' niet opgehaald (actieve telling):`, err.message);
-      }
-    }));
-  } catch (err) {
-    cds.log('travel-service').warn('Tellen van actieve reizen mislukt; val terug op 0:', err.message);
-    return 0;
-  }
-
-  return countPersons ? activePersons.size : activeCount;
+  const persons = new Set();
+  active.forEach(t => (owners.get(t.TripId) || []).forEach(u => persons.add(u)));
+  return persons.size;
 }
 
 // ── Hulpfunctie: tel komende reizen binnen `days` dagen ───────────────────────
@@ -291,36 +270,11 @@ async function _countActiveTrips(TripPin, countPersons) {
 async function _countUpcomingTrips(TripPin, days) {
   const now = new Date();
   const horizon = new Date(now.getTime() + days * 86400000);
-  let count = 0;
-
-  try {
-    const people    = await TripPin.run(SELECT.from('TripPinService.People'));
-    const peopleArr = Array.isArray(people) ? people : (people ? [people] : []);
-
-    await Promise.all(peopleArr.map(async (person) => {
-      try {
-        const tripsResp = await TripPin.send({
-          method: 'GET',
-          path: `People('${person.UserName}')/Trips?$select=TripId,StartsAt`,
-        });
-        const trips = Array.isArray(tripsResp?.value) ? tripsResp.value
-                    : Array.isArray(tripsResp)        ? tripsResp
-                    : [];
-        for (const trip of trips) {
-          if (!trip.StartsAt) continue;
-          const start = new Date(trip.StartsAt);
-          if (start > now && start <= horizon) count++;
-        }
-      } catch (err) {
-        cds.log('travel-service').warn(`Reizen van '${person.UserName}' niet opgehaald (komende telling):`, err.message);
-      }
-    }));
-  } catch (err) {
-    cds.log('travel-service').warn('Tellen van komende reizen mislukt; val terug op 0:', err.message);
-    return 0;
-  }
-
-  return count;
+  // Hergebruik de gedeelde, gecachte reizenlijst i.p.v. een eigen traversal.
+  const { trips } = await collectAllTrips(TripPin);
+  return trips.filter(t =>
+    t.StartsAt &&
+    new Date(t.StartsAt) > now && new Date(t.StartsAt) <= horizon).length;
 }
 
 // ── In-memory cache voor airline-statistieken ────────────────────────────────
@@ -356,7 +310,9 @@ async function _buildAirlineStats(TripPin) {
 
     // Haal per persoon de vluchtnummers op via PlanItems (diepte: People/Trips/PlanItems)
     // CAP's send() stuurt een ruwe OData-aanvraag naar de externe service.
-    for (const person of peopleArr.slice(0, SAMPLE_SIZE)) {
+    // Parallel over de gesamplede personen én hun reizen: scheelt veel tijd
+    // t.o.v. sequentiële remote-calls (de PlanItems-traversal is de bottleneck).
+    await Promise.all(peopleArr.slice(0, SAMPLE_SIZE).map(async (person) => {
       try {
         const tripsResp = await TripPin.send({
           method: 'GET',
@@ -366,7 +322,7 @@ async function _buildAirlineStats(TripPin) {
                     : Array.isArray(tripsResp)        ? tripsResp
                     : [];
 
-        for (const trip of trips) {
+        await Promise.all(trips.map(async (trip) => {
           const tripAirlines = new Set();   // airlines die in déze reis voorkomen
           try {
             const planResp = await TripPin.send({
@@ -397,11 +353,11 @@ async function _buildAirlineStats(TripPin) {
           // V8: ken het reisbudget toe aan elke airline in deze reis (set → geen dubbeltelling)
           const tripBudget = Number(trip.Budget?.Value ?? trip.Budget ?? 0) || 0;
           tripAirlines.forEach(code => { budgets[code] = (budgets[code] || 0) + tripBudget; });
-        }
+        }));
       } catch (err) {
         cds.log('travel-service').warn(`Airline-stats van '${person.UserName}' niet opgehaald:`, err.message);
       }
-    }
+    }));
   } catch (err) {
     cds.log('travel-service').warn('Airline-stats: ophalen van People mislukt; val terug op lege telling:', err.message);
   }

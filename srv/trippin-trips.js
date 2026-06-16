@@ -25,8 +25,9 @@ const CACHE_TTL = 5 * 60 * 1000;   // 5 minuten
 async function collectAllTrips(TripPin) {
   if (_cache && (Date.now() - _cacheTime < CACHE_TTL)) return _cache;
 
-  const trips = [];
-  const byId  = new Map();
+  const trips  = [];
+  const byId   = new Map();
+  const owners = new Map();   // TripId -> Set<UserName> (voor persoonsgebaseerde KPI's)
 
   try {
     // TripPin levert max 8 People per pagina en CAP volgt de @odata.nextLink niet,
@@ -50,7 +51,11 @@ async function collectAllTrips(TripPin) {
                   : Array.isArray(resp)        ? resp
                   : [];
         for (const t of arr) {
-          if (t.TripId === undefined || byId.has(t.TripId)) continue;
+          if (t.TripId === undefined) continue;
+          // Eigenaar bijhouden (ook voor gedeelde reizen die al in byId staan)
+          if (!owners.has(t.TripId)) owners.set(t.TripId, new Set());
+          owners.get(t.TripId).add(person.UserName);
+          if (byId.has(t.TripId)) continue;
           const trip = {
             TripId:      t.TripId,
             Name:        t.Name ?? null,
@@ -74,7 +79,7 @@ async function collectAllTrips(TripPin) {
     );
   }
 
-  _cache = { trips, byId };
+  _cache = { trips, byId, owners };
   _cacheTime = Date.now();
   return _cache;
 }

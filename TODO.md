@@ -43,7 +43,7 @@ Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser gete
 - [x] **[Tom]** **"Start"-knop Team → geen bug.** Dit is de standaard Fiori-filterbalkknop "Go" (in NL UI5 "Start"): hij past de filters toe. Omdat de lijst al via `initialLoad` geladen is, verandert er visueel niets bij ongewijzigde filters. Verwacht gedrag.
 
 ### 🟡 Performance
-- [~] **[Tom]** **Airlinegebruik laadt traag** — deels aangepakt: (a) ✅ `travel-start.html` leidt de top-airline nu af uit `getAirlineStats` i.p.v. een aparte `getTopAirline`-call (scheelt een zware traversal). Nog open: (b) de in-memory cache pre-warmen bij boot, (c) de PlanItems-calls parallelliseren of de sample verkleinen.
+- [x] **[Tom]** **Airlinegebruik laadt traag → GEDAAN.** (a) `travel-start.html` leidt de top-airline af uit `getAirlineStats` (één call minder); (b) caches pre-warmen bij boot in travel/team/hr; (c) de PlanItems-traversal parallelliseren (`Promise.all` over personen én reizen). Resultaat: `getAirlineStats` cold **31,5s → 8,1s**, warm **0,003s**. Bovendien hergebruiken de KPI-counts (active/onTravel/upcoming) nu de gecachte reizenlijst → **instant** (was elke keer een volledige traversal).
 
 ### 🟢 Ruis (geen actie vereist — ter info)
 > Deze console-meldingen zijn normaal voor een ongebouwde, standalone SAPUI5-app in dev en breken niets:
