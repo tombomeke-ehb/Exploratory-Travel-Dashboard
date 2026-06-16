@@ -100,6 +100,34 @@ module.exports = cds.service.impl(async function () {
 
   // FV-05 + FV-15: TravelExtensions met StartsAt, TripName, TripBudget, TripDescription uit TripPin
   this.on('READ', 'TravelExtensions', async (req) => {
+    // FV-13: StartsAt is een virtueel veld (geen DB-kolom). Een $filter op StartsAt
+    // kan dus niet naar de database. We halen de datumgrenzen uit de WHERE, strippen
+    // die predicaten (andere filters zoals ApprovalStatus blijven), en passen het
+    // datumbereik na de verrijking in JS toe.
+    let startsAtFrom = null, startsAtTo = null;
+    const where = req.query.SELECT?.where;
+    if (Array.isArray(where)) {
+      const kept = [];
+      for (let i = 0; i < where.length; i++) {
+        const tok = where[i];
+        if (tok && tok.ref && tok.ref[0] === 'StartsAt') {
+          const op = where[i + 1];
+          const val = where[i + 2]?.val;
+          if (val != null) {
+            const d = new Date(val);
+            if (op === '>=' || op === '>') startsAtFrom = d;
+            else if (op === '<=' || op === '<') startsAtTo = d;
+          }
+          i += 2;                                  // sla de 3 filtertokens over
+          if (where[i + 1] === 'and' || where[i + 1] === 'or') i += 1;       // + aanliggende connector
+          else if (kept[kept.length - 1] === 'and' || kept[kept.length - 1] === 'or') kept.pop();
+          continue;
+        }
+        kept.push(tok);
+      }
+      req.query.SELECT.where = kept.length ? kept : undefined;
+    }
+
     const extensions = await cds.run(req.query);
     const extArr = Array.isArray(extensions) ? extensions : (extensions ? [extensions] : []);
     if (extArr.length === 0) return extensions;
@@ -127,14 +155,27 @@ module.exports = cds.service.impl(async function () {
       }
     }
 
+    // FV-13: datumbereik-filter toepassen op het (verrijkte) virtuele StartsAt.
+    let result = extArr;
+    if (startsAtFrom || startsAtTo) {
+      result = result.filter(e => {
+        if (!e.StartsAt) return false;
+        const d = new Date(e.StartsAt);
+        if (startsAtFrom && d < startsAtFrom) return false;
+        if (startsAtTo && d > startsAtTo) return false;
+        return true;
+      });
+    }
+
     // Sorteer op StartsAt ascending (FV-05)
-    extArr.sort((a, b) => {
+    result.sort((a, b) => {
       if (!a.StartsAt) return 1;
       if (!b.StartsAt) return -1;
       return new Date(a.StartsAt) - new Date(b.StartsAt);
     });
 
-    return Array.isArray(extensions) ? extArr : extArr[0];
+    if (Array.isArray(extensions)) { result.$count = result.length; return result; }
+    return result[0];
   });
 
   // FV-11–16: reizen – data mashup TripPin (via People-navigatie) + TravelExtensions

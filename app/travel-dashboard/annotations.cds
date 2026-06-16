@@ -39,7 +39,7 @@ annotate TravelService.TravelExtensions with @(
   UI.Identification: [
     { $Type: 'UI.DataFieldForAction', Action: 'TravelService.bewerk', Label: 'Bewerken' }
   ],
-  UI.SelectionFields: [ ApprovalStatus ],
+  UI.SelectionFields: [ ApprovalStatus, StartsAt ],
   UI.LineItem: [
     { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
     { $Type: 'UI.DataField', Value: StartsAt,        Label: 'Vertrekdatum' },
