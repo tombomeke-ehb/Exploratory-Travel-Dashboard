@@ -22,8 +22,21 @@ module.exports = cds.service.impl(async function () {
 
   // ── READ: TripPin doorsturen ───────────────────────────────────────────────
   this.on('READ', 'People',   req => TripPin.run(req.query));
-  this.on('READ', 'Airlines', req => TripPin.run(req.query));
   this.on('READ', 'Airports', req => TripPin.run(req.query));
+  // FV-18: verrijk de airlines met het aantal boekingen uit de (gecachte) airline-stats.
+  // Graceful: faalt de stats-call, dan blijft de lijst werken met TripCount 0.
+  this.on('READ', 'Airlines', async (req) => {
+    const airlines = await TripPin.run(req.query);
+    const arr = Array.isArray(airlines) ? airlines : (airlines ? [airlines] : []);
+    try {
+      const stats  = await this.send('getAirlineStats');
+      const byCode = Object.fromEntries((stats || []).map(s => [s.AirlineCode, s.TripCount]));
+      arr.forEach(a => { a.TripCount = byCode[a.AirlineCode] ?? 0; });
+    } catch (err) {
+      cds.log('hr-service').warn('Airline-boekingen niet gemerged:', err.message);
+    }
+    return Array.isArray(airlines) ? arr : arr[0];
+  });
 
   // Trips: TripPin heeft geen top-level /Trips → aggregeer via People-navigatie
   this.on('READ', 'Trips', async (req) => {

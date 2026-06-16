@@ -20,7 +20,10 @@ service HRService {
   // ── TripPin data (read-only) ───────────────────────────────────────────────
   @readonly entity People   as projection on shared.People;
   @readonly entity Trips    as projection on shared.Trips;
-  @readonly entity Airlines as projection on shared.Airlines;
+  @readonly entity Airlines as projection on shared.Airlines {
+    *,
+    virtual null as TripCount : Integer   // FV-18: aantal boekingen (uit airline-stats)
+  };
   @readonly entity Airports as projection on shared.Airports;
 
   // ── PrimePath velden (read-only voor HR) ──────────────────────────────────

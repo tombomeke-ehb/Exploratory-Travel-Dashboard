@@ -5,12 +5,14 @@ annotate HRService.Airlines with @(
   UI.SelectionFields: [ AirlineCode ],
   UI.LineItem: [
     { $Type: 'UI.DataField', Value: AirlineCode, Label: 'IATA-code' },
-    { $Type: 'UI.DataField', Value: Name, Label: 'Naam' }
+    { $Type: 'UI.DataField', Value: Name, Label: 'Naam' },
+    { $Type: 'UI.DataField', Value: TripCount, Label: 'Boekingen' }
   ],
   UI.Facets: [{ $Type: 'UI.ReferenceFacet', Label: 'Airline', Target: '@UI.FieldGroup#AirlineInfo' }],
   UI.FieldGroup#AirlineInfo: { Label: 'Airlinegegevens', Data: [
     { $Type: 'UI.DataField', Value: AirlineCode, Label: 'IATA-code' },
-    { $Type: 'UI.DataField', Value: Name,        Label: 'Naam' }
+    { $Type: 'UI.DataField', Value: Name,        Label: 'Naam' },
+    { $Type: 'UI.DataField', Value: TripCount,   Label: 'Boekingen' }
   ]}
 );
 annotate HRService.Trips with @(
