@@ -43,6 +43,35 @@ cds.on('bootstrap', (app) => {
   // het echte client-IP uit X-Forwarded-For haalt (i.p.v. het router-IP).
   app.set('trust proxy', 1)
 
+  // ── Auth-gate voor de UI ──────────────────────────────────────────────────
+  // De OData-data is al beschermd via @requires; hier zorgen we dat ook de
+  // statische app-shell en startpagina's niet zonder geldige sessie laden.
+  // Login-/landingspagina's en /auth/* blijven bewust publiek.
+  const PROTECTED_UI = [
+    { prefix: '/travel-dashboard', login: '/travel-login.html' },
+    { prefix: '/team-dashboard',   login: '/team-login.html'   },
+    { prefix: '/hr-dashboard',     login: '/hr-login.html'     },
+    { exact:  '/travel-start.html', login: '/travel-login.html' },
+    { exact:  '/team-start.html',   login: '/team-login.html'   },
+    { exact:  '/hr-start.html',     login: '/hr-login.html'     },
+  ]
+  function readAuthCookie (req) {
+    const raw = req.headers?.cookie
+    if (!raw) return null
+    const hit = raw.split(';').map(s => s.trim()).find(s => s.startsWith(COOKIE_NAME + '='))
+    return hit ? decodeURIComponent(hit.slice(COOKIE_NAME.length + 1)) : null
+  }
+  app.use((req, res, next) => {
+    const rule = PROTECTED_UI.find(r =>
+      (r.prefix && req.path.startsWith(r.prefix)) || (r.exact && req.path === r.exact))
+    if (!rule) return next()
+    const token = readAuthCookie(req)
+    if (token) {
+      try { jwt.verify(token, JWT_SECRET); return next() } catch { /* ongeldig/verlopen token */ }
+    }
+    return res.redirect(302, rule.login)
+  })
+
   // ── Statische HTML-pagina's (landingspagina + loginpagina's) ──────────────
   // In productie staan de HTML-bestanden naast server.js (gekopieerd via mta.yaml).
   // In development worden ze direct gelezen vanuit app/.
