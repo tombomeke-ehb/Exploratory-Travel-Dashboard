@@ -64,7 +64,7 @@ Volledige controle van de Functionele Analyse (FV01–FV30) en de Technische Ana
 
 ### 🟡 Functioneel — ontbreekt of gedeeltelijk
 - [x] **[Ismael]** **FV-11** — Aankomstdatum toegevoegd: virtueel veld `EndsAt` op TravelExtensions, gevuld uit de gecachte reisdata en getoond als 'Aankomstdatum' in de Reisextensies-`LineItem` + detail-FieldGroup. **Bestemming (land/stad) blijft buiten scope**: TripPin heeft geen Destination op reisniveau (zie FV-12, 🔵 Buiten scope).
-- [ ] **[Naam]** **FV-13** — **Datumbereik-filter ontbreekt** in de Travel-lijst: `UI.SelectionFields` van TravelExtensions bevat enkel `ApprovalStatus`, geen datum. Voeg `StartsAt`/`EndsAt` toe als (bereik)filter in `app/travel-dashboard/annotations.cds`.
+- [x] **[Ismael]** **FV-13** — Datumbereik-filter toegevoegd: `StartsAt` staat nu in `UI.SelectionFields`. Omdat `StartsAt` virtueel is (geen DB-kolom), haalt de `READ TravelExtensions`-handler de datumgrenzen uit de WHERE, stript die predicaten (andere filters zoals `ApprovalStatus` blijven server-side) en past het bereik na de verrijking in JS toe. Getest: ondergrens, volledig bereik én combinatie met ApprovalStatus werken.
 - [ ] **[Naam]** **FV-04 / FV-21** — **Centrale zoekbalk** ontbreekt: FA vraagt één centrale zoekbalk (medewerker/luchthaven/airline); nu is er enkel zoeken **per lijst** (Fiori-standaard). Beslis: aanvaarden + in de demo benoemen, of als bewuste afwijking documenteren in de FA.
 
 ### 🟡 Technisch (TA) — beschreven maar ontbreekt
