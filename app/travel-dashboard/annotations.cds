@@ -43,7 +43,7 @@ annotate TravelService.TravelExtensions with @(
   UI.LineItem: [
     { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
     { $Type: 'UI.DataField', Value: StartsAt,        Label: 'Vertrekdatum' },
-    { $Type: 'UI.DataField', Value: EndsAt,          Label: 'Aankomst' },
+    { $Type: 'UI.DataField', Value: EndsAt,          Label: 'Aankomstdatum' },
     { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
     // Gekleurde statusbadge: Approved=3 groen, Rejected=1 rood, Pending=2 oranje
     { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
@@ -61,7 +61,8 @@ annotate TravelService.TravelExtensions with @(
     { $Type: 'UI.DataField', Value: TripName,        Label: 'Reisnaam' },
     { $Type: 'UI.DataField', Value: TripBudget,      Label: 'Budget' },
     { $Type: 'UI.DataField', Value: TripDescription, Label: 'Beschrijving' },
-    { $Type: 'UI.DataField', Value: StartsAt,        Label: 'Vertrekdatum' }
+    { $Type: 'UI.DataField', Value: StartsAt,        Label: 'Vertrekdatum' },
+    { $Type: 'UI.DataField', Value: EndsAt,          Label: 'Aankomstdatum' }
   ]},
   UI.FieldGroup#PrimePath: { Label: 'Interne PrimePath Velden', Data: [
     { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },

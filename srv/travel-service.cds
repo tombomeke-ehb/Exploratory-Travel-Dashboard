@@ -55,7 +55,7 @@ service TravelService {
   entity TravelExtensions as projection on p.TravelExtensions {
     *,
     virtual null as StartsAt        : DateTime,
-    virtual null as EndsAt          : DateTime,   // FV-11: aankomstdatum (uit TripPin)
+    virtual null as EndsAt          : DateTime,
     virtual null as TripName        : String,
     virtual null as TripBudget      : Decimal,
     virtual null as TripDescription : String
