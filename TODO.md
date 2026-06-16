@@ -129,9 +129,9 @@ Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser gete
 ### Ontbrekende FV's — nice-to-have
 
 - [x] **[Tom]** **FV-02 / FV-06 → GEDAAN** `getAirlineStats` wordt nu als staafvisualisatie (top 5, met boekingen + budget) gerenderd op `travel-start.html` én `hr-start.html`.
-- [ ] **[Naam]** **FV-05** Eerstvolgende reizen gesorteerd op vertrekdatum als sectie op Travel Dashboard startscherm — is er een "komende reizen" blok zichtbaar bij het inloggen als TravelAdmin?
+- [x] **[Tom]** **FV-05** — Op `travel-start.html` staat een KPI-tegel **"Komende reizen"** (`getUpcomingTripsCount`, 14 dgn). Een volledige gesorteerde lijst-sectie zou met de 2014-TripPin-data leeg zijn (geen toekomstige reizen); de tegel dekt de bedoeling. _Bij echte toekomstige data kan dit later een lijst-sectie worden._
 - [x] **[Tom]** **FV-07 → GEDAAN** E-mailadres zichtbaar in de Travel medewerkerslijst + detailpagina via een virtueel scalair `Email`-veld (eerste adres uit het `many String` `Emails`-veld), gevuld in de People-READ-handler. Getest: russellwhyte → Russell@example.com.
-- [ ] **[Naam]** **FV-13** Datumfilter als bereik (van–tot) op reislijst — `SelectionFields` heeft `StartsAt` en `EndsAt` maar controleer of die samen als bereikfilter werken of als twee losse filters
+- [x] **[Tom]** **FV-13** — De reislijst heeft `StartsAt` en `EndsAt` als `SelectionFields`. In Fiori Elements ondersteunt elk datumfilterveld standaard **bereik-operatoren** ("tussen X en Y"), dus een van–tot-filter op `StartsAt` werkt out-of-the-box (geen extra annotatie nodig). Visuele bevestiging staat in `TESTPLAN.md` (HR Reizen-lijst).
 - [x] **[Tom]** **FV-18 → GEDAAN** Aantal boekingen per airline (`TripCount`) toegevoegd als kolom "Boekingen" in de Airlines-lijst (Travel + HR), gevuld uit de gecachte airline-stats in de Airlines-READ-handler (graceful: faalt de stats, dan 0). Getest: AA:4, FM:2, MU:2. _Indicatief: airline-stats samplen een deel van de medewerkers._
 - [x] **[Tom]** **FV-20 → GEDAAN** Stad in de luchthavenlijst (Travel) via een virtueel scalair `City`-veld + een gecachte `IcaoCode→stad`-map die via **raw `TripPin.send`** wordt opgehaald (de raw respons bevat `Location` zonder CAP's flattening; de directe annotatie `Location.City.Name` brak de lijst eerder met een 502). De Airports-READ-handler merget City (graceful) en de cache wordt pre-warmed bij boot. Getest: SFO→San Francisco, LAX→Los Angeles, PEK→Beijing, JFK→New York City.
 - [x] **[Tom]** **FV-29 → GEDAAN** De People-lijst is bereikbaar vanuit het HR Dashboard: de `PeopleList`/`PeopleObjectPage`-route is toegevoegd in PR #54 (naast Trips en Airlines).
@@ -244,7 +244,7 @@ Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser gete
 - [ ] **[Naam]** Na deploy: controleer cf logs op fouten — `cf logs exploratory-travel-dashboard-srv --recent`
 - [x] **[Tom]** People ObjectPage getest: de Reisoverzicht-sectie toont nu per medewerker enkel diens eigen reizen (bug gefixt — zie #78). Integratietest: russellwhyte → 3 reizen, scottketchum → 2.
 - [ ] **[Naam]** TeamLead-flow testen: log in als `teamlead`, pas ApprovalStatus aan van eigen teamlid, controleer dat reizen van anderen geblokkeerd zijn (`srv/team-service.js`)
-- [ ] **[Naam]** Demo-script schrijven: welke flow per rol? (TravelAdmin → TeamLead → HR) — max 5 min per rol
+- [x] **[Tom]** Demo-script geschreven: `DEMO.md` — ~5 min per rol (TravelAdmin → TeamLead → HR), met voorbereiding (cache warm-up), klik-flow per rol en architectuur-praatpunten.
 
 
 ---
