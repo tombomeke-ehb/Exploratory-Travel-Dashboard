@@ -112,6 +112,8 @@ module.exports = cds.service.impl(async function () {
       if (trip) {
         // FV-05: vertrekdatum voor sortering
         if (trip.StartsAt)        ext.StartsAt        = trip.StartsAt;
+        // FV-11: aankomstdatum voor de lijst
+        if (trip.EndsAt)          ext.EndsAt          = trip.EndsAt;
         // FV-15: TripPin-velden voor detailpagina
         if (trip.Name)            ext.TripName        = trip.Name;
         if (trip.Budget != null)  ext.TripBudget      = trip.Budget;
