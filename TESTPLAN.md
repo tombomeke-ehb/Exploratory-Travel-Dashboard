@@ -125,7 +125,7 @@ Open **http://localhost:4004**.
 - **Eerste airlinegrafiek-load ~8s** (zware externe traversal); daarna gecached (en bij boot voorgewarmd).
 - **Console-meldingen** zoals `Component-preload.js` 404, `i18n_nl.properties` 404, `/sap/bc/lrep/...` 404 → onschadelijk; normaal voor een ongebouwde, standalone SAPUI5-app in dev. In productie genereert `cds build` een preload-bundle.
 - **Sleutels in de URL** (`#/People('keithpinckney')`) → standaard Fiori Elements-gedrag (client-side hash, geen server-lek).
-- **Een volledige ruwe `GET /travel/Airports` (zonder $select) geeft 502** — bewust: het geneste TripPin-`Location`-complextype. De Fiori-app vraagt alleen smalle velden op (werkt); de stad komt via het virtuele `City`-veld.
+- **Airports**: het geneste TripPin-`Location`-complextype wordt **niet** in de projectie opgenomen (zou anders een 502 geven, zie BUG-01). De stad komt via het virtuele `City`-veld; ook een volledige `GET /travel/Airports` werkt nu (200).
 
 ## 8. Technische validatie (voor ontwikkelaars)
 

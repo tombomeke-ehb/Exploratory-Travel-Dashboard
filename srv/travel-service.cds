@@ -32,9 +32,15 @@ service TravelService {
     *,
     virtual null as TripCount : Integer   // FV-18: aantal boekingen (uit airline-stats)
   };
+  // Let op: Location (complextype) wordt BEWUST niet geprojecteerd. Met '*' kwam het
+  // in het entity-type terecht en vroeg de Fiori-lijst het (deels) op -> CAP sloeg het
+  // plat naar 'Location_Address' wat TripPin niet kent -> 500/502. De stad komt via het
+  // virtuele City-veld (gevuld in de READ-handler uit een raw TripPin-call).
   @readonly entity Airports as projection on shared.Airports {
-    *,
-    virtual null as City : String   // FV-20: stad (uit het geneste Location.City.Name)
+    IcaoCode,
+    IataCode,
+    Name,
+    virtual null as City : String   // FV-20: stad uit het geneste Location.City.Name
   };
 
   // ── Eigen PrimePath-velden (volledig CRUD voor TravelAdmin) ───────────────
