@@ -28,6 +28,17 @@ module.exports = cds.service.impl(async function () {
 
   // FV-07–10: medewerkers (People) – met OnTravel statusbadge (FV-07)
   this.on('READ', 'People', async (req) => {
+    // FV-07: 'Email' is een virtueel veld afgeleid van 'Emails'. Bij een $select dat
+    // enkel 'Email' opvraagt (zoals de Fiori-lijst doet), levert TripPin 'Emails' niet
+    // mee → leeg. Zorg daarom dat 'Emails' altijd meegevraagd wordt en strip het
+    // virtuele 'Email' uit de passthrough naar TripPin.
+    const cols = req.query.SELECT?.columns;
+    if (Array.isArray(cols)) {
+      const want = cols.filter(c => c.ref?.[0] !== 'Email');
+      if (!want.some(c => c.ref?.[0] === 'Emails')) want.push({ ref: ['Emails'] });
+      req.query.SELECT.columns = want;
+    }
+
     const people = await TripPin.run(req.query);
     const peopleArr = Array.isArray(people) ? people : (people ? [people] : []);
     if (peopleArr.length === 0) return people;
