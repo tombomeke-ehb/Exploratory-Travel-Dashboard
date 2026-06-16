@@ -24,6 +24,7 @@ service TravelService {
   @readonly entity People as projection on shared.People {
     *,
     virtual null as OnTravel : Boolean,
+    virtual null as Email    : String,   // FV-07: eerste e-mailadres als scalair veld
     Trips: redirected to Trips
   };
   @readonly entity Trips    as projection on shared.Trips;

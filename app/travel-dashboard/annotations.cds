@@ -92,6 +92,7 @@ annotate TravelService.People with @(
     { $Type: 'UI.DataField', Value: UserName,  Label: 'Gebruikersnaam' },
     { $Type: 'UI.DataField', Value: FirstName, Label: 'Voornaam' },
     { $Type: 'UI.DataField', Value: LastName,  Label: 'Familienaam' },
+    { $Type: 'UI.DataField', Value: Email,     Label: 'E-mail' },
     { $Type: 'UI.DataField', Value: Gender,    Label: 'Geslacht' },
     {
       $Type: 'UI.DataFieldForAnnotation',
@@ -112,6 +113,7 @@ annotate TravelService.People with @(
     { $Type: 'UI.DataField', Value: UserName,  Label: 'Gebruikersnaam' },
     { $Type: 'UI.DataField', Value: FirstName, Label: 'Voornaam' },
     { $Type: 'UI.DataField', Value: LastName,  Label: 'Familienaam' },
+    { $Type: 'UI.DataField', Value: Email,     Label: 'E-mail' },
     { $Type: 'UI.DataField', Value: Gender,    Label: 'Geslacht' },
     { $Type: 'UI.DataField', Value: OnTravel,  Label: 'Op reis' }
   ]}

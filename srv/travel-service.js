@@ -34,6 +34,8 @@ module.exports = cds.service.impl(async function () {
 
     const now = new Date();
     await Promise.all(peopleArr.map(async (person) => {
+      // FV-07: eerste e-mailadres als scalair veld voor de lijst
+      person.Email = Array.isArray(person.Emails) ? (person.Emails[0] ?? null) : (person.Emails ?? null);
       try {
         const tripsResp = await TripPin.send({
           method: 'GET',
