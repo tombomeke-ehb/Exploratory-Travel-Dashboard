@@ -147,7 +147,7 @@ Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser gete
 
 - [x] **[Tom]** Logout-knop toegevoegd in alle 3 Fiori-apps (de "Afmelden"-knop in de PrimePath-balk in `webapp/index.html`; roept `POST /auth/logout` aan en gaat naar de landingspagina).
 - [ ] **[Naam]** Automatische redirect naar loginpagina bij verlopen sessie (401/403) — voeg een `fetch`-interceptor toe in de webapps die bij een 401-response redirect naar de juiste login-HTML (bijv. `travel-login.html`)
-- [ ] **[Naam]** Auditlog tonen in UI: `modifiedAt` en `modifiedBy` zijn al aanwezig via CAP `managed`-mixin (`db/schema.cds` regel 27) — voeg ze toe aan de ObjectPage van TravelExtensions zodat zichtbaar is wie wanneer de status heeft gewijzigd
+- [x] **[Tom]** Auditlog in UI: `modifiedAt`/`modifiedBy`/`createdAt`/`createdBy` toegevoegd als "Wijzigingshistoriek"-facet op de TravelExtensions Object Page in Travel én Team — zichtbaar wie wanneer de status wijzigde.
 - [x] **[Ismael]** Foutmelding verbeteren bij ongeldige datumparameters in `getTripCountByPeriod` — GEDAAN in `srv/hr-service.js`: een opgegeven `from`/`to` die geen geldige datum is, geeft `req.error(400, 'Ongeldige datumparameters: gebruik een geldige datum (ISO 8601).')`.
 
 ### Logging
@@ -180,7 +180,7 @@ Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser gete
 > Volgens de officiële SAP-richtlijnen is `UI.HeaderInfo` de **enige verplichte annotatie** voor een Object Page. `UI.Facets` en `UI.FieldGroup` zijn technisch optioneel maar essentieel voor zinvolle weergave van detaildata.
 
 - [ ] **[Naam]** Controleer of **elke** Object Page een `@UI.HeaderInfo` heeft met `TypeName`, `TypeNamePlural` en een zinvolle `Title`-waarde — loop door `app/travel-dashboard/annotations.cds`, `app/team-dashboard/annotations.cds` en `app/hr-dashboard/annotations.cds` en vul ontbrekende `HeaderInfo`-annotaties aan.
-- [ ] **[Naam]** `@UI.Facets` toevoegen op TravelExtensions ObjectPage met aparte secties voor: (1) reisgegevens (`TripName`, `StartsAt`, `TripBudget`, `TripDescription`), (2) goedkeuringsstatus (`ApprovalStatus`, `InternalNote`), (3) auditgegevens (`modifiedAt`, `modifiedBy`) — nu zijn alle velden waarschijnlijk in één vlak blok. Gebruik `#FIELDGROUP_REFERENCE` facetten.
+- [x] **[Tom]** `@UI.Facets` op de TravelExtensions Object Page met aparte secties: (1) reisgegevens (TripPin), (2) PrimePath interne velden incl. goedkeuringsstatus, (3) **wijzigingshistoriek** (`modifiedAt`/`modifiedBy`/`createdAt`/`createdBy`). Reeds als losse FieldGroup-facetten.
 - [ ] **[Naam]** `@UI.Identification` annotatie toevoegen op TravelExtensions — verplicht voor acties op de ObjectPage-toolbar (bijv. een toekomstige "Override"-actie voor TravelAdmin). Voeg toe in `app/travel-dashboard/annotations.cds`.
 
 ### Semantische kleuren & Criticality (officieel Fiori-patroon)
