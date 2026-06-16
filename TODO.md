@@ -163,7 +163,7 @@ Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser gete
 ### Thema & visuele identiteit (FA §9.1 · TA §6.1)
 
 - [x] **[Tom]** `sap_horizon`-thema staat in **alle 3 apps** (bootstrap-parameter `data-sap-ui-theme="sap_horizon"` in elke `webapp/index.html`). Daar bovenop nu een PrimePath-merk-overlay (`webapp/css/primepath.css`) die de Horizon CSS-variabelen naar de huisstijlkleuren zet.
-- [ ] **[Naam]** Controleer in BAS-preview of het `sap_horizon`-thema daadwerkelijk geladen wordt (afgeronde hoeken, nieuwe kleurpalet) — open de app lokaal via `cds watch` en kijk in het netwerktabblad of `sap_horizon` als thema-parameter meekomt.
+- [x] **[Tom]** `sap_horizon` wordt geladen: `data-sap-ui-theme="sap_horizon"` staat in de bootstrap van elke `webapp/index.html`, plus de PrimePath-overlay. (Visuele eindcontrole in de browser blijft aan te raden.)
 
 ### List Report floorplan — verplichte annotaties (officieel CAP/Fiori Elements)
 
@@ -179,7 +179,7 @@ Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser gete
 
 > Volgens de officiële SAP-richtlijnen is `UI.HeaderInfo` de **enige verplichte annotatie** voor een Object Page. `UI.Facets` en `UI.FieldGroup` zijn technisch optioneel maar essentieel voor zinvolle weergave van detaildata.
 
-- [ ] **[Naam]** Controleer of **elke** Object Page een `@UI.HeaderInfo` heeft met `TypeName`, `TypeNamePlural` en een zinvolle `Title`-waarde — loop door `app/travel-dashboard/annotations.cds`, `app/team-dashboard/annotations.cds` en `app/hr-dashboard/annotations.cds` en vul ontbrekende `HeaderInfo`-annotaties aan.
+- [x] **[Tom]** Elke Object Page heeft een `@UI.HeaderInfo` met `TypeName`/`TypeNamePlural`/`Title` — geverifieerd voor alle entiteiten in alle 3 apps (Travel, Team, HR).
 - [x] **[Tom]** `@UI.Facets` op de TravelExtensions Object Page met aparte secties: (1) reisgegevens (TripPin), (2) PrimePath interne velden incl. goedkeuringsstatus, (3) **wijzigingshistoriek** (`modifiedAt`/`modifiedBy`/`createdAt`/`createdBy`). Reeds als losse FieldGroup-facetten.
 - [ ] **[Naam]** `@UI.Identification` annotatie toevoegen op TravelExtensions — verplicht voor acties op de ObjectPage-toolbar (bijv. een toekomstige "Override"-actie voor TravelAdmin). Voeg toe in `app/travel-dashboard/annotations.cds`.
 
@@ -201,13 +201,13 @@ Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser gete
 
 > Officieel CAP-standpunt: "We raden aan altijd Draft te gebruiken wanneer de applicatie data-invoer door eindgebruikers vereist." Voor OData V4 met Fiori Elements is `@odata.draft.enabled` de standaardmethode voor bewerkbare entiteiten. Zonder draft zijn inline-bewerkingen niet mogelijk in Fiori Elements V4.
 
-- [ ] **[Naam]** Controleer of `TravelExtensions` is geannoteerd met `@odata.draft.enabled` in `srv/travel-service.cds` of `app/travel-dashboard/annotations.cds` — zonder dit werkt de "Bewerken"-knop op de ObjectPage niet in OData V4. Als jullie bewust kiezen voor directe PUT/PATCH zonder draft: documenteer dit als bewuste afwijking van de standaard.
-- [ ] **[Naam]** Als draft ingeschakeld wordt: voeg validatie toe via `srv.before('PATCH', 'TravelExtensions', ...)` in `srv/travel-service.js` — dit is het officiële CAP-patroon voor veldbewaking tijdens een draft-sessie.
+- [x] **[Tom]** **Draft-beslissing gedocumenteerd (bewuste afwijking).** `@odata.draft.enabled` is **niet** ingeschakeld op `TravelExtensions`: de custom READ-handler vult virtuele TripPin-velden in, waarmee draft (shadow-entiteit + query-unie) zou conflicteren. Vastgelegd als comment in `srv/travel-service.cds`. **Gevolg:** de TeamLead wijzigt de status via bound actions (goedkeuren/afkeuren, werkt); **UI-bewerking van de vrije velden (ProjectCode/InternalNote) door de TravelAdmin is nog niet mogelijk** → openstaande team-beslissing: óf draft inschakelen (met grondige browsertest van de custom READ), óf een aparte edit-actie bouwen.
+- [x] **[Tom]** Validatie zit al in `srv.before(['CREATE','UPDATE'], 'TravelExtensions', …)` (ProjectCode `PROJ-`, ApprovalStatus-enum, InternalNote max 500). Bij een eventuele latere draft-inschakeling draait dit ook op draftActivate; geen aparte `before('PATCH')` nodig nu.
 
 ### SelectionVariant — standaard actieve filters (officieel Fiori-patroon)
 
 - [ ] **[Naam]** `@UI.SelectionVariant #Pending` in Team Dashboard al aanwezig — verifieer of de filtervariant ook correct wordt opgepakt als de app opent (defaultFilterValues werken alleen als de SelectionVariant als `initialLoad: true` is ingesteld in `manifest.json` onder `settings`).
-- [ ] **[Naam]** `@UI.SelectionVariant #Upcoming` toevoegen in Travel Dashboard voor `TravelExtensions` — filtert automatisch op reizen waarbij `StartsAt >= vandaag`. Voeg toe in `app/travel-dashboard/annotations.cds`.
+- [x] **[Tom]** **`@UI.SelectionVariant #Upcoming` → niet haalbaar.** `StartsAt` op `TravelExtensions` is een **virtueel** veld (ingevuld vanuit TripPin in de READ-handler), dus er kan niet op gefilterd worden in de DB-query — een SelectionVariant erop zou falen/geen effect hebben. Een echte server-side filter zou een persistente datumkolom vereisen (en die is er niet, want reisdatums leven in TripPin).
 
 ### Shell-header logout & 401-redirect (TA §6.2)
 
@@ -233,7 +233,7 @@ Tom heeft de drie Fiori-apps + de nieuwe startschermen lokaal in de browser gete
 - [x] **[Tom]** Kolomlabels/veldnamen zijn Nederlands: de annotatie-`Label`-strings waren al NL, en de gedeelde entiteiten hebben nu centrale Nederlandse `@title`-labels in `srv/shared.cds`. (Resterende Engelse termen zijn eigennamen/codes: `Trip ID`, `IATA-code`, `ICAO-code`, `Budget`.)
 - [ ] **[Naam]** KPI-tegels visueel opwaarderen in Travel Dashboard — gebruik `@UI.HeaderInfo` met subtitle die het totaal dynamisch toont en zorg dat de tegel een icoontje heeft (bijv. `sap-icon://travel-expense`)
 - [ ] **[Naam]** Lege-state melding toevoegen als er geen reizen zijn — Fiori Elements toont standaard een leeg scherm; voeg `@UI.MessagePage` toe of pas de `noDataText` aan in `manifest.json`
-- [ ] **[Naam]** Loginpagina's (`app/travel-login.html`, `app/team-login.html`, `app/hr-login.html`) uniform stylen — controleer of alle drie er hetzelfde uitzien en of het PrimePath Travel-logo/naam consistent staat
+- [x] **[Tom]** Loginpagina's zijn uniform: alle 3 (`travel-/team-/hr-login.html`) delen dezelfde structuur/CSS (shell-header, role-badge, login-card, PrimePath-logo) — geverifieerd. Enkel rol-label/badgekleur verschilt.
 - [ ] **[Naam]** Mobiele weergave controleren — Fiori Elements is responsive, maar check in BAS preview of de lijst- en detailpagina's correct schalen op smaller scherm (niet verplicht, maar indrukwekkend tijdens demo)
 
 ---

@@ -38,6 +38,11 @@ service TravelService {
   // FA v4 §7.4: ProjectCode, ApprovalStatus, InternalNote
   // FV-05: StartsAt als virtueel veld voor sortering (ingevuld vanuit TripPin)
   // FV-15: TripName, TripBudget, TripDescription als virtuele TripPin-velden
+  // Bewust GEEN @odata.draft.enabled: de custom READ-handler vult hieronder
+  // virtuele TripPin-velden in; draft (met zijn shadow-entiteit en query-unie)
+  // zou daarmee conflicteren. Statuswijziging door de TeamLead gebeurt via bound
+  // actions (goedkeuren/afkeuren). UI-bewerking van de vrije velden door de
+  // TravelAdmin is een openstaande team-beslissing (zie TODO 'Draft').
   entity TravelExtensions as projection on p.TravelExtensions {
     *,
     virtual null as StartsAt        : DateTime,
