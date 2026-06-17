@@ -28,56 +28,65 @@
     data-sap-ui-oninit="module:sap/ui/core/ComponentSupport">
   </script>
   <style>
+    /* Body als kolom: een echte headerbalk (in-flow) + de UI5-app eronder.
+       Geen zwevende overlay meer, dus geen overlap met de Fiori-toolbar. */
     html, body, #content { height: 100%; margin: 0; }
-    /* ComponentSupport wikkelt de app in een tussen-div; geef de hele keten hoogte */
-    #content > div, #container { height: 100%; }
+    body#content { display: flex; flex-direction: column; }
 
-    /* PrimePath-balk: vaste overlay (geen layout-impact op de UI5-app) */
-    .pp-shell {
-      position: fixed; top: 8px; right: 12px; z-index: 2000;
-      display: flex; align-items: center; gap: 8px;
+    .pp-appbar {
+      flex: 0 0 44px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 12px 0 16px;
+      background: linear-gradient(135deg, #0070F2 0%, #0040A8 60%, #0A2540 100%);
+      color: #fff;
       font-family: '72', 'Segoe UI', Arial, sans-serif;
-      background: rgba(255,255,255,.92);
-      padding: 5px 7px; border-radius: 8px;
-      box-shadow: 0 1px 6px rgba(0,0,0,.18);
-      opacity: 0; transition: opacity .25s ease;   /* verschijnt pas als UI5 klaar is (BUG-02) */
+      box-shadow: 0 2px 10px rgba(16,42,76,.22);
+      z-index: 5;
     }
-    .pp-shell.pp-ready { opacity: 1; }
-    .pp-shell a, .pp-shell button {
-      font-size: 12px; font-weight: 600; line-height: 1; white-space: nowrap;
-      padding: 7px 12px; border-radius: 6px; cursor: pointer;
-      text-decoration: none; border: 1px solid transparent;
+    .pp-appbar .pp-brand { display: flex; align-items: center; gap: .5rem; font-size: 13px; font-weight: 700; letter-spacing: .3px; }
+    .pp-appbar .pp-brand .mark { width: 22px; height: 22px; border-radius: 6px; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.3); display: flex; align-items: center; justify-content: center; }
+    .pp-appbar .pp-brand .mark svg { width: 13px; height: 13px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .pp-appbar .pp-app { font-weight: 600; opacity: .82; font-size: 12px; border-left: 1px solid rgba(255,255,255,.3); padding-left: .55rem; }
+    .pp-appbar .pp-actions { display: flex; align-items: center; gap: 8px; }
+    .pp-appbar a, .pp-appbar button {
+      font-family: inherit; font-size: 12px; font-weight: 600; line-height: 1; white-space: nowrap;
+      padding: 7px 12px; border-radius: 8px; cursor: pointer; text-decoration: none; border: 1px solid transparent;
     }
-    .pp-shell .pp-home { background: #0a6ed1; color: #fff; }
-    .pp-shell .pp-home:hover { background: #085caf; }
-    .pp-shell .pp-logout { background: #fff; color: #0a6ed1; border-color: #0a6ed1; }
-    .pp-shell .pp-logout:hover { background: #eaf2fb; }
+    .pp-appbar .pp-home { background: rgba(255,255,255,.16); color: #fff; border-color: rgba(255,255,255,.35); }
+    .pp-appbar .pp-home:hover { background: rgba(255,255,255,.28); }
+    .pp-appbar .pp-logout { background: #fff; color: #0058C4; }
+    .pp-appbar .pp-logout:hover { background: #EAF2FF; }
+
+    .pp-app-host { flex: 1 1 auto; min-height: 0; position: relative; }
+    #container { position: absolute; inset: 0; }
   </style>
 </head>
 <body class="sapUiBody" id="content">
-  <div class="pp-shell">
-    <a class="pp-home" href="/travel-start.html" title="Terug naar het overzicht">← Overzicht</a>
-    <button class="pp-logout" type="button" onclick="ppLogout()">Afmelden</button>
+
+  <header class="pp-appbar">
+    <span class="pp-brand">
+      <span class="mark"><svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></span>
+      PrimePath Travel
+      <span class="pp-app">Travel Dashboard</span>
+    </span>
+    <span class="pp-actions">
+      <a class="pp-home" href="/travel-start.html" title="Terug naar het overzicht">Overzicht</a>
+      <button class="pp-logout" type="button" onclick="ppLogout()">Afmelden</button>
+    </span>
+  </header>
+
+  <div class="pp-app-host">
+    <div data-sap-ui-component
+      data-name="primepath.travel"
+      data-id="container"
+      data-height="100%"
+      data-settings='{"id":"primepath.travel"}'
+      data-handle-validation="true">
+    </div>
   </div>
+
   <script>
     function ppLogout(){ fetch('/auth/logout',{method:'POST',credentials:'include'}).finally(function(){ location.href='/'; }); }
-    // BUG-02: toon de balk pas wanneer UI5 klaar is, zodat hij niet over het laadscherm zweeft.
-    (function () {
-      function reveal(){ var s = document.querySelector('.pp-shell'); if (s) s.classList.add('pp-ready'); }
-      var n = 0, t = setInterval(function () {
-        if (window.sap && sap.ui && typeof sap.ui.getCore === 'function') {
-          clearInterval(t);
-          try { sap.ui.getCore().attachInit(reveal); } catch (e) { reveal(); }
-        } else if (++n > 120) { clearInterval(t); reveal(); }   // fallback ~12s
-      }, 100);
-    })();
   </script>
-  <div data-sap-ui-component
-    data-name="primepath.travel"
-    data-id="container"
-    data-height="100%"
-    data-settings='{"id":"primepath.travel"}'
-    data-handle-validation="true">
-  </div>
 </body>
 </html>
