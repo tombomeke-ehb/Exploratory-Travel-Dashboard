@@ -3,260 +3,829 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PrimePath Travel – Travel Dashboard (overzicht)</title>
+  <title>PrimePath Travel – Travel Dashboard</title>
   <style>
-    /* PrimePath huisstijl-tokens — gelijk aan landing & Fiori-overlay (#0070F2). */
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap');
     :root {
-      --font-head: 'Poppins','72','Segoe UI',system-ui,sans-serif;
-      --font-body: 'Open Sans','72','Segoe UI',system-ui,sans-serif;
-      --pp-brand: #0070F2; --pp-brand-dark: #0040A8; --pp-brand-darker: #0A2540;
-      --pp-ink: #1A2A3A; --pp-muted: #5B6B7B; --pp-line: #E3E9F0;
-      --pp-bg: #F4F7FB; --pp-surface: #FFFFFF;
-      --pp-radius: 16px;
-      --pp-shadow: 0 1px 2px rgba(16,42,76,.06), 0 10px 30px rgba(16,42,76,.08);
-      --pp-shadow-hover: 0 6px 14px rgba(0,112,242,.16), 0 18px 44px rgba(16,42,76,.14);
-      --c-blue: #0070F2; --c-red: #D14343; --c-green: #1F9D63; --c-orange: #E1820A;
-      --role: var(--c-blue);
+      --pp-primary: #0070F2;
+      --pp-primary-hover: #005BCB;
+      --pp-primary-light: #E8F2FF;
+      --pp-header: #2C3E50;
+      --pp-header-accent: #3498DB;
+      --pp-sidebar: #FAFBFC;
+      --pp-sidebar-hover: #EBF2FF;
+      --pp-sidebar-border: #E0E4E8;
+      --pp-text: #1A1D21;
+      --pp-text-2: #5E6366;
+      --pp-text-3: #8C9196;
+      --pp-border: #DFE3E8;
+      --pp-bg: #F0F2F5;
+      --pp-success: #0E8345;
+      --pp-success-bg: #E3F5E8;
+      --pp-warning: #D97706;
+      --pp-warning-bg: #FEF3C7;
+      --pp-error: #C41E3A;
+      --pp-error-bg: #FEE2E2;
+      --pp-row-hover: #F5F8FF;
+      --pp-row-stripe: #FAFBFC;
+      --pp-nav-active: #0070F2;
+      --pp-card-shadow: 0 1px 3px rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.06);
+      --pp-card-shadow-hover: 0 4px 16px rgba(0,0,0,.1), 0 2px 6px rgba(0,0,0,.06);
+      --pp-radius: 10px;
+      --transition-fast: .15s ease;
+      --transition-med: .25s ease;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--font-body); background: var(--pp-bg); color: var(--pp-ink); min-height: 100vh; -webkit-font-smoothing: antialiased; }
-    h1, .kpi-value, .nc-title, .shell-header .logo { font-family: var(--font-head); }
+    body { font-family: "72", "Segoe UI", system-ui, sans-serif; background: var(--pp-bg); color: var(--pp-text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    :focus-visible { outline: 2px solid var(--pp-primary); outline-offset: 2px; }
 
-    /* Lijn-iconen: erven de kleur van hun container (chip/accent of rol). */
-    svg.ic { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
-    .shell-header {
-      position: sticky; top: 0; z-index: 50;
-      background: linear-gradient(135deg, var(--pp-brand) 0%, var(--pp-brand-dark) 60%, var(--pp-brand-darker) 100%);
-      color: #fff; padding: 0 1.75rem; height: 3.25rem;
+    /* ── Header ─────────────────────────────────────────── */
+    .header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 48px; background: linear-gradient(135deg, var(--pp-header) 0%, #1a2a3a 100%);
+      color: #fff;
       display: flex; align-items: center; justify-content: space-between;
-      box-shadow: 0 2px 12px rgba(16,42,76,.18);
+      padding: 0 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,.18);
     }
-    .shell-header .logo { display: flex; align-items: center; gap: .55rem; font-size: 1rem; font-weight: 700; letter-spacing: .3px; }
-    .shell-header .logo .mark { width: 1.75rem; height: 1.75rem; border-radius: 8px; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.28); display: flex; align-items: center; justify-content: center; }
-    .shell-header .logo .mark svg { width: 1rem; height: 1rem; }
-    .shell-header .right { display: flex; align-items: center; gap: 1rem; }
-    .shell-header .subtitle { font-size: .75rem; opacity: .9; }
-    .logout-btn { background: rgba(255,255,255,.16); color: #fff; border: 1px solid rgba(255,255,255,.4); border-radius: 8px; padding: .3rem .8rem; font-size: .75rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: background .15s; }
-    .logout-btn:hover { background: rgba(255,255,255,.3); }
-
-    .page-title { max-width: 1120px; margin: 0 auto; padding: 1.5rem 1.75rem 1rem; }
-    .page-title h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -.3px; }
-    .page-title p { font-size: .9rem; color: var(--pp-muted); margin-top: .3rem; }
-
-    main { max-width: 1120px; margin: 0 auto; padding: 0 1.75rem 2rem; }
-    .section-label { font-size: .75rem; font-weight: 700; color: var(--pp-muted); text-transform: uppercase; letter-spacing: .6px; margin: 1.75rem 0 .85rem; }
-
-    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.1rem; }
-    .kpi {
-      position: relative; background: var(--pp-surface); border: 1px solid var(--pp-line);
-      border-radius: var(--pp-radius); padding: 1.25rem; box-shadow: var(--pp-shadow);
-      display: flex; flex-direction: column; gap: .55rem; min-height: 7.5rem; overflow: hidden;
-      transition: transform .15s, box-shadow .15s;
+    .header-left { display: flex; align-items: center; gap: .75rem; }
+    .header-logo {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: linear-gradient(135deg, rgba(255,255,255,.2), rgba(255,255,255,.08));
+      border: 1px solid rgba(255,255,255,.2);
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(4px);
     }
-    .kpi:hover { transform: translateY(-2px); box-shadow: var(--pp-shadow-hover); }
-    .kpi::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 4px; background: var(--accent, var(--c-blue)); }
-    .kpi-head { display: flex; align-items: center; gap: .6rem; }
-    .kpi .chip { width: 2.4rem; height: 2.4rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--accent, var(--c-blue)) 14%, #fff); color: var(--accent, var(--c-blue)); }
-    .kpi .chip svg { width: 1.25rem; height: 1.25rem; }
-    .kpi .kpi-label { font-size: .8rem; color: var(--pp-muted); font-weight: 600; }
-    .kpi .kpi-value { font-size: 2.3rem; font-weight: 700; line-height: 1; letter-spacing: -1px; color: var(--pp-ink); }
-    .kpi .kpi-sub { font-size: .74rem; color: #93A1B0; margin-top: auto; }
-    .kpi.accent-blue   { --accent: var(--c-blue); }
-    .kpi.accent-red    { --accent: var(--c-red); }
-    .kpi.accent-green  { --accent: var(--c-green); }
-    .kpi.accent-orange { --accent: var(--c-orange); }
-
-    .nav-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.1rem; }
-    .nav-card {
-      background: var(--pp-surface); border: 1px solid var(--pp-line); border-radius: var(--pp-radius);
-      padding: 1.15rem 1.25rem; text-decoration: none; color: inherit;
-      display: flex; align-items: center; gap: .9rem; box-shadow: var(--pp-shadow);
-      transition: transform .15s, box-shadow .15s, border-color .15s;
+    .header-logo svg { width: 18px; height: 18px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .header-title { font-size: .9375rem; font-weight: 700; letter-spacing: .3px; }
+    .header-title span { opacity: .65; font-weight: 400; margin-left: .25rem; }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .header-link { color: rgba(255,255,255,.8); text-decoration: none; font-size: .8rem; font-weight: 500; transition: color var(--transition-fast); }
+    .header-link:hover { color: #fff; }
+    .btn-logout {
+      background: rgba(255,255,255,.12); color: #fff;
+      border: 1px solid rgba(255,255,255,.25); border-radius: 8px;
+      padding: .35rem .9rem; font-size: .78rem; font-weight: 600;
+      font-family: inherit; cursor: pointer; transition: all var(--transition-fast);
     }
-    .nav-card:hover { transform: translateY(-3px); box-shadow: var(--pp-shadow-hover); border-color: color-mix(in srgb, var(--role) 40%, var(--pp-line)); }
-    .nav-card .nc-icon { width: 2.6rem; height: 2.6rem; border-radius: 12px; background: color-mix(in srgb, var(--role) 12%, #fff); color: var(--role); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .nav-card .nc-icon svg { width: 1.3rem; height: 1.3rem; }
-    .nav-card .nc-title { font-size: .95rem; font-weight: 700; }
-    .nav-card .nc-sub { font-size: .78rem; color: var(--pp-muted); }
-    .nav-card .nc-arrow { margin-left: auto; color: var(--role); display: flex; transition: transform .15s; }
-    .nav-card .nc-arrow svg { width: 1.1rem; height: 1.1rem; }
-    .nav-card:hover .nc-arrow { transform: translateX(4px); }
+    .btn-logout:hover { background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.4); }
 
-    .airline-card { background: var(--pp-surface); border: 1px solid var(--pp-line); border-radius: var(--pp-radius); padding: 1.4rem; box-shadow: var(--pp-shadow); }
-    .airline-row { display: grid; grid-template-columns: 9rem 1fr 6.5rem; align-items: center; gap: .85rem; padding: .55rem 0; }
-    .airline-row + .airline-row { border-top: 1px solid var(--pp-line); }
-    .airline-name { font-size: .85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .bar-track { background: #EDF1F6; border-radius: 999px; height: .85rem; overflow: hidden; }
-    .bar-fill { background: linear-gradient(90deg, var(--pp-brand), color-mix(in srgb, var(--pp-brand) 55%, #00B4D8)); height: 100%; border-radius: 999px; }
-    .airline-meta { font-size: .78rem; color: var(--pp-muted); text-align: right; }
-    .muted { color: #93A1B0; font-size: .85rem; }
+    /* ── Sidebar ─────────────────────────────────────────── */
+    .sidebar {
+      position: fixed; top: 48px; left: 0; bottom: 0; width: 248px;
+      background: var(--pp-sidebar); border-right: 1px solid var(--pp-sidebar-border);
+      overflow-y: auto; z-index: 90;
+      transition: transform var(--transition-med);
+    }
+    .sidebar-label {
+      font-size: .625rem; font-weight: 700; color: var(--pp-text-3);
+      text-transform: uppercase; letter-spacing: .8px; padding: 1.25rem 1.25rem .5rem;
+    }
+    .sidebar-nav { list-style: none; padding: .75rem .625rem; }
+    .sidebar-nav li { margin-bottom: 2px; }
+    .sidebar-nav li a {
+      display: flex; align-items: center; gap: .7rem;
+      padding: .7rem 1rem; text-decoration: none; color: var(--pp-text-2);
+      font-size: .84rem; font-weight: 500; border-radius: 8px;
+      transition: all var(--transition-fast);
+    }
+    .sidebar-nav li a:hover { background: var(--pp-sidebar-hover); color: var(--pp-text); }
+    .sidebar-nav li a.active {
+      background: var(--pp-primary); color: #fff; font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0,112,242,.3);
+    }
+    .sidebar-nav li a svg { width: 20px; height: 20px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
 
-    footer { text-align: center; padding: 2rem 1.5rem; font-size: .75rem; color: #93A1B0; margin-top: 1.5rem; }
-    footer .dot { color: var(--pp-line); margin: 0 .4rem; }
+    /* ── Content ─────────────────────────────────────────── */
+    .content { margin-left: 248px; margin-top: 48px; padding: 2rem 2.25rem; min-height: calc(100vh - 48px); }
+    .view { display: none; }
+    .view.active { display: block; animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-    @media (max-width: 640px) { .page-title h1 { font-size: 1.3rem; } }
+    /* ── View Header ────────────────────────────────────── */
+    .view-header { margin-bottom: 1.75rem; }
+    .view-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--pp-text); letter-spacing: -.3px; }
+    .view-header p { font-size: .875rem; color: var(--pp-text-2); margin-top: .25rem; }
+
+    /* ── Section Title ──────────────────────────────────── */
+    .section-title { font-size: .6875rem; font-weight: 700; color: var(--pp-text-3); text-transform: uppercase; letter-spacing: .8px; margin: 0 0 1rem; }
+
+    /* ── KPI Cards ───────────────────────────────────────── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.25rem; margin-bottom: 2.25rem; }
+    .kpi-card {
+      position: relative; background: #fff; border: 1px solid var(--pp-border);
+      border-radius: var(--pp-radius); box-shadow: var(--pp-card-shadow);
+      padding: 1.35rem 1.4rem; display: flex; flex-direction: column; gap: .5rem;
+      overflow: hidden; transition: all var(--transition-med);
+    }
+    .kpi-card::before {
+      content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 4px;
+      background: var(--accent); border-radius: 0 4px 4px 0;
+    }
+    .kpi-card:hover { box-shadow: var(--pp-card-shadow-hover); transform: translateY(-2px); }
+    .kpi-card .kpi-head { display: flex; align-items: center; gap: .65rem; }
+    .kpi-card .kpi-icon {
+      width: 2.5rem; height: 2.5rem; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--icon-bg, var(--pp-primary-light));
+      flex-shrink: 0;
+    }
+    .kpi-card .kpi-icon svg {
+      width: 1.25rem; height: 1.25rem; fill: none; stroke: var(--accent);
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .kpi-card .kpi-label { font-size: .78rem; color: var(--pp-text-2); font-weight: 600; }
+    .kpi-card .kpi-value { font-size: 2.25rem; font-weight: 800; line-height: 1; letter-spacing: -.5px; }
+    .kpi-card .kpi-sub { font-size: .72rem; color: var(--pp-text-3); margin-top: auto; }
+
+    /* ── Airline Bar Chart ───────────────────────────────── */
+    .chart-card {
+      background: #fff; border: 1px solid var(--pp-border);
+      border-radius: var(--pp-radius); box-shadow: var(--pp-card-shadow); padding: 1.5rem;
+    }
+    .chart-card-title { font-size: .95rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--pp-text); }
+    .chart-row { display: grid; grid-template-columns: 11rem 1fr 8rem; align-items: center; gap: 1rem; padding: .7rem 0; }
+    .chart-row + .chart-row { border-top: 1px solid #F0F1F3; }
+    .chart-rank { width: 1.5rem; font-size: .72rem; font-weight: 700; color: var(--pp-text-3); text-align: center; }
+    .chart-name { font-size: .84rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chart-track { background: #EEF1F6; border-radius: 999px; height: .55rem; overflow: hidden; }
+    .chart-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--pp-primary), #4DA6FF); transition: width .8s cubic-bezier(.4,0,.2,1); }
+    .chart-meta { font-size: .78rem; color: var(--pp-text-2); text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; }
+
+    /* ── Toolbar ──────────────────────────────────────────── */
+    .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: .75rem; }
+    .toolbar h2 { font-size: 1.1rem; font-weight: 700; }
+    .search-wrap { position: relative; }
+    .search-wrap svg {
+      position: absolute; left: .75rem; top: 50%; transform: translateY(-50%);
+      width: 16px; height: 16px; stroke: var(--pp-text-3); fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+      pointer-events: none;
+    }
+    .search-input {
+      padding: .55rem .85rem .55rem 2.25rem; border: 1px solid var(--pp-border);
+      border-radius: 8px; font-size: .84rem; font-family: inherit; width: 300px;
+      outline: none; transition: all var(--transition-fast); background: #fff;
+    }
+    .search-input:focus { border-color: var(--pp-primary); box-shadow: 0 0 0 3px rgba(0,112,242,.1); }
+    .search-input::placeholder { color: var(--pp-text-3); }
+
+    /* ── Table ────────────────────────────────────────────── */
+    .table-card {
+      background: #fff; border: 1px solid var(--pp-border);
+      border-radius: var(--pp-radius); box-shadow: var(--pp-card-shadow); overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      text-transform: uppercase; font-size: .6875rem; font-weight: 700; color: var(--pp-text-3);
+      padding: .85rem 1rem; text-align: left; border-bottom: 2px solid var(--pp-border);
+      white-space: nowrap; user-select: none; position: relative; background: #FAFBFC;
+      letter-spacing: .05em;
+    }
+    thead th.sortable { cursor: pointer; transition: color var(--transition-fast); }
+    thead th.sortable:hover { color: var(--pp-primary); }
+    thead th .sort-arrow { font-size: .55rem; margin-left: .3rem; opacity: .35; }
+    thead th.sorted .sort-arrow { opacity: 1; color: var(--pp-primary); }
+    tbody td { padding: .8rem 1rem; font-size: .84rem; border-bottom: 1px solid #F2F3F5; vertical-align: middle; }
+    tbody tr { transition: background var(--transition-fast); }
+    tbody tr:nth-child(even) { background: var(--pp-row-stripe); }
+    tbody tr:hover { background: var(--pp-row-hover); }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr.clickable { cursor: pointer; }
+    tbody tr.clickable:active { background: #E3EFFF; }
+    .row-arrow { color: var(--pp-text-3); font-size: 1.15rem; text-align: center; width: 2.5rem; transition: all var(--transition-fast); }
+    tbody tr.clickable:hover .row-arrow { color: var(--pp-primary); transform: translateX(3px); }
+    .empty-msg { text-align: center; padding: 3rem 1rem; color: var(--pp-text-3); font-size: .9rem; }
+
+    /* ── Pill Badges ──────────────────────────────────────── */
+    .pill {
+      display: inline-flex; align-items: center; gap: .3rem;
+      padding: .25rem .7rem; border-radius: 999px; font-size: .72rem;
+      font-weight: 600; white-space: nowrap; line-height: 1.3;
+    }
+    .pill::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: currentColor; flex-shrink: 0;
+    }
+    .pill-approved { color: var(--pp-success); background: var(--pp-success-bg); }
+    .pill-pending  { color: var(--pp-warning); background: var(--pp-warning-bg); }
+    .pill-rejected { color: var(--pp-error); background: var(--pp-error-bg); }
+    .pill-ontravel { color: var(--pp-error); background: var(--pp-error-bg); }
+    .pill-available { color: var(--pp-success); background: var(--pp-success-bg); }
+
+    /* ── Detail Drawer ────────────────────────────────────── */
+    .drawer-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,.35); z-index: 200; opacity: 0; pointer-events: none;
+      transition: opacity var(--transition-med);
+      backdrop-filter: blur(2px);
+    }
+    .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+    .drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; width: 440px;
+      background: #fff; z-index: 210; box-shadow: -8px 0 32px rgba(0,0,0,.12);
+      transform: translateX(100%); transition: transform .3s cubic-bezier(.4,0,.2,1);
+      overflow-y: auto; display: flex; flex-direction: column;
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid var(--pp-border);
+      background: #FAFBFC;
+    }
+    .drawer-header h3 { font-size: 1.15rem; font-weight: 700; }
+    .drawer-close {
+      background: none; border: 1px solid var(--pp-border); font-size: 1.2rem;
+      cursor: pointer; color: var(--pp-text-2); line-height: 1;
+      padding: .4rem .5rem; border-radius: 8px;
+      transition: all var(--transition-fast);
+    }
+    .drawer-close:hover { color: var(--pp-text); background: var(--pp-bg); border-color: var(--pp-text-3); }
+    .drawer-body { padding: 1.5rem; flex: 1; }
+    .drawer-section { margin-bottom: 1.75rem; }
+    .drawer-section h4 {
+      font-size: .6875rem; font-weight: 700; text-transform: uppercase;
+      color: var(--pp-text-3); letter-spacing: .6px; margin-bottom: .85rem;
+      padding-bottom: .5rem; border-bottom: 1px solid #F0F1F3;
+    }
+    .drawer-field { margin-bottom: .85rem; }
+    .drawer-field .label { font-size: .7rem; color: var(--pp-text-3); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+    .drawer-field .value { font-size: .88rem; margin-top: .25rem; line-height: 1.5; color: var(--pp-text); }
+    .drawer-footer { padding: 1.25rem 1.5rem; border-top: 1px solid var(--pp-border); background: #FAFBFC; }
+    .btn-fiori {
+      display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+      background: var(--pp-primary); color: #fff; border: none;
+      border-radius: 8px; padding: .7rem 1.25rem; font-size: .84rem; font-weight: 600;
+      font-family: inherit; cursor: pointer; text-decoration: none; text-align: center;
+      transition: all var(--transition-fast); width: 100%;
+    }
+    .btn-fiori:hover { background: var(--pp-primary-hover); box-shadow: 0 2px 8px rgba(0,112,242,.3); }
+    .btn-fiori:active { transform: scale(.98); }
+
+    /* ── Spinner ──────────────────────────────────────────── */
+    .spinner-wrap { display: flex; justify-content: center; padding: 3rem; }
+    .spinner { width: 28px; height: 28px; border: 3px solid var(--pp-border); border-top-color: var(--pp-primary); border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Error ────────────────────────────────────────────── */
+    .error-msg { background: var(--pp-error-bg); color: var(--pp-error); padding: .85rem 1.15rem; border-radius: 8px; font-size: .84rem; margin-bottom: 1rem; border: 1px solid #FECACA; }
+
+    /* ── Footer ───────────────────────────────────────────── */
+    .footer { text-align: center; padding: 2.5rem 1rem 1rem; font-size: .72rem; color: var(--pp-text-3); letter-spacing: .2px; }
+
+    /* ── Responsive ───────────────────────────────────────── */
+    @media (max-width: 1023px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .content { margin-left: 0; }
+      .drawer { width: 100%; max-width: 440px; }
+      .search-input { width: 100%; }
+    }
   </style>
 </head>
 <body>
 
-  <header class="shell-header">
-    <span class="logo">
-      <span class="mark"><svg class="ic" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></span>
-      PrimePath Travel
-    </span>
-    <div class="right">
-      <span class="subtitle" id="welcome">Travel Coördinator</span>
-      <button class="logout-btn" id="logoutBtn" type="button">Afmelden</button>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <span class="header-logo"><svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></span>
+      <span class="header-title">PrimePath Travel <span>| Travel Dashboard</span></span>
+    </div>
+    <div class="header-right">
+      <a href="/" class="header-link">Overzicht</a>
+      <button class="btn-logout" id="logoutBtn">Afmelden</button>
     </div>
   </header>
 
-  <div class="page-title">
-    <h1>Travel Dashboard — Overzicht</h1>
-    <p>Live kerncijfers uit TripPin. Klik op een kaart om door te gaan naar de detaillijsten.</p>
-  </div>
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-label">Navigatie</div>
+    <ul class="sidebar-nav">
+      <li><a href="#dashboard" data-view="dashboard" class="active">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a></li>
+      <li><a href="#reisextensies" data-view="reisextensies">
+        <svg viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h6"/></svg>
+        Reisextensies
+      </a></li>
+      <li><a href="#medewerkers" data-view="medewerkers">
+        <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Medewerkers
+      </a></li>
+      <li><a href="#airlines" data-view="airlines">
+        <svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+        Airlines
+      </a></li>
+      <li><a href="#luchthavens" data-view="luchthavens">
+        <svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M9 6h.01M15 6h.01M9 10h.01M15 10h.01M9 14h.01M15 14h.01"/></svg>
+        Luchthavens
+      </a></li>
+    </ul>
+  </nav>
 
-  <main>
-    <div class="section-label">Kerncijfers</div>
-    <section class="kpi-row">
-      <div class="kpi accent-orange">
-        <div class="kpi-head"><span class="chip"><svg class="ic" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></span><span class="kpi-label">Actieve reizen</span></div>
-        <span class="kpi-value" id="kpiActive">…</span>
-        <span class="kpi-sub">reizen die nu lopen</span>
-      </div>
-      <div class="kpi accent-red">
-        <div class="kpi-head"><span class="chip"><svg class="ic" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="kpi-label">Medewerkers op reis</span></div>
-        <span class="kpi-value" id="kpiOnTravel">…</span>
-        <span class="kpi-sub">momenteel onderweg</span>
-      </div>
-      <div class="kpi accent-green">
-        <div class="kpi-head"><span class="chip"><svg class="ic" viewBox="0 0 24 24"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg></span><span class="kpi-label">Komende reizen</span></div>
-        <span class="kpi-value" id="kpiUpcoming">…</span>
-        <span class="kpi-sub">binnen 14 dagen</span>
-      </div>
-      <div class="kpi accent-blue">
-        <div class="kpi-head"><span class="chip"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/></svg></span><span class="kpi-label">Meest gebruikte airline</span></div>
-        <span class="kpi-value" id="kpiTopAirline" style="font-size:1.5rem; letter-spacing:-.3px;">…</span>
-        <span class="kpi-sub" id="kpiTopAirlineSub">op basis van boekingen</span>
-      </div>
-    </section>
+  <!-- Content -->
+  <main class="content">
 
-    <div class="section-label">Naar de lijsten</div>
-    <section class="nav-row">
-      <a class="nav-card" href="/travel-dashboard/webapp/">
-        <span class="nc-icon"><svg class="ic" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h6"/></svg></span>
-        <span>
-          <div class="nc-title">Reizen &amp; extensies</div>
-          <div class="nc-sub">Status, projectcode &amp; notities</div>
-        </span>
-        <span class="nc-arrow"><svg class="ic" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></span>
-      </a>
-      <a class="nav-card" href="/travel-dashboard/webapp/#/People">
-        <span class="nc-icon"><svg class="ic" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-        <span>
-          <div class="nc-title">Medewerkers</div>
-          <div class="nc-sub">Wie is op reis?</div>
-        </span>
-        <span class="nc-arrow"><svg class="ic" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></span>
-      </a>
-      <a class="nav-card" href="/travel-dashboard/webapp/#/Airlines">
-        <span class="nc-icon"><svg class="ic" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></span>
-        <span>
-          <div class="nc-title">Airlines</div>
-          <div class="nc-sub">Maatschappijen</div>
-        </span>
-        <span class="nc-arrow"><svg class="ic" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></span>
-      </a>
-      <a class="nav-card" href="/travel-dashboard/webapp/#/Airports">
-        <span class="nc-icon"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M9 6h.01M15 6h.01M9 10h.01M15 10h.01M9 14h.01M15 14h.01"/></svg></span>
-        <span>
-          <div class="nc-title">Luchthavens</div>
-          <div class="nc-sub">Airports</div>
-        </span>
-        <span class="nc-arrow"><svg class="ic" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></span>
-      </a>
-    </section>
+    <!-- Dashboard View -->
+    <div id="view-dashboard" class="view active">
+      <div class="view-header">
+        <h1>Dashboard</h1>
+        <p>Overzicht van actieve reizen, medewerkers en airlinegebruik.</p>
+      </div>
 
-    <div class="section-label">Airlinegebruik (top 5)</div>
-    <section class="airline-card" id="airlineCard">
-      <div class="muted" id="airlineLoading">Laden…</div>
-    </section>
+      <h2 class="section-title">Kerncijfers</h2>
+      <div class="kpi-grid">
+        <div class="kpi-card" style="--accent: var(--pp-warning); --icon-bg: var(--pp-warning-bg);">
+          <div class="kpi-head">
+            <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></div>
+            <span class="kpi-label">Actieve reizen</span>
+          </div>
+          <span class="kpi-value" id="kpiActive">
+            <div class="spinner-wrap" style="padding:.5rem"><div class="spinner"></div></div>
+          </span>
+          <span class="kpi-sub">reizen die nu lopen</span>
+        </div>
+        <div class="kpi-card" style="--accent: var(--pp-error); --icon-bg: var(--pp-error-bg);">
+          <div class="kpi-head">
+            <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <span class="kpi-label">Medewerkers op reis</span>
+          </div>
+          <span class="kpi-value" id="kpiOnTravel">
+            <div class="spinner-wrap" style="padding:.5rem"><div class="spinner"></div></div>
+          </span>
+          <span class="kpi-sub">momenteel onderweg</span>
+        </div>
+        <div class="kpi-card" style="--accent: var(--pp-success); --icon-bg: var(--pp-success-bg);">
+          <div class="kpi-head">
+            <div class="kpi-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+            <span class="kpi-label">Komende reizen</span>
+          </div>
+          <span class="kpi-value" id="kpiUpcoming">
+            <div class="spinner-wrap" style="padding:.5rem"><div class="spinner"></div></div>
+          </span>
+          <span class="kpi-sub">binnen 14 dagen</span>
+        </div>
+        <div class="kpi-card" style="--accent: var(--pp-primary); --icon-bg: var(--pp-primary-light);">
+          <div class="kpi-head">
+            <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+            <span class="kpi-label">Meest gebruikte airline</span>
+          </div>
+          <span class="kpi-value" id="kpiTopAirline" style="font-size:1.35rem;">
+            <div class="spinner-wrap" style="padding:.5rem"><div class="spinner"></div></div>
+          </span>
+          <span class="kpi-sub" id="kpiTopAirlineSub">op basis van boekingen</span>
+        </div>
+      </div>
+
+      <h2 class="section-title">Airlinegebruik (top 5)</h2>
+      <div class="chart-card" id="airlineChart">
+        <div class="spinner-wrap"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Reisextensies View -->
+    <div id="view-reisextensies" class="view">
+      <div class="view-header">
+        <h1>Reisextensies</h1>
+        <p>Beheer PrimePath-specifieke reisinformatie: projectcodes, goedkeuringsstatus en notities.</p>
+      </div>
+      <div class="toolbar">
+        <h2></h2>
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" class="search-input" id="searchExtensies" placeholder="Zoeken op Trip ID, projectcode, status...">
+        </div>
+      </div>
+      <div id="extensiesContent">
+        <div class="spinner-wrap"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Medewerkers View -->
+    <div id="view-medewerkers" class="view">
+      <div class="view-header">
+        <h1>Medewerkers</h1>
+        <p>Overzicht van alle medewerkers en hun beschikbaarheid.</p>
+      </div>
+      <div class="toolbar">
+        <h2></h2>
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" class="search-input" id="searchMedewerkers" placeholder="Zoeken op naam of gebruikersnaam...">
+        </div>
+      </div>
+      <div id="medewerkersContent">
+        <div class="spinner-wrap"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Airlines View -->
+    <div id="view-airlines" class="view">
+      <div class="view-header">
+        <h1>Airlines</h1>
+        <p>Sorteerbaar overzicht van alle luchtvaartmaatschappijen.</p>
+      </div>
+      <div id="airlinesContent">
+        <div class="spinner-wrap"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Luchthavens View -->
+    <div id="view-luchthavens" class="view">
+      <div class="view-header">
+        <h1>Luchthavens</h1>
+        <p>Doorzoek luchthavens op naam, ICAO- of IATA-code.</p>
+      </div>
+      <div class="toolbar">
+        <h2></h2>
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" class="search-input" id="searchLuchthavens" placeholder="Zoeken op naam, ICAO, IATA, stad...">
+        </div>
+      </div>
+      <div id="luchthavensContent">
+        <div class="spinner-wrap"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <div class="footer">EhB Cloud Integration &middot; In samenwerking met Flexso &middot; Demo: 19 juni 2026</div>
   </main>
 
-  <footer>
-    EhB Cloud Integration <span class="dot">·</span> In samenwerking met Flexso <span class="dot">·</span> Demo: 19 juni 2026
-  </footer>
+  <!-- Detail Drawer -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <aside class="drawer" id="drawer">
+    <div class="drawer-header">
+      <h3 id="drawerTitle">Reis</h3>
+      <button class="drawer-close" id="drawerClose">&times;</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+    <div class="drawer-footer">
+      <a id="drawerFioriLink" class="btn-fiori" href="#" target="_blank">Bewerken in Fiori</a>
+    </div>
+  </aside>
 
-  <script>
-    // Roept een unbound OData V4-functie op de Travel-service aan.
-    // Bij 401/403 (geen/verlopen sessie) → terug naar de loginpagina.
-    async function odata (fn) {
-      const res = await fetch('/travel/' + fn, {
-        credentials: 'include',
-        headers: { 'Accept': 'application/json' }
-      });
-      if (res.status === 401 || res.status === 403) {
-        window.location.href = '/travel-login.html';
-        throw new Error('unauthorized');
-      }
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json();
+<script>
+(function () {
+  var SVC = '/travel';
+  var LOGIN = '/travel-login.html';
+  var dateFmt = new Intl.DateTimeFormat('nl-BE', { day: 'numeric', month: 'long', year: 'numeric' });
+  var eurFmt = new Intl.NumberFormat('nl-BE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+
+  // ── Fetch helper ─────────────────────────────────────
+  async function api(path) {
+    var res = await fetch(SVC + '/' + path, {
+      credentials: 'include',
+      headers: { 'Accept': 'application/json' }
+    });
+    if (res.status === 401 || res.status === 403) {
+      window.location.href = LOGIN;
+      throw new Error('unauthorized');
     }
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  }
 
-    function setText (id, value) { document.getElementById(id).textContent = value; }
+  function esc(s) {
+    if (s == null) return '';
+    var d = document.createElement('div');
+    d.textContent = String(s);
+    return d.innerHTML;
+  }
 
-    // Primitieve functie-imports geven { value: <n> } terug.
-    async function loadCount (fn, id) {
-      try { const d = await odata(fn); setText(id, d.value ?? '—'); }
-      catch (e) { setText(id, '—'); }
-    }
+  function fmtDate(v) {
+    if (!v) return '—';
+    try { return dateFmt.format(new Date(v)); } catch { return String(v); }
+  }
 
-    // Eén bron: getAirlineStats levert zowel de "meest gebruikte airline"-tegel
-    // als de grafiek (scheelt een tweede zware remote-call zoals getTopAirline).
-    async function loadAirlineStats () {
-      const card = document.getElementById('airlineCard');
-      try {
-        const d = await odata('getAirlineStats()');
-        const sorted = (d.value || []).slice().sort((a, b) => (b.TripCount || 0) - (a.TripCount || 0));
+  function statusPill(s) {
+    var cls = s === 'Approved' ? 'pill-approved' : s === 'Rejected' ? 'pill-rejected' : 'pill-pending';
+    var label = s === 'Approved' ? 'Goedgekeurd' : s === 'Rejected' ? 'Afgewezen' : 'In afwachting';
+    return '<span class="pill ' + cls + '">' + esc(label) + '</span>';
+  }
 
-        const top = sorted[0];
-        if (top && (top.TripCount || 0) > 0) {
-          setText('kpiTopAirline', top.Name || top.AirlineCode || '—');
-          setText('kpiTopAirlineSub', (top.TripCount || 0) + ' boekingen');
-        } else {
-          setText('kpiTopAirline', '—');
-        }
+  // ── Navigation ───────────────────────────────────────
+  var views = ['dashboard', 'reisextensies', 'medewerkers', 'airlines', 'luchthavens'];
+  var loaded = {};
 
-        const rows = sorted.slice(0, 5);
-        if (!rows.length) { card.innerHTML = '<div class="muted">Geen airlinegegevens beschikbaar.</div>'; return; }
-        const max = Math.max.apply(null, rows.map(r => r.TripCount || 0).concat([1]));
-        const eur = new Intl.NumberFormat('nl-BE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
-        card.innerHTML = rows.map(r => {
-          const pct = Math.round(((r.TripCount || 0) / max) * 100);
-          const budget = r.TotalBudget != null ? eur.format(r.TotalBudget) : '';
-          const name = (r.Name || r.AirlineCode || '—');
-          return '<div class="airline-row">'
-            + '<div class="airline-name" title="' + name + '">' + name + '</div>'
-            + '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div>'
-            + '<div class="airline-meta">' + (r.TripCount || 0) + ' · ' + budget + '</div>'
-            + '</div>';
-        }).join('');
-      } catch (e) {
-        setText('kpiTopAirline', '—');
-        card.innerHTML = '<div class="muted">Kon airlinegegevens niet laden.</div>';
-      }
-    }
+  function navigate() {
+    var hash = (location.hash || '#dashboard').replace('#', '');
+    if (views.indexOf(hash) === -1) hash = 'dashboard';
 
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      try { await fetch('/auth/logout', { method: 'POST', credentials: 'include' }); } catch (e) {}
-      window.location.href = '/';
+    views.forEach(function (v) {
+      document.getElementById('view-' + v).classList.toggle('active', v === hash);
+    });
+    document.querySelectorAll('.sidebar-nav a').forEach(function (a) {
+      a.classList.toggle('active', a.getAttribute('data-view') === hash);
     });
 
-    loadCount('getActiveTripsCount()',   'kpiActive');
-    loadCount('getOnTravelCount()',      'kpiOnTravel');
-    loadCount('getUpcomingTripsCount()', 'kpiUpcoming');
-    loadAirlineStats();
-  </script>
+    if (!loaded[hash]) {
+      loaded[hash] = true;
+      if (hash === 'dashboard') loadDashboard();
+      else if (hash === 'reisextensies') loadExtensies();
+      else if (hash === 'medewerkers') loadMedewerkers();
+      else if (hash === 'airlines') loadAirlines();
+      else if (hash === 'luchthavens') loadLuchthavens();
+    }
+  }
+
+  window.addEventListener('hashchange', navigate);
+
+  // ── Dashboard ────────────────────────────────────────
+  function setText(id, val) { document.getElementById(id).textContent = val; }
+
+  async function loadDashboard() {
+    api('getActiveTripsCount()').then(function (d) { setText('kpiActive', d.value ?? '—'); }).catch(function () { setText('kpiActive', '—'); });
+    api('getOnTravelCount()').then(function (d) { setText('kpiOnTravel', d.value ?? '—'); }).catch(function () { setText('kpiOnTravel', '—'); });
+    api('getUpcomingTripsCount()').then(function (d) { setText('kpiUpcoming', d.value ?? '—'); }).catch(function () { setText('kpiUpcoming', '—'); });
+
+    try {
+      var d = await api('getAirlineStats()');
+      var sorted = (d.value || []).slice().sort(function (a, b) { return (b.TripCount || 0) - (a.TripCount || 0); });
+      var top = sorted[0];
+      if (top && (top.TripCount || 0) > 0) {
+        setText('kpiTopAirline', top.Name || top.AirlineCode || '—');
+        setText('kpiTopAirlineSub', (top.TripCount || 0) + ' boekingen');
+      } else {
+        setText('kpiTopAirline', '—');
+      }
+
+      var rows = sorted.slice(0, 5);
+      var chart = document.getElementById('airlineChart');
+      if (!rows.length) { chart.innerHTML = '<div class="empty-msg">Geen airlinegegevens beschikbaar.</div>'; return; }
+      var max = Math.max.apply(null, rows.map(function (r) { return r.TripCount || 0; }).concat([1]));
+      chart.innerHTML = rows.map(function (r) {
+        var pct = Math.round(((r.TripCount || 0) / max) * 100);
+        var budget = r.TotalBudget != null ? eurFmt.format(r.TotalBudget) : '';
+        return '<div class="chart-row">'
+          + '<div class="chart-name" title="' + esc(r.Name) + '">' + esc(r.Name || r.AirlineCode) + '</div>'
+          + '<div class="chart-track"><div class="chart-fill" style="width:' + pct + '%"></div></div>'
+          + '<div class="chart-meta">' + (r.TripCount || 0) + ' &middot; ' + esc(budget) + '</div>'
+          + '</div>';
+      }).join('');
+    } catch (e) {
+      setText('kpiTopAirline', '—');
+      document.getElementById('airlineChart').innerHTML = '<div class="error-msg">Kon airlinegegevens niet laden.</div>';
+    }
+  }
+
+  // ── Reisextensies ────────────────────────────────────
+  var extensiesData = [];
+
+  async function loadExtensies() {
+    var container = document.getElementById('extensiesContent');
+    try {
+      var d = await api('TravelExtensions');
+      extensiesData = d.value || [];
+      renderExtensies(extensiesData);
+    } catch (e) {
+      container.innerHTML = '<div class="error-msg">Kon reisextensies niet laden.</div>';
+    }
+  }
+
+  function renderExtensies(data) {
+    var container = document.getElementById('extensiesContent');
+    if (!data.length) {
+      container.innerHTML = '<div class="table-card"><div class="empty-msg">Geen gegevens beschikbaar</div></div>';
+      return;
+    }
+    var html = '<div class="table-card"><table><thead><tr>'
+      + '<th>TRIP ID</th><th>VERTREKDATUM</th><th>AANKOMSTDATUM</th><th>PROJECTCODE</th><th>GOEDKEURINGSSTATUS</th><th>INTERNE NOTITIE</th><th></th>'
+      + '</tr></thead><tbody>';
+    data.forEach(function (r) {
+      html += '<tr class="clickable" data-tripid="' + esc(r.TripID) + '">'
+        + '<td>' + esc(r.TripID) + '</td>'
+        + '<td>' + fmtDate(r.StartsAt) + '</td>'
+        + '<td>' + fmtDate(r.EndsAt) + '</td>'
+        + '<td>' + esc(r.ProjectCode || '—') + '</td>'
+        + '<td>' + statusPill(r.ApprovalStatus) + '</td>'
+        + '<td>' + esc(r.InternalNote || '—') + '</td>'
+        + '<td class="row-arrow">&rsaquo;</td>'
+        + '</tr>';
+    });
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+
+    container.querySelectorAll('tr.clickable').forEach(function (tr) {
+      tr.addEventListener('click', function () {
+        var id = tr.getAttribute('data-tripid');
+        var item = extensiesData.find(function (r) { return String(r.TripID) === id; });
+        if (item) openDrawer(item);
+      });
+    });
+  }
+
+  document.getElementById('searchExtensies').addEventListener('input', function () {
+    var q = this.value.toLowerCase();
+    var filtered = extensiesData.filter(function (r) {
+      return (String(r.TripID).toLowerCase().indexOf(q) !== -1)
+        || ((r.ProjectCode || '').toLowerCase().indexOf(q) !== -1)
+        || ((r.ApprovalStatus || '').toLowerCase().indexOf(q) !== -1);
+    });
+    renderExtensies(filtered);
+  });
+
+  // ── Drawer ───────────────────────────────────────────
+  function openDrawer(item) {
+    document.getElementById('drawerTitle').textContent = 'Reis ' + item.TripID;
+    var body = document.getElementById('drawerBody');
+    body.innerHTML = '<div class="drawer-section"><h4>Reisgegevens</h4>'
+      + '<div class="drawer-field"><div class="label">Reisnaam</div><div class="value">' + esc(item.TripName || '—') + '</div></div>'
+      + '<div class="drawer-field"><div class="label">Budget</div><div class="value">' + (item.TripBudget != null ? eurFmt.format(item.TripBudget) : '—') + '</div></div>'
+      + '<div class="drawer-field"><div class="label">Vertrekdatum</div><div class="value">' + fmtDate(item.StartsAt) + '</div></div>'
+      + '<div class="drawer-field"><div class="label">Aankomstdatum</div><div class="value">' + fmtDate(item.EndsAt) + '</div></div>'
+      + '</div>'
+      + '<div class="drawer-section"><h4>PrimePath Velden</h4>'
+      + '<div class="drawer-field"><div class="label">Projectcode</div><div class="value">' + esc(item.ProjectCode || '—') + '</div></div>'
+      + '<div class="drawer-field"><div class="label">Goedkeuringsstatus</div><div class="value">' + statusPill(item.ApprovalStatus) + '</div></div>'
+      + '<div class="drawer-field"><div class="label">Interne notitie</div><div class="value">' + esc(item.InternalNote || '—') + '</div></div>'
+      + '</div>';
+    document.getElementById('drawerFioriLink').href = '/travel-dashboard/webapp/#/TravelExtensions(' + item.TripID + ')';
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.getElementById('drawer').classList.add('open');
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawerOverlay').classList.remove('open');
+    document.getElementById('drawer').classList.remove('open');
+  }
+
+  document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+  document.getElementById('drawerOverlay').addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDrawer(); });
+
+  // ── Medewerkers ──────────────────────────────────────
+  var medewerkersData = [];
+
+  async function loadMedewerkers() {
+    var container = document.getElementById('medewerkersContent');
+    try {
+      var d = await api('People');
+      medewerkersData = d.value || [];
+      renderMedewerkers(medewerkersData);
+    } catch (e) {
+      container.innerHTML = '<div class="error-msg">Kon medewerkers niet laden.</div>';
+    }
+  }
+
+  function renderMedewerkers(data) {
+    var container = document.getElementById('medewerkersContent');
+    if (!data.length) {
+      container.innerHTML = '<div class="table-card"><div class="empty-msg">Geen gegevens beschikbaar</div></div>';
+      return;
+    }
+    var html = '<div class="table-card"><table><thead><tr>'
+      + '<th>GEBRUIKERSNAAM</th><th>VOORNAAM</th><th>FAMILIENAAM</th><th>E-MAIL</th><th>STATUS</th>'
+      + '</tr></thead><tbody>';
+    data.forEach(function (p) {
+      var pillClass = p.OnTravel ? 'pill-ontravel' : 'pill-available';
+      var pillText = p.OnTravel ? 'Op reis' : 'Beschikbaar';
+      html += '<tr class="clickable" data-username="' + esc(p.UserName) + '">'
+        + '<td>' + esc(p.UserName) + '</td>'
+        + '<td>' + esc(p.FirstName) + '</td>'
+        + '<td>' + esc(p.LastName) + '</td>'
+        + '<td>' + esc(p.Email || '—') + '</td>'
+        + '<td><span class="pill ' + pillClass + '">' + pillText + '</span></td>'
+        + '<td class="row-arrow">&#8250;</td>'
+        + '</tr>';
+    });
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+    container.querySelectorAll('tr.clickable').forEach(function (tr) {
+      tr.addEventListener('click', function () {
+        window.location.href = '/travel-dashboard/webapp/#/People(\'' + tr.dataset.username + '\')';
+      });
+    });
+  }
+
+  document.getElementById('searchMedewerkers').addEventListener('input', function () {
+    var q = this.value.toLowerCase();
+    var filtered = medewerkersData.filter(function (p) {
+      return (p.UserName || '').toLowerCase().indexOf(q) !== -1
+        || (p.FirstName || '').toLowerCase().indexOf(q) !== -1
+        || (p.LastName || '').toLowerCase().indexOf(q) !== -1;
+    });
+    renderMedewerkers(filtered);
+  });
+
+  // ── Airlines ─────────────────────────────────────────
+  var airlinesData = [];
+  var airlineSort = { col: 'Name', asc: true };
+
+  async function loadAirlines() {
+    var container = document.getElementById('airlinesContent');
+    try {
+      var d = await api('Airlines?$orderby=Name');
+      airlinesData = d.value || [];
+      renderAirlines();
+    } catch (e) {
+      container.innerHTML = '<div class="error-msg">Kon airlines niet laden.</div>';
+    }
+  }
+
+  function renderAirlines() {
+    var container = document.getElementById('airlinesContent');
+    var data = airlinesData.slice();
+    data.sort(function (a, b) {
+      var va = a[airlineSort.col], vb = b[airlineSort.col];
+      if (typeof va === 'string') va = va.toLowerCase();
+      if (typeof vb === 'string') vb = vb.toLowerCase();
+      if (va < vb) return airlineSort.asc ? -1 : 1;
+      if (va > vb) return airlineSort.asc ? 1 : -1;
+      return 0;
+    });
+
+    if (!data.length) {
+      container.innerHTML = '<div class="table-card"><div class="empty-msg">Geen gegevens beschikbaar</div></div>';
+      return;
+    }
+
+    function thClass(col) { return 'sortable' + (airlineSort.col === col ? ' sorted' : ''); }
+    function arrow(col) {
+      if (airlineSort.col !== col) return '<span class="sort-arrow">&#9650;</span>';
+      return '<span class="sort-arrow">' + (airlineSort.asc ? '&#9650;' : '&#9660;') + '</span>';
+    }
+
+    var html = '<div class="table-card"><table><thead><tr>'
+      + '<th class="' + thClass('AirlineCode') + '" data-col="AirlineCode">IATA-CODE ' + arrow('AirlineCode') + '</th>'
+      + '<th class="' + thClass('Name') + '" data-col="Name">NAAM ' + arrow('Name') + '</th>'
+      + '<th class="' + thClass('TripCount') + '" data-col="TripCount">BOEKINGEN ' + arrow('TripCount') + '</th>'
+      + '</tr></thead><tbody>';
+    data.forEach(function (a) {
+      html += '<tr class="clickable" data-code="' + esc(a.AirlineCode) + '"><td>' + esc(a.AirlineCode) + '</td><td>' + esc(a.Name) + '</td><td>' + (a.TripCount ?? 0) + '</td><td class="row-arrow">&#8250;</td></tr>';
+    });
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+    container.querySelectorAll('tr.clickable').forEach(function (tr) {
+      tr.addEventListener('click', function () {
+        window.location.href = '/travel-dashboard/webapp/#/Airlines(\'' + tr.dataset.code + '\')';
+      });
+    });
+
+    container.querySelectorAll('th.sortable').forEach(function (th) {
+      th.addEventListener('click', function () {
+        var col = th.getAttribute('data-col');
+        if (airlineSort.col === col) airlineSort.asc = !airlineSort.asc;
+        else { airlineSort.col = col; airlineSort.asc = true; }
+        renderAirlines();
+      });
+    });
+  }
+
+  // ── Luchthavens ──────────────────────────────────────
+  var luchthavensData = [];
+
+  async function loadLuchthavens() {
+    var container = document.getElementById('luchthavensContent');
+    try {
+      var d = await api('Airports?$orderby=Name');
+      luchthavensData = d.value || [];
+      renderLuchthavens(luchthavensData);
+    } catch (e) {
+      container.innerHTML = '<div class="error-msg">Kon luchthavens niet laden.</div>';
+    }
+  }
+
+  function renderLuchthavens(data) {
+    var container = document.getElementById('luchthavensContent');
+    if (!data.length) {
+      container.innerHTML = '<div class="table-card"><div class="empty-msg">Geen gegevens beschikbaar</div></div>';
+      return;
+    }
+    var html = '<div class="table-card"><table><thead><tr>'
+      + '<th>ICAO</th><th>IATA</th><th>NAAM</th><th>STAD</th>'
+      + '</tr></thead><tbody>';
+    data.forEach(function (a) {
+      html += '<tr class="clickable" data-icao="' + esc(a.IcaoCode) + '"><td>' + esc(a.IcaoCode) + '</td><td>' + esc(a.IataCode) + '</td><td>' + esc(a.Name) + '</td><td>' + esc(a.City || '—') + '</td><td class="row-arrow">&#8250;</td></tr>';
+    });
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+    container.querySelectorAll('tr.clickable').forEach(function (tr) {
+      tr.addEventListener('click', function () {
+        window.location.href = '/travel-dashboard/webapp/#/Airports(\'' + tr.dataset.icao + '\')';
+      });
+    });
+  }
+
+  document.getElementById('searchLuchthavens').addEventListener('input', function () {
+    var q = this.value.toLowerCase();
+    var filtered = luchthavensData.filter(function (a) {
+      return (a.IcaoCode || '').toLowerCase().indexOf(q) !== -1
+        || (a.IataCode || '').toLowerCase().indexOf(q) !== -1
+        || (a.Name || '').toLowerCase().indexOf(q) !== -1
+        || (a.City || '').toLowerCase().indexOf(q) !== -1;
+    });
+    renderLuchthavens(filtered);
+  });
+
+  // ── Logout ───────────────────────────────────────────
+  document.getElementById('logoutBtn').addEventListener('click', async function () {
+    try { await fetch('/auth/logout', { method: 'POST', credentials: 'include' }); } catch (e) {}
+    window.location.href = '/';
+  });
+
+  // ── Init ─────────────────────────────────────────────
+  navigate();
+})();
+</script>
 </body>
 </html>
