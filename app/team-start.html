@@ -3,204 +3,615 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PrimePath Travel – Team Dashboard (overzicht)</title>
+  <title>PrimePath Travel – Team Dashboard</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap');
-    /* PrimePath huisstijl-tokens — gelijk aan landing & Fiori-overlay (#0070F2). */
     :root {
-      --font-head: 'Poppins','72','Segoe UI',system-ui,sans-serif;
-      --font-body: 'Open Sans','72','Segoe UI',system-ui,sans-serif;
-      --pp-brand: #0070F2; --pp-brand-dark: #0040A8; --pp-brand-darker: #0A2540;
-      --pp-ink: #1A2A3A; --pp-muted: #5B6B7B; --pp-line: #E3E9F0;
-      --pp-bg: #F4F7FB; --pp-surface: #FFFFFF;
-      --pp-radius: 16px;
-      --pp-shadow: 0 1px 2px rgba(16,42,76,.06), 0 10px 30px rgba(16,42,76,.08);
-      --pp-shadow-hover: 0 6px 14px rgba(31,157,99,.16), 0 18px 44px rgba(16,42,76,.14);
-      --c-blue: #0070F2; --c-red: #D14343; --c-green: #1F9D63; --c-orange: #E1820A;
-      --role: var(--c-green);
+      --pp-primary: #0070F2;
+      --pp-primary-hover: #005BCB;
+      --pp-primary-light: #E8F2FF;
+      --pp-header: #2C3E50;
+      --pp-sidebar: #FAFBFC;
+      --pp-sidebar-hover: #EBF2FF;
+      --pp-sidebar-border: #E0E4E8;
+      --pp-text: #1A1D21;
+      --pp-text-2: #5E6366;
+      --pp-text-3: #8C9196;
+      --pp-border: #DFE3E8;
+      --pp-bg: #F0F2F5;
+      --pp-success: #0E8345;
+      --pp-success-bg: #E3F5E8;
+      --pp-warning: #D97706;
+      --pp-warning-bg: #FEF3C7;
+      --pp-error: #C41E3A;
+      --pp-error-bg: #FEE2E2;
+      --pp-row-hover: #F5F8FF;
+      --pp-row-stripe: #FAFBFC;
+      --pp-nav-active: #0070F2;
+      --pp-card-shadow: 0 1px 3px rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.06);
+      --pp-card-shadow-hover: 0 4px 16px rgba(0,0,0,.1), 0 2px 6px rgba(0,0,0,.06);
+      --pp-radius: 10px;
+      --transition-fast: .15s ease;
+      --transition-med: .25s ease;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--font-body); background: var(--pp-bg); color: var(--pp-ink); min-height: 100vh; -webkit-font-smoothing: antialiased; }
-    h1, .kpi-value, .nc-title, .shell-header .logo { font-family: var(--font-head); }
-    svg.ic { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    body { font-family: "72", "Segoe UI", system-ui, sans-serif; background: var(--pp-bg); color: var(--pp-text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    :focus-visible { outline: 2px solid var(--pp-primary); outline-offset: 2px; }
 
-    .shell-header {
-      position: sticky; top: 0; z-index: 50;
-      background: linear-gradient(135deg, var(--pp-brand) 0%, var(--pp-brand-dark) 60%, var(--pp-brand-darker) 100%);
-      color: #fff; padding: 0 1.75rem; height: 3.25rem;
-      display: flex; align-items: center; justify-content: space-between;
-      box-shadow: 0 2px 12px rgba(16,42,76,.18);
+    /* ── Header ─────────────────────────────────────────────── */
+    .header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 48px; background: linear-gradient(135deg, var(--pp-header) 0%, #1a2a3a 100%);
+      color: #fff; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,.18);
     }
-    .shell-header .logo { display: flex; align-items: center; gap: .55rem; font-size: 1rem; font-weight: 700; letter-spacing: .3px; }
-    .shell-header .logo .mark { width: 1.75rem; height: 1.75rem; border-radius: 8px; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.28); display: flex; align-items: center; justify-content: center; }
-    .shell-header .logo .mark svg { width: 1rem; height: 1rem; }
-    .shell-header .right { display: flex; align-items: center; gap: 1rem; }
-    .shell-header .subtitle { font-size: .75rem; opacity: .9; }
-    .logout-btn { background: rgba(255,255,255,.16); color: #fff; border: 1px solid rgba(255,255,255,.4); border-radius: 8px; padding: .3rem .8rem; font-size: .75rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: background .15s; }
-    .logout-btn:hover { background: rgba(255,255,255,.3); }
-
-    .page-title { max-width: 1120px; margin: 0 auto; padding: 1.5rem 1.75rem 1rem; }
-    .page-title h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -.3px; }
-    .page-title p { font-size: .9rem; color: var(--pp-muted); margin-top: .3rem; }
-
-    main { max-width: 1120px; margin: 0 auto; padding: 0 1.75rem 2rem; }
-    .section-label { font-size: .75rem; font-weight: 700; color: var(--pp-muted); text-transform: uppercase; letter-spacing: .6px; margin: 1.75rem 0 .85rem; }
-
-    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.1rem; }
-    .kpi {
-      position: relative; background: var(--pp-surface); border: 1px solid var(--pp-line);
-      border-radius: var(--pp-radius); padding: 1.25rem; box-shadow: var(--pp-shadow);
-      display: flex; flex-direction: column; gap: .55rem; min-height: 7.5rem; overflow: hidden;
-      transition: transform .15s, box-shadow .15s;
+    .header-left { display: flex; align-items: center; gap: .75rem; }
+    .header-logo {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: linear-gradient(135deg, rgba(255,255,255,.2), rgba(255,255,255,.08));
+      border: 1px solid rgba(255,255,255,.2);
+      display: flex; align-items: center; justify-content: center;
     }
-    .kpi:hover { transform: translateY(-2px); box-shadow: var(--pp-shadow-hover); }
-    .kpi::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 4px; background: var(--accent, var(--c-blue)); }
-    .kpi-head { display: flex; align-items: center; gap: .6rem; }
-    .kpi .chip { width: 2.4rem; height: 2.4rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--accent, var(--c-blue)) 14%, #fff); color: var(--accent, var(--c-blue)); }
-    .kpi .chip svg { width: 1.25rem; height: 1.25rem; }
-    .kpi .kpi-label { font-size: .8rem; color: var(--pp-muted); font-weight: 600; }
-    .kpi .kpi-value { font-size: 2.3rem; font-weight: 700; line-height: 1; letter-spacing: -1px; color: var(--pp-ink); font-variant-numeric: tabular-nums; }
-    .kpi .kpi-sub { font-size: .74rem; color: #93A1B0; margin-top: auto; }
-    .kpi.accent-blue   { --accent: var(--c-blue); }
-    .kpi.accent-red    { --accent: var(--c-red); }
-    .kpi.accent-green  { --accent: var(--c-green); }
-    .kpi.accent-orange { --accent: var(--c-orange); }
-
-    .nav-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.1rem; }
-    .nav-card {
-      background: var(--pp-surface); border: 1px solid var(--pp-line); border-radius: var(--pp-radius);
-      padding: 1.15rem 1.25rem; text-decoration: none; color: inherit;
-      display: flex; align-items: center; gap: .9rem; box-shadow: var(--pp-shadow);
-      transition: transform .15s, box-shadow .15s, border-color .15s;
+    .header-logo svg { width: 18px; height: 18px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .header-title { font-size: .9375rem; font-weight: 700; letter-spacing: .3px; }
+    .header-title span { opacity: .65; font-weight: 400; margin-left: .25rem; }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .header-right a { color: rgba(255,255,255,.8); text-decoration: none; font-size: .8rem; font-weight: 500; transition: color var(--transition-fast); }
+    .header-right a:hover { color: #fff; }
+    .btn-logout {
+      background: rgba(255,255,255,.12); color: #fff;
+      border: 1px solid rgba(255,255,255,.25); border-radius: 8px;
+      padding: .35rem .9rem; font-size: .78rem; font-weight: 600;
+      font-family: inherit; cursor: pointer; transition: all var(--transition-fast);
     }
-    .nav-card:hover { transform: translateY(-3px); box-shadow: var(--pp-shadow-hover); border-color: color-mix(in srgb, var(--role) 40%, var(--pp-line)); }
-    .nav-card .nc-icon { width: 2.6rem; height: 2.6rem; border-radius: 12px; background: color-mix(in srgb, var(--role) 12%, #fff); color: var(--role); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .nav-card .nc-icon svg { width: 1.3rem; height: 1.3rem; }
-    .nav-card .nc-title { font-size: .95rem; font-weight: 700; }
-    .nav-card .nc-sub { font-size: .78rem; color: var(--pp-muted); }
-    .nav-card .nc-arrow { margin-left: auto; color: var(--role); display: flex; transition: transform .15s; }
-    .nav-card .nc-arrow svg { width: 1.1rem; height: 1.1rem; }
-    .nav-card:hover .nc-arrow { transform: translateX(4px); }
+    .btn-logout:hover { background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.4); }
 
-    footer { text-align: center; padding: 2rem 1.5rem; font-size: .75rem; color: #93A1B0; margin-top: 1.5rem; }
-    footer .dot { color: var(--pp-line); margin: 0 .4rem; }
+    /* ── Sidebar ────────────────────────────────────────────── */
+    .sidebar {
+      position: fixed; top: 48px; left: 0; bottom: 0; width: 248px;
+      background: var(--pp-sidebar); border-right: 1px solid var(--pp-sidebar-border);
+      padding: 0; overflow-y: auto; z-index: 90;
+      transition: transform var(--transition-med);
+    }
+    .sidebar-label { font-size: .625rem; font-weight: 700; color: var(--pp-text-3); text-transform: uppercase; letter-spacing: .8px; padding: 1.25rem 1.25rem .5rem; }
+    .nav-item {
+      display: flex; align-items: center; gap: .7rem; padding: .7rem 1rem;
+      font-size: .84rem; font-weight: 500; color: var(--pp-text-2); cursor: pointer;
+      border-radius: 8px; margin: 2px .625rem;
+      transition: all var(--transition-fast); text-decoration: none;
+    }
+    .nav-item:hover { background: var(--pp-sidebar-hover); color: var(--pp-text); }
+    .nav-item.active { background: var(--pp-nav-active); color: #fff; font-weight: 600; box-shadow: 0 2px 8px rgba(0,112,242,.3); }
+    .nav-item svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 
-    @media (max-width: 640px) { .page-title h1 { font-size: 1.3rem; } }
+    /* ── Content ────────────────────────────────────────────── */
+    .content { margin-left: 248px; margin-top: 48px; padding: 2rem 2.25rem; min-height: calc(100vh - 48px); }
+    .view { display: none; }
+    .view.active { display: block; animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .view-title { font-size: 1.5rem; font-weight: 700; color: var(--pp-text); margin-bottom: .25rem; letter-spacing: -.3px; }
+    .view-sub { font-size: .875rem; color: var(--pp-text-2); margin-bottom: 1.75rem; }
+    .section-label { font-size: .6875rem; font-weight: 700; color: var(--pp-text-3); text-transform: uppercase; letter-spacing: .8px; margin: 1.75rem 0 1rem; }
+
+    /* ── KPI kaarten ───────────────────────────────────────── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.25rem; }
+    .kpi-card {
+      position: relative; background: #fff; border: 1px solid var(--pp-border);
+      border-radius: var(--pp-radius); padding: 1.35rem 1.4rem; box-shadow: var(--pp-card-shadow);
+      display: flex; flex-direction: column; gap: .5rem; overflow: hidden;
+      transition: all var(--transition-med);
+    }
+    .kpi-card:hover { box-shadow: var(--pp-card-shadow-hover); transform: translateY(-2px); }
+    .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 4px; background: var(--accent); border-radius: 0 4px 4px 0; }
+    .kpi-card .kpi-head { display: flex; align-items: center; gap: .65rem; }
+    .kpi-card .kpi-icon {
+      width: 2.5rem; height: 2.5rem; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      background: var(--icon-bg, var(--pp-primary-light)); flex-shrink: 0;
+    }
+    .kpi-card .kpi-icon svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .kpi-label { font-size: .78rem; color: var(--pp-text-2); font-weight: 600; }
+    .kpi-value { font-size: 2.25rem; font-weight: 800; line-height: 1; letter-spacing: -.5px; }
+    .kpi-sub { font-size: .72rem; color: var(--pp-text-3); margin-top: auto; }
+
+    /* ── Welkomstbanner ─────────────────────────────────────── */
+    .welcome-banner {
+      background: var(--pp-success-bg); border: 1px solid #A5D6A7; border-radius: var(--pp-radius);
+      padding: 1rem 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center;
+      justify-content: space-between; font-size: .875rem; color: var(--pp-success);
+    }
+    .welcome-banner .dismiss {
+      background: none; border: none; color: var(--pp-success); cursor: pointer;
+      font-size: 1.2rem; font-weight: 700; padding: .2rem .4rem; line-height: 1;
+      border-radius: 6px; transition: background var(--transition-fast);
+    }
+    .welcome-banner .dismiss:hover { background: rgba(14,131,69,.08); }
+    .welcome-banner.hidden { display: none; }
+
+    /* ── Toolbar ────────────────────────────────────────────── */
+    .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: .75rem; }
+    .toolbar-title { font-size: 1rem; font-weight: 700; }
+    .search-wrap { position: relative; }
+    .search-wrap svg {
+      position: absolute; left: .75rem; top: 50%; transform: translateY(-50%);
+      width: 16px; height: 16px; stroke: var(--pp-text-3); fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; pointer-events: none;
+    }
+    .search-input {
+      padding: .55rem .85rem .55rem 2.25rem; border: 1px solid var(--pp-border); border-radius: 8px;
+      font-size: .84rem; font-family: inherit; outline: none; width: 300px;
+      transition: all var(--transition-fast); background: #fff;
+    }
+    .search-input:focus { border-color: var(--pp-primary); box-shadow: 0 0 0 3px rgba(0,112,242,.1); }
+    .search-input::placeholder { color: var(--pp-text-3); }
+
+    /* ── Tabel ──────────────────────────────────────────────── */
+    .table-card { background: #fff; border: 1px solid var(--pp-border); border-radius: var(--pp-radius); box-shadow: var(--pp-card-shadow); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      text-align: left; font-size: .6875rem; font-weight: 700; color: var(--pp-text-3);
+      text-transform: uppercase; letter-spacing: .05em; padding: .85rem 1rem;
+      border-bottom: 2px solid var(--pp-border); background: #FAFBFC;
+    }
+    tbody td { padding: .8rem 1rem; font-size: .84rem; border-bottom: 1px solid #F2F3F5; vertical-align: middle; }
+    tbody tr:nth-child(even) { background: var(--pp-row-stripe); }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--pp-row-hover); }
+    tr.clickable { cursor: pointer; transition: background var(--transition-fast); }
+    tr.clickable:active { background: #E3EFFF; }
+    .row-arrow { color: var(--pp-text-3); font-size: 1.15rem; text-align: center; width: 2.5rem; transition: all var(--transition-fast); }
+    tr.clickable:hover .row-arrow { color: var(--pp-primary); transform: translateX(3px); }
+    .empty-msg { text-align: center; color: var(--pp-text-3); padding: 3rem 1rem; font-size: .9rem; }
+
+    /* ── Status-pill ───────────────────────────────────────── */
+    .pill {
+      display: inline-flex; align-items: center; gap: .3rem;
+      padding: .25rem .7rem; border-radius: 999px;
+      font-size: .72rem; font-weight: 600; white-space: nowrap; line-height: 1.3;
+    }
+    .pill::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+    .pill-green { color: var(--pp-success); background: var(--pp-success-bg); }
+    .pill-orange { color: var(--pp-warning); background: var(--pp-warning-bg); }
+    .pill-red { color: var(--pp-error); background: var(--pp-error-bg); }
+
+    /* ── Action button ─────────────────────────────────────── */
+    .btn-action {
+      padding: .35rem .75rem; border: 1px solid var(--pp-primary); border-radius: 8px;
+      background: transparent; color: var(--pp-primary); font-size: .78rem; font-weight: 600;
+      font-family: inherit; cursor: pointer; transition: all var(--transition-fast); white-space: nowrap;
+    }
+    .btn-action:hover { background: var(--pp-primary); color: #fff; box-shadow: 0 2px 6px rgba(0,112,242,.25); }
+
+    /* ── Status dropdown ───────────────────────────────────── */
+    .status-cell { position: relative; }
+    .status-select {
+      padding: .3rem .5rem; border: 1px solid var(--pp-border); border-radius: 6px;
+      font-size: .8rem; font-family: inherit; cursor: pointer; background: #fff;
+      outline: none; margin-left: .5rem; transition: border-color var(--transition-fast);
+    }
+    .status-select:focus { border-color: var(--pp-primary); box-shadow: 0 0 0 3px rgba(0,112,242,.1); }
+
+    /* ── Spinner ────────────────────────────────────────────── */
+    .spinner-wrap { display: flex; justify-content: center; padding: 3rem; }
+    .spinner {
+      width: 28px; height: 28px; border: 3px solid var(--pp-border);
+      border-top-color: var(--pp-primary); border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Toast ──────────────────────────────────────────────── */
+    .toast-container { position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 200; display: flex; flex-direction: column; gap: .5rem; }
+    .toast {
+      padding: .75rem 1.15rem; border-radius: 10px; color: #fff; font-size: .84rem; font-weight: 600;
+      box-shadow: 0 6px 20px rgba(0,0,0,.2); opacity: 0; transform: translateY(12px);
+      animation: toastIn .3s ease forwards; max-width: 360px;
+    }
+    .toast.success { background: var(--pp-success); }
+    .toast.error { background: var(--pp-error); }
+    .toast.out { animation: toastOut .25s ease forwards; }
+    @keyframes toastIn { to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastOut { to { opacity: 0; transform: translateY(12px); } }
+
+    /* ── Error ──────────────────────────────────────────────── */
+    .error-msg { background: var(--pp-error-bg); color: var(--pp-error); padding: 1rem 1.15rem; border-radius: var(--pp-radius); font-size: .88rem; margin: 1rem 0; border: 1px solid #FECACA; }
+
+    /* ── Footer ─────────────────────────────────────────────── */
+    .footer { text-align: center; padding: 2.5rem 1rem 1rem; font-size: .72rem; color: var(--pp-text-3); letter-spacing: .2px; }
+
+    /* ── Responsive ────────────────────────────────────────── */
+    @media (max-width: 1023px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-label { display: none; }
+      .nav-item span { display: none; }
+      .nav-item { justify-content: center; padding: .6rem 0; }
+      .content { margin-left: 0; }
+    }
+    @media (min-width: 1024px) {
+      .sidebar { transform: translateX(0); }
+    }
   </style>
 </head>
 <body>
 
-  <header class="shell-header">
-    <span class="logo">
-      <span class="mark"><svg class="ic" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></span>
-      PrimePath Travel
-    </span>
-    <div class="right">
-      <span class="subtitle">Team Lead</span>
-      <button class="logout-btn" id="logoutBtn" type="button">Afmelden</button>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="header-logo"><svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></div>
+      <div class="header-title">PrimePath Travel <span>| Team Dashboard</span></div>
+    </div>
+    <div class="header-right">
+      <a href="#dashboard">Overzicht</a>
+      <button class="btn-logout" id="logoutBtn">Afmelden</button>
     </div>
   </header>
 
-  <div class="page-title">
-    <h1>Team Dashboard — Overzicht</h1>
-    <p>Openstaande goedkeuringen en de beschikbaarheid van je team. Klik door om te beheren.</p>
-  </div>
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-label">Navigatie</div>
+    <a class="nav-item active" data-view="dashboard" href="#dashboard">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a class="nav-item" data-view="mijn-team" href="#mijn-team">
+      <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Mijn Team</span>
+    </a>
+    <a class="nav-item" data-view="reizen" href="#reizen">
+      <svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+      <span>Reizen</span>
+    </a>
+  </nav>
 
-  <main>
-    <div class="section-label">Kerncijfers</div>
-    <section class="kpi-row">
-      <div class="kpi accent-orange">
-        <div class="kpi-head"><span class="chip"><svg class="ic" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h6"/></svg></span><span class="kpi-label">Openstaande goedkeuringen</span></div>
-        <span class="kpi-value" id="kpiPending">…</span>
-        <span class="kpi-sub">wachten op jouw beslissing</span>
+  <!-- Content -->
+  <main class="content">
+
+    <!-- Dashboard view -->
+    <section class="view active" id="view-dashboard">
+      <h1 class="view-title">Dashboard</h1>
+      <p class="view-sub">Overzicht van je team en openstaande goedkeuringen.</p>
+
+      <div class="welcome-banner" id="welcomeBanner">
+        <span>Welkom! U ziet enkel uw eigen teamleden.</span>
+        <button class="dismiss" id="dismissBanner">&times;</button>
       </div>
-      <div class="kpi accent-red">
-        <div class="kpi-head"><span class="chip"><svg class="ic" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></span><span class="kpi-label">Teamleden op reis</span></div>
-        <span class="kpi-value" id="kpiOnTravel">…</span>
-        <span class="kpi-sub">momenteel onderweg</span>
-      </div>
-      <div class="kpi accent-green">
-        <div class="kpi-head"><span class="chip"><svg class="ic" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/></svg></span><span class="kpi-label">Teamleden beschikbaar</span></div>
-        <span class="kpi-value" id="kpiAvailable">…</span>
-        <span class="kpi-sub">vandaag beschikbaar</span>
+
+      <div class="section-label">Kerncijfers</div>
+      <div class="kpi-grid">
+        <div class="kpi-card" style="--accent: var(--pp-error); --icon-bg: var(--pp-error-bg);">
+          <div class="kpi-head">
+            <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></div>
+            <span class="kpi-label">Teamleden op reis</span>
+          </div>
+          <span class="kpi-value" id="kpiOnTravel">…</span>
+          <span class="kpi-sub">momenteel onderweg</span>
+        </div>
+        <div class="kpi-card" style="--accent: var(--pp-warning); --icon-bg: var(--pp-warning-bg);">
+          <div class="kpi-head">
+            <div class="kpi-icon"><svg viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h6"/></svg></div>
+            <span class="kpi-label">Openstaande goedkeuringen</span>
+          </div>
+          <span class="kpi-value" id="kpiPending">…</span>
+          <span class="kpi-sub">wachten op jouw beslissing</span>
+        </div>
+        <div class="kpi-card" style="--accent: var(--pp-primary); --icon-bg: var(--pp-primary-light);">
+          <div class="kpi-head">
+            <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <span class="kpi-label">Teamleden totaal</span>
+          </div>
+          <span class="kpi-value" id="kpiTotal">…</span>
+          <span class="kpi-sub">in jouw team</span>
+        </div>
       </div>
     </section>
 
-    <div class="section-label">Beheren</div>
-    <section class="nav-row">
-      <a class="nav-card" href="/team-dashboard/webapp/#/TravelExtensions">
-        <span class="nc-icon"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>
-        <span>
-          <div class="nc-title">Reisgoedkeuringen</div>
-          <div class="nc-sub">Goedkeuren / afkeuren</div>
-        </span>
-        <span class="nc-arrow"><svg class="ic" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></span>
-      </a>
-      <a class="nav-card" href="/team-dashboard/webapp/#/People">
-        <span class="nc-icon"><svg class="ic" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-        <span>
-          <div class="nc-title">Teamleden</div>
-          <div class="nc-sub">Status &amp; eerstvolgende reis</div>
-        </span>
-        <span class="nc-arrow"><svg class="ic" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></span>
-      </a>
-      <a class="nav-card" href="/team-dashboard/webapp/">
-        <span class="nc-icon"><svg class="ic" viewBox="0 0 24 24"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect x="2" y="6" width="20" height="14" rx="2"/></svg></span>
-        <span>
-          <div class="nc-title">Reizen</div>
-          <div class="nc-sub">Reisoverzicht</div>
-        </span>
-        <span class="nc-arrow"><svg class="ic" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></span>
-      </a>
+    <!-- Mijn Team view -->
+    <section class="view" id="view-mijn-team">
+      <h1 class="view-title">Mijn Team</h1>
+      <p class="view-sub">Overzicht van je teamleden en hun beschikbaarheid.</p>
+
+      <div class="toolbar">
+        <span class="toolbar-title">Teamleden</span>
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input class="search-input" type="text" id="teamSearch" placeholder="Zoek op naam…" />
+        </div>
+      </div>
+      <div class="table-card">
+        <div id="teamTableWrap">
+          <div class="spinner-wrap"><div class="spinner"></div></div>
+        </div>
+      </div>
     </section>
+
+    <!-- Reizen view -->
+    <section class="view" id="view-reizen">
+      <h1 class="view-title">Reizen</h1>
+      <p class="view-sub">Reisextensies van je teamleden. Pas de goedkeuringsstatus aan.</p>
+
+      <div class="toolbar">
+        <span class="toolbar-title">Reisextensies</span>
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input class="search-input" type="text" id="reizenSearch" placeholder="Zoek op Trip ID / status…" />
+        </div>
+      </div>
+      <div class="table-card">
+        <div id="reizenTableWrap">
+          <div class="spinner-wrap"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">EhB Cloud Integration &middot; In samenwerking met Flexso &middot; Demo: 19 juni 2026</div>
   </main>
 
-  <footer>
-    EhB Cloud Integration <span class="dot">·</span> In samenwerking met Flexso <span class="dot">·</span> Demo: 19 juni 2026
-  </footer>
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer"></div>
 
   <script>
-    // Roept een OData-resource/functie op de Team-service aan; 401/403 → loginpagina.
-    async function odata (resource) {
-      const res = await fetch('/team/' + resource, {
-        credentials: 'include',
-        headers: { 'Accept': 'application/json' }
+    (function () {
+      var dateFmt = new Intl.DateTimeFormat('nl-BE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+      // ── Data fetch helper ────────────────────────────────────
+      function odata(resource, opts) {
+        var init = Object.assign({
+          credentials: 'include',
+          headers: { 'Accept': 'application/json' }
+        }, opts || {});
+        return fetch('/team/' + resource, init).then(function (res) {
+          if (res.status === 401 || res.status === 403) {
+            window.location.href = '/team-login.html';
+            throw new Error('unauthorized');
+          }
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        });
+      }
+
+      // ── Toast ────────────────────────────────────────────────
+      function showToast(message, type) {
+        var container = document.getElementById('toastContainer');
+        var el = document.createElement('div');
+        el.className = 'toast ' + (type || 'success');
+        el.textContent = message;
+        container.appendChild(el);
+        setTimeout(function () {
+          el.classList.add('out');
+          setTimeout(function () { el.remove(); }, 250);
+        }, 3000);
+      }
+
+      // ── Escape HTML ──────────────────────────────────────────
+      function esc(s) {
+        if (s == null) return '';
+        var d = document.createElement('div');
+        d.textContent = String(s);
+        return d.innerHTML;
+      }
+
+      // ── Navigation ───────────────────────────────────────────
+      var views = { dashboard: 'view-dashboard', 'mijn-team': 'view-mijn-team', reizen: 'view-reizen' };
+
+      function navigate() {
+        var hash = (location.hash || '#dashboard').slice(1).split('?')[0];
+        if (!views[hash]) hash = 'dashboard';
+
+        document.querySelectorAll('.view').forEach(function (v) { v.classList.remove('active'); });
+        document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); });
+
+        var viewEl = document.getElementById(views[hash]);
+        if (viewEl) viewEl.classList.add('active');
+        var navEl = document.querySelector('.nav-item[data-view="' + hash + '"]');
+        if (navEl) navEl.classList.add('active');
+
+        if (hash === 'dashboard') loadDashboard();
+        if (hash === 'mijn-team') loadTeam();
+        if (hash === 'reizen') loadReizen();
+      }
+
+      window.addEventListener('hashchange', navigate);
+
+      // ── Dashboard ────────────────────────────────────────────
+      var dashboardLoaded = false;
+      function loadDashboard() {
+        if (dashboardLoaded) return;
+        dashboardLoaded = true;
+
+        odata('getPendingCount()').then(function (d) {
+          document.getElementById('kpiPending').textContent = d.value != null ? d.value : '—';
+        }).catch(function () {
+          document.getElementById('kpiPending').textContent = '—';
+        });
+
+        odata('People').then(function (d) {
+          var people = d.value || [];
+          var onTravel = people.filter(function (p) { return p.OnTravel === true; }).length;
+          document.getElementById('kpiOnTravel').textContent = onTravel;
+          document.getElementById('kpiTotal').textContent = people.length;
+        }).catch(function () {
+          document.getElementById('kpiOnTravel').textContent = '—';
+          document.getElementById('kpiTotal').textContent = '—';
+        });
+      }
+
+      // ── Mijn Team ────────────────────────────────────────────
+      var teamData = null;
+      function loadTeam() {
+        var wrap = document.getElementById('teamTableWrap');
+        if (teamData) { renderTeam(teamData); return; }
+        wrap.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+
+        odata('People').then(function (d) {
+          teamData = d.value || [];
+          renderTeam(teamData);
+        }).catch(function (e) {
+          wrap.innerHTML = '<div class="error-msg">Kon teamleden niet laden.</div>';
+        });
+      }
+
+      function renderTeam(data) {
+        var q = (document.getElementById('teamSearch').value || '').toLowerCase();
+        var filtered = data.filter(function (p) {
+          if (!q) return true;
+          return ((p.FirstName || '') + ' ' + (p.LastName || '') + ' ' + (p.UserName || '')).toLowerCase().indexOf(q) !== -1;
+        });
+
+        var wrap = document.getElementById('teamTableWrap');
+        if (filtered.length === 0) {
+          wrap.innerHTML = '<table><thead><tr><th>VOORNAAM</th><th>FAMILIENAAM</th><th>STATUS</th><th>ACTIES</th></tr></thead><tbody><tr><td colspan="4" class="empty-msg">Geen gegevens beschikbaar</td></tr></tbody></table>';
+          return;
+        }
+
+        var html = '<table><thead><tr><th>VOORNAAM</th><th>FAMILIENAAM</th><th>STATUS</th><th>ACTIES</th></tr></thead><tbody>';
+        filtered.forEach(function (p) {
+          var statusPill = p.OnTravel
+            ? '<span class="pill pill-red">Op reis</span>'
+            : '<span class="pill pill-green">Beschikbaar</span>';
+          html += '<tr class="clickable" data-username="' + esc(p.UserName) + '">'
+            + '<td>' + esc(p.FirstName) + '</td>'
+            + '<td>' + esc(p.LastName) + '</td>'
+            + '<td>' + statusPill + '</td>'
+            + '<td><button class="btn-action" data-user="' + esc(p.UserName) + '">Reizen bekijken</button></td>'
+            + '<td class="row-arrow" title="Openen in Fiori">&#8250;</td>'
+            + '</tr>';
+        });
+        html += '</tbody></table>';
+        wrap.innerHTML = html;
+
+        wrap.querySelectorAll('.btn-action').forEach(function (btn) {
+          btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            reizenFilter = btn.getAttribute('data-user');
+            reizenData = null;
+            location.hash = '#reizen';
+          });
+        });
+        wrap.querySelectorAll('tr.clickable').forEach(function (tr) {
+          tr.addEventListener('click', function () {
+            window.location.href = '/team-dashboard/webapp/#/People(\'' + tr.dataset.username + '\')';
+          });
+        });
+      }
+
+      document.getElementById('teamSearch').addEventListener('input', function () {
+        if (teamData) renderTeam(teamData);
       });
-      if (res.status === 401 || res.status === 403) {
-        window.location.href = '/team-login.html';
-        throw new Error('unauthorized');
+
+      // ── Reizen ───────────────────────────────────────────────
+      var reizenData = null;
+      var reizenFilter = null;
+
+      function loadReizen() {
+        var wrap = document.getElementById('reizenTableWrap');
+        if (reizenData) { renderReizen(reizenData); return; }
+        wrap.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+
+        odata('TravelExtensions').then(function (d) {
+          reizenData = d.value || [];
+          renderReizen(reizenData);
+        }).catch(function () {
+          wrap.innerHTML = '<div class="error-msg">Kon reisextensies niet laden.</div>';
+        });
       }
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json();
-    }
 
-    function setText (id, value) { document.getElementById(id).textContent = value; }
+      function renderReizen(data) {
+        var q = (document.getElementById('reizenSearch').value || '').toLowerCase();
+        var filtered = data.filter(function (r) {
+          if (!q) return true;
+          return (String(r.TripID) + ' ' + (r.ProjectCode || '') + ' ' + (r.ApprovalStatus || '')).toLowerCase().indexOf(q) !== -1;
+        });
 
-    async function loadPending () {
-      try { const d = await odata('getPendingCount()'); setText('kpiPending', d.value ?? '—'); }
-      catch (e) { setText('kpiPending', '—'); }
-    }
+        var wrap = document.getElementById('reizenTableWrap');
+        if (filtered.length === 0) {
+          wrap.innerHTML = '<table><thead><tr><th>TRIP ID</th><th>PROJECTCODE</th><th>GOEDKEURINGSSTATUS</th><th>INTERNE NOTITIE</th><th>ACTIE</th></tr></thead><tbody><tr><td colspan="5" class="empty-msg">Geen gegevens beschikbaar</td></tr></tbody></table>';
+          return;
+        }
 
-    async function loadTeam () {
-      try {
-        const d = await odata('People');
-        const people = d.value || [];
-        const onTravel = people.filter(p => p.OnTravel === true).length;
-        setText('kpiOnTravel', onTravel);
-        setText('kpiAvailable', Math.max(people.length - onTravel, 0));
-      } catch (e) {
-        setText('kpiOnTravel', '—');
-        setText('kpiAvailable', '—');
+        var html = '<table><thead><tr><th>TRIP ID</th><th>PROJECTCODE</th><th>GOEDKEURINGSSTATUS</th><th>INTERNE NOTITIE</th><th>ACTIE</th></tr></thead><tbody>';
+        filtered.forEach(function (r) {
+          var pillClass = r.ApprovalStatus === 'Approved' ? 'pill-green' : r.ApprovalStatus === 'Rejected' ? 'pill-red' : 'pill-orange';
+          var pillLabel = r.ApprovalStatus === 'Approved' ? 'Goedgekeurd' : r.ApprovalStatus === 'Rejected' ? 'Afgewezen' : 'In afwachting';
+          html += '<tr data-tripid="' + esc(r.TripID) + '">'
+            + '<td>' + esc(r.TripID) + '</td>'
+            + '<td>' + esc(r.ProjectCode || '—') + '</td>'
+            + '<td class="status-cell"><span class="pill ' + pillClass + '" data-pill="' + esc(r.TripID) + '">' + pillLabel + '</span>'
+            + '<select class="status-select" data-tripid="' + esc(r.TripID) + '">'
+            + '<option value="">Wijzig…</option>'
+            + '<option value="Approved"' + (r.ApprovalStatus === 'Approved' ? ' selected' : '') + '>Goedgekeurd</option>'
+            + '<option value="Pending"' + (r.ApprovalStatus === 'Pending' ? ' selected' : '') + '>In afwachting</option>'
+            + '<option value="Rejected"' + (r.ApprovalStatus === 'Rejected' ? ' selected' : '') + '>Afgewezen</option>'
+            + '</select></td>'
+            + '<td>' + esc(r.InternalNote || '—') + '</td>'
+            + '<td><a class="btn-action" href="/team-dashboard/webapp/#/TravelExtensions(' + esc(r.TripID) + ')" target="_blank">Openen in Fiori</a></td>'
+            + '</tr>';
+        });
+        html += '</tbody></table>';
+        wrap.innerHTML = html;
+
+        wrap.querySelectorAll('.status-select').forEach(function (sel) {
+          sel.addEventListener('change', function () {
+            var tripId = sel.getAttribute('data-tripid');
+            var newStatus = sel.value;
+            if (!newStatus) return;
+            patchStatus(tripId, newStatus, sel);
+          });
+        });
       }
-    }
 
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      try { await fetch('/auth/logout', { method: 'POST', credentials: 'include' }); } catch (e) {}
-      window.location.href = '/';
-    });
+      function patchStatus(tripId, status, selectEl) {
+        selectEl.disabled = true;
+        fetch('/team/TravelExtensions(' + tripId + ')', {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ApprovalStatus: status })
+        }).then(function (res) {
+          if (res.status === 401 || res.status === 403) {
+            window.location.href = '/team-login.html';
+            throw new Error('unauthorized');
+          }
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        }).then(function () {
+          var pillEl = document.querySelector('[data-pill="' + tripId + '"]');
+          if (pillEl) {
+            var pillClass = status === 'Approved' ? 'pill-green' : status === 'Rejected' ? 'pill-red' : 'pill-orange';
+            var pillLabel = status === 'Approved' ? 'Goedgekeurd' : status === 'Rejected' ? 'Afgewezen' : 'In afwachting';
+            pillEl.className = 'pill ' + pillClass;
+            pillEl.textContent = pillLabel;
+          }
+          if (reizenData) {
+            var ext = reizenData.find(function (r) { return String(r.TripID) === String(tripId); });
+            if (ext) ext.ApprovalStatus = status;
+          }
+          selectEl.disabled = false;
+          showToast('Status bijgewerkt', 'success');
+          dashboardLoaded = false;
+        }).catch(function (e) {
+          selectEl.disabled = false;
+          showToast('Kon status niet bijwerken: ' + e.message, 'error');
+        });
+      }
 
-    loadPending();
-    loadTeam();
+      document.getElementById('reizenSearch').addEventListener('input', function () {
+        if (reizenData) renderReizen(reizenData);
+      });
+
+      // ── Banner dismiss ───────────────────────────────────────
+      document.getElementById('dismissBanner').addEventListener('click', function () {
+        document.getElementById('welcomeBanner').classList.add('hidden');
+      });
+
+      // ── Logout ───────────────────────────────────────────────
+      document.getElementById('logoutBtn').addEventListener('click', function () {
+        fetch('/auth/logout', { method: 'POST', credentials: 'include' }).catch(function () {}).then(function () {
+          window.location.href = '/';
+        });
+      });
+
+      // ── Boot ─────────────────────────────────────────────────
+      navigate();
+    })();
   </script>
 </body>
 </html>
