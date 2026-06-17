@@ -2,79 +2,66 @@
  * PrimePath Travel — Fiori Elements Custom Theme
  * SAP UI5 1.136 / sap_horizon
  *
- * Strategie:
- *   1. SAP theming-variabelen (var-gebaseerd, breed effect)
- *   2. Shell-header override (#354A5E uit design)
- *   3. Tabel & filterbalk class-overrides (assertief met !important)
- *   4. Object Page styling
- *   5. Status-badges (Approved/Pending/Rejected)
+ * Design tokens afgestemd op de PrimePath-huisstijl (Poppins + Open Sans,
+ * merkblauw #0070F2, elevation-schaal, 14–20 px radius).
  * ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ── 1. SAP Theming variabelen ─────────────────────────────────────────── */
 :root {
-  /* Merk-blauw */
   --sapBrandColor:                        #0070F2;
   --sapHighlightColor:                    #0070F2;
   --sapSelectedColor:                     #0070F2;
   --sapActiveColor:                       #0058C4;
   --sapContent_FocusColor:                #0058C4;
 
-  /* Achtergronden */
-  --sapBackgroundColor:                   #F4F5F7;
-  --sapShellColor:                        #354A5E;
-  --sapShell_Background:                  #354A5E;
+  --sapBackgroundColor:                   #F3F6FB;
+  --sapShellColor:                        #0A2540;
+  --sapShell_Background:                  linear-gradient(135deg, #0070F2 0%, #0040A8 55%, #0A2540 100%);
   --sapShell_TextColor:                   #FFFFFF;
-  --sapShell_BorderColor:                 #2B3D4F;
-  --sapShell_Hover_Background:            #2B3D4F;
+  --sapShell_BorderColor:                 rgba(255,255,255,.12);
+  --sapShell_Hover_Background:            rgba(255,255,255,.14);
 
-  /* Oppervlakken */
   --sapGroup_ContentBackground:           #FFFFFF;
   --sapTile_Background:                   #FFFFFF;
   --sapList_Background:                   #FFFFFF;
-  --sapList_HeaderBackground:             #F7F7F7;
-  --sapList_Hover_Background:             #F0F7FF;
-  --sapList_SelectionBackgroundColor:     #E3F0FF;
+  --sapList_HeaderBackground:             #F3F6FB;
+  --sapList_Hover_Background:             #EAF1FE;
+  --sapList_SelectionBackgroundColor:     #D6E6FE;
   --sapList_HighlightColor:               #0070F2;
 
-  /* Tekst */
-  --sapTextColor:                         #32363A;
-  --sapTitleColor:                        #32363A;
-  --sapContent_LabelColor:                #6A6D70;
-  --sapContent_NonInteractiveIconColor:   #6A6D70;
+  --sapTextColor:                         #0F1F33;
+  --sapTitleColor:                        #0F1F33;
+  --sapContent_LabelColor:                #5B6B7B;
+  --sapContent_NonInteractiveIconColor:   #5B6B7B;
 
-  /* Knoppen */
   --sapButton_Emphasized_Background:      #0070F2;
   --sapButton_Emphasized_Hover_Background:#0058C4;
-  --sapButton_Emphasized_Active_Background:#004CB4;
+  --sapButton_Emphasized_Active_Background:#0040A8;
   --sapButton_Emphasized_TextColor:       #FFFFFF;
   --sapButton_Emphasized_BorderColor:     #0070F2;
 
-  /* Links */
   --sapLink_TextColor:                    #0070F2;
   --sapLink_Hover_Color:                  #0058C4;
-  --sapLink_Active_Color:                 #004CB4;
+  --sapLink_Active_Color:                 #0040A8;
 
-  /* Invoervelden */
   --sapField_Focus_BorderColor:           #0070F2;
   --sapField_Hover_BorderColor:           #0058C4;
-  --sapField_BorderColor:                 #E5E5E5;
+  --sapField_BorderColor:                 #E4EAF1;
   --sapField_Background:                  #FFFFFF;
 
-  /* Randen en radius */
-  --sapElement_BorderCornerRadius:        6px;
-  --sapButton_BorderCornerRadius:         6px;
-  --sapField_BorderCornerRadius:          4px;
-  --sapTile_BorderCornerRadius:           8px;
+  --sapElement_BorderCornerRadius:        10px;
+  --sapButton_BorderCornerRadius:         10px;
+  --sapField_BorderCornerRadius:          8px;
+  --sapTile_BorderCornerRadius:           14px;
 
-  /* Status */
-  --sapSuccessColor:                      #107E3E;
-  --sapWarningColor:                      #E9730C;
-  --sapErrorColor:                        #BB0000;
+  --sapSuccessColor:                      #0E8345;
+  --sapWarningColor:                      #D97706;
+  --sapErrorColor:                        #C41E3A;
   --sapInformationColor:                  #0070F2;
-  --sapNeutralColor:                      #6A6D70;
+  --sapNeutralColor:                      #5B6B7B;
 }
 
-/* ── 2. Shell / navigatiebalk (#354A5E uit design) ─────────────────────── */
+/* ── 2. Shell / navigatiebalk (gradient uit huisstijl) ─────────────────── */
 .sapUshellShellHead,
 .sapUshellHead,
 .sapFioriShellCont .sapUshellShellHead,
@@ -82,8 +69,9 @@
 .sapUshellShell .sapUshellShellHead,
 .sapUshellBar,
 .sapUshellContainerDockingArea {
-  background: #354A5E !important;
-  border-bottom: 1px solid #2B3D4F !important;
+  background: linear-gradient(135deg, #0070F2 0%, #0040A8 55%, #0A2540 100%) !important;
+  border-bottom: 1px solid rgba(255,255,255,.12) !important;
+  box-shadow: 0 2px 12px rgba(0,64,168,.18) !important;
 }
 
 .sapUshellShellHead .sapUshellHeadTitle,
@@ -102,14 +90,14 @@
 .sapFDynamicPageContentWrapper,
 .sapUxAPObjectPageWrapper,
 .sapUxAPObjectPageBackgroundColorTransparent {
-  background: #F4F5F7 !important;
+  background: #F3F6FB !important;
 }
 
 /* ── 4. DynamicPage header & filterbalk ─────────────────────────────────── */
 .sapFDynamicPageTitle,
 .sapFDynamicPageHeader {
   background: #FFFFFF !important;
-  border-bottom: 1px solid #E5E5E5 !important;
+  border-bottom: 1px solid #E4EAF1 !important;
 }
 
 .sapFDynamicPageTitle {
@@ -117,47 +105,54 @@
 }
 
 .sapFDynamicPageHeader {
-  box-shadow: 0 1px 0 0 rgba(0,0,0,.06) !important;
-  padding: 8px 16px !important;
+  box-shadow: 0 1px 3px rgba(15,31,51,.05) !important;
+  padding: 10px 20px !important;
 }
 
 .sapFDynamicPageTitle .sapMTitle,
 .sapFDynamicPageTitle h1,
 .sapFDynamicPageTitle h2 {
-  color: #32363A !important;
+  color: #0F1F33 !important;
   font-size: 18px !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
+  letter-spacing: -.3px !important;
 }
 
-/* ── 5. MDC-tabel als witte kaart ──────────────────────────────────────── */
+/* ── 5. MDC-tabel als kaart met elevation ──────────────────────────────── */
 .sapUiMdcTable {
   background: #FFFFFF !important;
-  border: 1px solid #E5E5E5 !important;
-  border-radius: 6px !important;
-  box-shadow: 0 1px 4px rgba(0,0,0,.08) !important;
-  margin: 8px 16px 16px !important;
+  border: 1px solid #E4EAF1 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 1px 2px rgba(15,31,51,.06), 0 1px 3px rgba(15,31,51,.05) !important;
+  margin: 12px 20px 20px !important;
   overflow: hidden !important;
+  transition: box-shadow .25s cubic-bezier(.4,0,.2,1) !important;
+}
+
+.sapUiMdcTable:hover {
+  box-shadow: 0 6px 16px rgba(15,31,51,.08), 0 2px 5px rgba(15,31,51,.05) !important;
 }
 
 .sapUiMdcTable > .sapMTB,
 .sapUiMdcTable .sapMTB-Transparent-CTX {
   background: #FFFFFF !important;
-  border-bottom: 1px solid #E5E5E5 !important;
-  padding: 6px 12px !important;
-  min-height: 44px !important;
+  border-bottom: 1px solid #E4EAF1 !important;
+  padding: 10px 16px !important;
+  min-height: 48px !important;
 }
 
 .sapUiMdcTable .sapMTitle {
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  color: #32363A !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #0F1F33 !important;
+  letter-spacing: -.2px !important;
 }
 
 /* ── 6. ResponsiveTable ─────────────────────────────────────────────────── */
 .sapMListTblHeader,
 .sapMListTblHeaderCell {
-  background: #F7F7F7 !important;
-  border-bottom: 1px solid #E5E5E5 !important;
+  background: #F3F6FB !important;
+  border-bottom: 1px solid #E4EAF1 !important;
 }
 
 .sapMListTblHeaderCell .sapMLabel,
@@ -166,45 +161,46 @@
   font-weight: 600 !important;
   font-size: 11px !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.04em !important;
-  color: #6A6D70 !important;
+  letter-spacing: 0.5px !important;
+  color: #5B6B7B !important;
 }
 
 .sapMListTblRow,
 .sapMLIBFocusable {
-  border-bottom: 1px solid #F0F0F0 !important;
+  border-bottom: 1px solid #F3F6FB !important;
+  transition: background .2s cubic-bezier(.4,0,.2,1), box-shadow .2s ease !important;
 }
 
 .sapMListTblRow:hover,
 .sapMLIBFocusable:hover {
-  background: #F0F7FF !important;
+  background: #EAF1FE !important;
 }
 
 .sapMListTblRow.sapMLIBSelected,
 .sapMListItem.sapMLIBSelected {
-  background: #E8F2FF !important;
+  background: #D6E6FE !important;
   box-shadow: inset 3px 0 0 0 #0070F2 !important;
 }
 
 .sapMListTblCell,
 .sapMListTblHeaderCell {
-  padding: 8px 10px !important;
+  padding: 10px 12px !important;
   font-size: 13px !important;
-  color: #32363A !important;
+  color: #0F1F33 !important;
 }
 
 /* ── 7. GridTable ───────────────────────────────────────────────────────── */
 .sapUiTable {
   background: #FFFFFF !important;
-  border: 1px solid #E5E5E5 !important;
-  border-radius: 6px !important;
+  border: 1px solid #E4EAF1 !important;
+  border-radius: 14px !important;
   overflow: hidden !important;
 }
 
 .sapUiTableColHdrCnt,
 .sapUiTableColHdr {
-  background: #F7F7F7 !important;
-  border-bottom: 1px solid #E5E5E5 !important;
+  background: #F3F6FB !important;
+  border-bottom: 1px solid #E4EAF1 !important;
 }
 
 .sapUiTableColCell .sapMLabel,
@@ -212,16 +208,16 @@
   font-weight: 600 !important;
   font-size: 11px !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.04em !important;
-  color: #6A6D70 !important;
+  letter-spacing: 0.5px !important;
+  color: #5B6B7B !important;
 }
 
 .sapUiTableRow:hover .sapUiTableCell {
-  background: #F0F7FF !important;
+  background: #EAF1FE !important;
 }
 
 .sapUiTableRowSel .sapUiTableCell {
-  background: #E8F2FF !important;
+  background: #D6E6FE !important;
   box-shadow: inset 3px 0 0 0 #0070F2 !important;
 }
 
@@ -229,62 +225,64 @@
 .sapUxAPObjectPageSection,
 .sapUxAPObjectPageSubSection {
   background: #FFFFFF !important;
-  border: 1px solid #E5E5E5 !important;
-  border-radius: 6px !important;
-  margin: 8px 0 !important;
-  box-shadow: 0 1px 4px rgba(0,0,0,.06) !important;
+  border: 1px solid #E4EAF1 !important;
+  border-radius: 14px !important;
+  margin: 10px 0 !important;
+  box-shadow: 0 1px 2px rgba(15,31,51,.06), 0 1px 3px rgba(15,31,51,.05) !important;
 }
 
 .sapUxAPObjectPageSectionTitle .sapMTitle,
 .sapUxAPObjectPageSectionTitle {
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  color: #32363A !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #0F1F33 !important;
+  letter-spacing: -.2px !important;
 }
 
 .sapUxAPObjectPageSubSectionTitle {
   font-size: 11px !important;
   font-weight: 600 !important;
-  color: #6A6D70 !important;
+  color: #5B6B7B !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.04em !important;
+  letter-spacing: 0.5px !important;
 }
 
 .sapUxAPObjectPageHeaderContent,
 .sapUxAPObjectPageHeaderTitle {
   background: #FFFFFF !important;
-  border-bottom: 1px solid #E5E5E5 !important;
+  border-bottom: 1px solid #E4EAF1 !important;
 }
 
-/* ── 9. Veldlabels & invoer (edit-mode) ────────────────────────────────── */
+/* ── 9. Veldlabels & invoer ────────────────────────────────────────────── */
 .sapMLabel {
   font-size: 11px !important;
   font-weight: 600 !important;
-  color: #6A6D70 !important;
+  color: #5B6B7B !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.03em !important;
+  letter-spacing: 0.4px !important;
 }
 
 .sapMInputBase .sapMInputBaseInner,
 .sapMInputBase input {
   background: #FFFFFF !important;
-  border: 1px solid #E5E5E5 !important;
-  border-radius: 4px !important;
+  border: 1px solid #E4EAF1 !important;
+  border-radius: 8px !important;
   font-size: 13px !important;
-  color: #32363A !important;
+  color: #0F1F33 !important;
+  transition: border-color .2s ease, box-shadow .2s ease !important;
 }
 
 .sapMInputBase.sapMFocus .sapMInputBaseInner,
 .sapMInputBase:focus-within .sapMInputBaseInner {
   border-color: #0070F2 !important;
-  box-shadow: 0 0 0 1px #0070F2 !important;
+  box-shadow: 0 0 0 3px rgba(0,112,242,.15) !important;
 }
 
-/* ── 10. Status-badges (Approved / Pending / Rejected) ──────────────────── */
+/* ── 10. Status-badges ──────────────────────────────────────────────────── */
 .sapMObjStatus {
   font-weight: 600 !important;
   font-size: 12px !important;
-  padding: 2px 8px !important;
+  padding: 3px 10px !important;
   border-radius: 999px !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -292,36 +290,32 @@
   line-height: 1.6 !important;
 }
 
-/* Success = Approved */
 .sapMObjStatusSuccess,
 .sapMObjStatus.sapMObjStatusSuccess {
-  background: #F1F8E9 !important;
-  color: #107E3E !important;
-  border: 1px solid #C7E1B5 !important;
+  background: #ECFDF5 !important;
+  color: #0E8345 !important;
+  border: 1px solid #A7F3D0 !important;
 }
 
-/* Error = Rejected */
 .sapMObjStatusError,
 .sapMObjStatus.sapMObjStatusError {
-  background: #FFEBEE !important;
-  color: #BB0000 !important;
-  border: 1px solid #F4B6B0 !important;
+  background: #FEF2F2 !important;
+  color: #C41E3A !important;
+  border: 1px solid #FECACA !important;
 }
 
-/* Warning = Pending */
 .sapMObjStatusWarning,
 .sapMObjStatus.sapMObjStatusWarning {
-  background: #FFF3E0 !important;
-  color: #E9730C !important;
-  border: 1px solid #F5CBA0 !important;
+  background: #FFFBEB !important;
+  color: #D97706 !important;
+  border: 1px solid #FDE68A !important;
 }
 
-/* Neutral */
 .sapMObjStatusNeutral,
 .sapMObjStatus.sapMObjStatusNeutral {
-  background: #EEF1F4 !important;
-  color: #6A6D70 !important;
-  border: 1px solid #D8DCE0 !important;
+  background: #F3F6FB !important;
+  color: #5B6B7B !important;
+  border: 1px solid #E4EAF1 !important;
 }
 
 /* ── 11. Knoppen ─────────────────────────────────────────────────────────── */
@@ -329,51 +323,61 @@
   background: #0070F2 !important;
   border-color: #0070F2 !important;
   color: #FFFFFF !important;
-  border-radius: 6px !important;
+  border-radius: 10px !important;
   font-weight: 600 !important;
   font-size: 13px !important;
+  transition: background .2s ease, box-shadow .2s ease, transform .15s ease !important;
 }
 
 .sapMBtnEmphasized:hover .sapMBtnInner {
   background: #0058C4 !important;
   border-color: #0058C4 !important;
+  box-shadow: 0 4px 12px rgba(0,112,242,.3) !important;
+}
+
+.sapMBtnEmphasized:active .sapMBtnInner {
+  transform: scale(.97) !important;
+  background: #0040A8 !important;
 }
 
 .sapMBtn .sapMBtnInner {
-  border-radius: 6px !important;
+  border-radius: 10px !important;
   font-size: 13px !important;
+  transition: background .15s ease, box-shadow .15s ease !important;
 }
 
 /* ── 12. Filterbar ───────────────────────────────────────────────────────── */
 .sapUiMdcFilterBar,
 .sapMFilterBar {
   background: #FFFFFF !important;
-  border-bottom: 1px solid #E5E5E5 !important;
-  padding: 6px 16px !important;
+  border-bottom: 1px solid #E4EAF1 !important;
+  padding: 8px 20px !important;
 }
 
 /* ── 13. Dialogen & popovers ─────────────────────────────────────────────── */
 .sapMPopover,
 .sapMDialog {
-  border-radius: 6px !important;
-  box-shadow: 0 4px 16px rgba(0,0,0,.12) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 22px 48px rgba(0,64,168,.18), 0 10px 20px rgba(15,31,51,.10) !important;
+  border: 1px solid #E4EAF1 !important;
 }
 
 .sapMDialog .sapMDialogTitle .sapMTitle {
-  font-size: 15px !important;
-  font-weight: 600 !important;
-  color: #32363A !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #0F1F33 !important;
+  letter-spacing: -.2px !important;
 }
 
 /* ── 14. Tabs (IconTabBar) ───────────────────────────────────────────────── */
 .sapMITB {
   background: #FFFFFF !important;
-  border-bottom: 1px solid #E5E5E5 !important;
+  border-bottom: 1px solid #E4EAF1 !important;
 }
 
 .sapMITBItem.sapMITBSelected .sapMITBText {
   color: #0070F2 !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
 }
 
 .sapMITBItem.sapMITBSelected {
@@ -389,53 +393,49 @@
 /* ── 16. Zoekveldje ──────────────────────────────────────────────────────── */
 .sapMSFB,
 .sapMSF .sapMSFB {
-  background: #F4F5F7 !important;
-  border: 1px solid #E5E5E5 !important;
-  border-radius: 4px !important;
+  background: #F3F6FB !important;
+  border: 1px solid #E4EAF1 !important;
+  border-radius: 10px !important;
+  transition: border-color .2s ease, box-shadow .2s ease !important;
+}
+
+.sapMSFB:focus-within,
+.sapMSF .sapMSFB:focus-within {
+  border-color: #0070F2 !important;
+  box-shadow: 0 0 0 3px rgba(0,112,242,.15) !important;
 }
 
 .sapMSF input {
   font-size: 13px !important;
-  color: #32363A !important;
+  color: #0F1F33 !important;
 }
 
-/* ── 17. Roltag bovenaan (Travel Dashboard role-indicator) ──────────────── */
+/* ── 17. Roltag ───────────────────────────────────────────────────────────── */
 .sapFeDraftBadge,
 .sapFeDraftIndicator {
   border-radius: 999px !important;
   font-size: 11px !important;
   font-weight: 600 !important;
-  padding: 2px 8px !important;
+  padding: 3px 10px !important;
 }
 
-/* ── 18. Micro-interacties & transities ───────────────────────────────────── */
-.sapMListTblRow,
-.sapMLIBFocusable {
-  transition: background .15s ease !important;
-}
-
-.sapMBtnEmphasized .sapMBtnInner {
-  transition: background .15s ease, box-shadow .15s ease !important;
-}
-
-.sapMBtnEmphasized:active .sapMBtnInner {
-  transform: scale(.98) !important;
-}
-
-.sapMInputBase .sapMInputBaseInner {
-  transition: border-color .15s ease, box-shadow .15s ease !important;
-}
-
-/* ── 19. Focus-visible voor toetsenbordnavigatie ──────────────────────────── */
+/* ── 18. Focus-visible ───────────────────────────────────────────────────── */
 .sapMBtn:focus-visible .sapMBtnInner,
 .sapMLink:focus-visible,
 .sapMListTblRow:focus-visible {
-  outline: 2px solid #0070F2 !important;
+  outline: 3px solid rgba(0,112,242,.45) !important;
   outline-offset: -2px !important;
+  border-radius: 8px;
 }
 
-/* ── 20. Tabular nummers in tabelcellen ──────────────────────────────────── */
+/* ── 19. Tabular nummers ─────────────────────────────────────────────────── */
 .sapMListTblCell,
 .sapUiTableCell {
   font-variant-numeric: tabular-nums !important;
 }
+
+/* ── 20. Scrollbars ──────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #8A97A6; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #5B6B7B; }
