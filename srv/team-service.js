@@ -14,6 +14,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const cds = require('@sap/cds');
+const { collectAllTrips, collectTripsForPerson } = require('./trippin-trips');
 
 module.exports = cds.service.impl(async function () {
   const TripPin = await cds.connect.to('TripPinService');
@@ -55,8 +56,24 @@ module.exports = cds.service.impl(async function () {
 
     return Array.isArray(people) ? peopleArr : peopleArr[0];
   });
-  this.on('READ', 'Trips',    req => TripPin.run(req.query));
   this.on('READ', 'Airlines', req => TripPin.run(req.query));
+
+  // Trips: TripPin heeft geen top-level /Trips → aggregeer via People-navigatie
+  this.on('READ', 'Trips', async (req) => {
+    const { trips, byId } = await collectAllTrips(TripPin);
+    const keyParam = req.params?.[req.params.length - 1];
+    const keyId    = (keyParam && typeof keyParam === 'object') ? keyParam.TripId : keyParam;
+    if (keyId !== undefined && keyId !== null) {
+      return byId.get(Number(keyId)) ?? null;
+    }
+    // People('x')/Trips navigatie -> enkel de reizen van die persoon
+    const personParam = req.params?.find(p => p && typeof p === 'object' && p.UserName !== undefined);
+    if (personParam?.UserName) {
+      return await collectTripsForPerson(TripPin, personParam.UserName);
+    }
+    trips.$count = trips.length;
+    return trips;
+  });
 
   // ── FV-26: aantal openstaande goedkeuringen voor dit team ────────────────
   // Telt enkel Pending-reizen van teamleden die aan deze TeamLead gekoppeld zijn.
@@ -122,42 +139,18 @@ module.exports = cds.service.impl(async function () {
       );
     }
 
-    // FA v4 §10.3: controleer of de Team Lead teamleden heeft in UserMapping
-    // In development (dummy auth) slaan we deze check over
-    if (localUserId && localUserId !== 'anonymous') {
-      const localUser = await cds.run(
-        SELECT.one.from('primepath.Users').where({ username: localUserId })
-      );
-      const teamLeadTripPin = localUser?.tripPinUserName;
-      if (!teamLeadTripPin) {
-        return req.error(403,
-          `Geen TripPin-gebruikersnaam geconfigureerd voor '${localUserId}'. ` +
-          `Vraag de Travel Coördinator om jouw TripPin-gebruikersnaam in te stellen.`
-        );
-      }
-      const teamMembers = await cds.run(
-        SELECT.from('primepath.UserMapping')
-          .where({ TeamLeadUserName: teamLeadTripPin })
-      );
-      if (!teamMembers || teamMembers.length === 0) {
-        return req.error(403,
-          `Geen teamleden gevonden voor Team Lead '${teamLeadTripPin}'. ` +
-          `Vraag de Travel Coördinator om jouw team in te stellen via UserMapping.`
-        );
-      }
-
-      // Volledige eigenaarschapscheck (FV-24): hoort dit specifieke TripID bij een teamlid?
-      // De vorige check bevestigde enkel dát er teamleden zijn, niet dat deze reis van hen is.
-      const tripId = req.data?.TripID ?? _tripIdFromParams(req);
-      const teamTripIds = await _collectTeamTripIds(TripPin, teamMembers);
-      if (tripId === undefined || !teamTripIds.has(Number(tripId))) {
-        return req.error(403,
-          `Je mag de goedkeuringsstatus van reis ${tripId} niet aanpassen: ` +
-          `deze reis hoort niet bij een lid van jouw team.`
-        );
-      }
-    }
+    // FV-24: volledige teamcheck — hergebruikt door de Goedkeuren/Afkeuren-acties.
+    const tripId = req.data?.TripID ?? _tripIdFromParams(req);
+    await _assertTeamOwnership(req, tripId, TripPin);
   });
+
+  // ── FV-24: Goedkeuren / Afkeuren als bound actions (één klik) ──────────────
+  // Zelfde teamcheck als de UPDATE; zet de status direct op Approved/Rejected.
+  this.on('goedkeuren', 'TravelExtensions', req => _setApprovalStatus(req, 'Approved', TripPin));
+  this.on('afkeuren',  'TravelExtensions', req => _setApprovalStatus(req, 'Rejected', TripPin));
+
+  // Pre-warm de gedeelde reizen-cache bij boot (niet-blokkerend).
+  collectAllTrips(TripPin).catch(() => {});
 });
 
 // ── Hulpfuncties ─────────────────────────────────────────────────────────────
@@ -167,6 +160,55 @@ function _tripIdFromParams(req) {
   const p = req.params?.[req.params.length - 1];
   if (p === undefined || p === null) return undefined;
   return (typeof p === 'object') ? p.TripID : p;
+}
+
+// Controleer of de ingelogde Team Lead de goedkeuringsstatus van deze TripID mag aanpassen.
+// In development (dummy auth / anonymous) wordt de check overgeslagen.
+// Registreert een 403 via req.error bij een schending.
+async function _assertTeamOwnership(req, tripId, TripPin) {
+  const localUserId = req.user?.id;
+  if (!localUserId || localUserId === 'anonymous') return;
+
+  const localUser = await cds.run(
+    SELECT.one.from('primepath.Users').where({ username: localUserId })
+  );
+  const teamLeadTripPin = localUser?.tripPinUserName;
+  if (!teamLeadTripPin) {
+    return req.error(403,
+      `Geen TripPin-gebruikersnaam geconfigureerd voor '${localUserId}'. ` +
+      `Vraag de Travel Coördinator om jouw TripPin-gebruikersnaam in te stellen.`
+    );
+  }
+  const teamMembers = await cds.run(
+    SELECT.from('primepath.UserMapping').where({ TeamLeadUserName: teamLeadTripPin })
+  );
+  if (!teamMembers || teamMembers.length === 0) {
+    return req.error(403,
+      `Geen teamleden gevonden voor Team Lead '${teamLeadTripPin}'. ` +
+      `Vraag de Travel Coördinator om jouw team in te stellen via UserMapping.`
+    );
+  }
+  // Volledige eigenaarschapscheck (FV-24): hoort dit specifieke TripID bij een teamlid?
+  const teamTripIds = await _collectTeamTripIds(TripPin, teamMembers);
+  if (tripId === undefined || !teamTripIds.has(Number(tripId))) {
+    return req.error(403,
+      `Je mag de goedkeuringsstatus van reis ${tripId} niet aanpassen: ` +
+      `deze reis hoort niet bij een lid van jouw team.`
+    );
+  }
+}
+
+// FV-24: zet de ApprovalStatus via een bound action, ná de teamcheck.
+async function _setApprovalStatus(req, status, TripPin) {
+  const tripId = _tripIdFromParams(req);
+  await _assertTeamOwnership(req, tripId, TripPin);
+  if (req.errors && req.errors.length) return;   // teamcheck registreerde een 403
+  await cds.run(
+    UPDATE('primepath.TravelExtensions').set({ ApprovalStatus: status }).where({ TripID: tripId })
+  );
+  return await cds.run(
+    SELECT.one.from('primepath.TravelExtensions').where({ TripID: tripId })
+  );
 }
 
 // Verzamel alle TripIDs die toebehoren aan de opgegeven teamleden, via TripPin-navigatie.

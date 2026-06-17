@@ -21,7 +21,7 @@
   "sap.ui5": {
     "flexEnabled": true,
     "dependencies": {
-      "minUI5Version": "1.130.0",
+      "minUI5Version": "1.136.0",
       "libs": {
         "sap.fe.templates": {},
         "sap.ui.core": {},
@@ -44,6 +44,11 @@
         "settings": { "bundleName": "primepath.hr.i18n.i18n" }
       }
     },
+    "resources": {
+      "css": [
+        { "uri": "css/primepath.css" }
+      ]
+    },
     "routing": {
       "routes": [
         {
@@ -55,6 +60,26 @@
           "pattern": "Trips({key}):?query:",
           "name": "TripsObjectPage",
           "target": "TripsObjectPage"
+        },
+        {
+          "pattern": "People:?query:",
+          "name": "PeopleList",
+          "target": "PeopleList"
+        },
+        {
+          "pattern": "People({key}):?query:",
+          "name": "PeopleObjectPage",
+          "target": "PeopleObjectPage"
+        },
+        {
+          "pattern": "Airlines:?query:",
+          "name": "AirlinesList",
+          "target": "AirlinesList"
+        },
+        {
+          "pattern": "Airlines({key}):?query:",
+          "name": "AirlinesObjectPage",
+          "target": "AirlinesObjectPage"
         }
       ],
       "targets": {
@@ -80,6 +105,58 @@
           "options": {
             "settings": {
               "entitySet": "Trips",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "PeopleList": {
+          "type": "Component",
+          "id": "PeopleList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "entitySet": "People",
+              "variantManagement": "Page",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "People": { "detail": { "route": "PeopleObjectPage" } }
+              }
+            }
+          }
+        },
+        "PeopleObjectPage": {
+          "type": "Component",
+          "id": "PeopleObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "entitySet": "People",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "AirlinesList": {
+          "type": "Component",
+          "id": "AirlinesList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "entitySet": "Airlines",
+              "variantManagement": "Page",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "Airlines": { "detail": { "route": "AirlinesObjectPage" } }
+              }
+            }
+          }
+        },
+        "AirlinesObjectPage": {
+          "type": "Component",
+          "id": "AirlinesObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "entitySet": "Airlines",
               "editableHeaderContent": false
             }
           }

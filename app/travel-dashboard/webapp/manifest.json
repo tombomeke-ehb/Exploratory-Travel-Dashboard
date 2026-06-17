@@ -21,7 +21,7 @@
   "sap.ui5": {
     "flexEnabled": true,
     "dependencies": {
-      "minUI5Version": "1.130.0",
+      "minUI5Version": "1.136.0",
       "libs": {
         "sap.fe.templates": {},
         "sap.ui.core": {},
@@ -44,6 +44,11 @@
         "settings": { "bundleName": "primepath.travel.i18n.i18n" }
       }
     },
+    "resources": {
+      "css": [
+        { "uri": "css/primepath.css" }
+      ]
+    },
     "routing": {
       "routes": [
         {
@@ -65,6 +70,26 @@
           "pattern": "People({key}):?query:",
           "name": "PeopleObjectPage",
           "target": "PeopleObjectPage"
+        },
+        {
+          "pattern": "Airlines:?query:",
+          "name": "AirlinesList",
+          "target": "AirlinesList"
+        },
+        {
+          "pattern": "Airlines({key}):?query:",
+          "name": "AirlinesObjectPage",
+          "target": "AirlinesObjectPage"
+        },
+        {
+          "pattern": "Airports:?query:",
+          "name": "AirportsList",
+          "target": "AirportsList"
+        },
+        {
+          "pattern": "Airports({key}):?query:",
+          "name": "AirportsObjectPage",
+          "target": "AirportsObjectPage"
         }
       ],
       "targets": {
@@ -116,6 +141,58 @@
           "options": {
             "settings": {
               "entitySet": "People",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "AirlinesList": {
+          "type": "Component",
+          "id": "AirlinesList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "entitySet": "Airlines",
+              "variantManagement": "Page",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "Airlines": { "detail": { "route": "AirlinesObjectPage" } }
+              }
+            }
+          }
+        },
+        "AirlinesObjectPage": {
+          "type": "Component",
+          "id": "AirlinesObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "entitySet": "Airlines",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "AirportsList": {
+          "type": "Component",
+          "id": "AirportsList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "entitySet": "Airports",
+              "variantManagement": "Page",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "Airports": { "detail": { "route": "AirportsObjectPage" } }
+              }
+            }
+          }
+        },
+        "AirportsObjectPage": {
+          "type": "Component",
+          "id": "AirportsObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "entitySet": "Airports",
               "editableHeaderContent": false
             }
           }

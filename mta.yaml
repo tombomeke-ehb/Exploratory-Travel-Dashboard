@@ -14,6 +14,9 @@ build-parameters:
         - cp app/travel-login.html gen/srv/travel-login.html
         - cp app/team-login.html gen/srv/team-login.html
         - cp app/hr-login.html gen/srv/hr-login.html
+        - cp app/travel-start.html gen/srv/travel-start.html
+        - cp app/team-start.html gen/srv/team-start.html
+        - cp app/hr-start.html gen/srv/hr-start.html
         - mkdir -p gen/srv/app
         - cp -r app/travel-dashboard/webapp gen/srv/app/travel-dashboard
         - cp -r app/team-dashboard/webapp gen/srv/app/team-dashboard

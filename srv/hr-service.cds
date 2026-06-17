@@ -20,17 +20,21 @@ service HRService {
   // ── TripPin data (read-only) ───────────────────────────────────────────────
   @readonly entity People   as projection on shared.People;
   @readonly entity Trips    as projection on shared.Trips;
-  @readonly entity Airlines as projection on shared.Airlines;
+  @readonly entity Airlines as projection on shared.Airlines {
+    *,
+    virtual null as TripCount : Integer   // FV-18: aantal boekingen (uit airline-stats)
+  };
   @readonly entity Airports as projection on shared.Airports;
 
   // ── PrimePath velden (read-only voor HR) ──────────────────────────────────
   @readonly entity TravelExtensions as projection on p.TravelExtensions;
 
-  // ── FV-27: airline-statistieken voor grafiek ──────────────────────────────
+  // ── FV-27 + V8: airline-statistieken (aantal boekingen + totaal budget) ───
   function getAirlineStats() returns array of {
     AirlineCode : String;
     Name        : String;
     TripCount   : Integer;
+    TotalBudget : Decimal;
   };
 
   // ── FV-28: totaal reizen in periode ───────────────────────────────────────

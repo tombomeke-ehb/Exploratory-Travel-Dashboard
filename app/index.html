@@ -5,291 +5,275 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PrimePath Travel – Exploratory Travel Dashboard</title>
   <style>
+    /* ═══════════════════════════════════════════════════════════════════════
+     * PrimePath Travel — design system (landing).
+     * Tokens: merkschaal, inkt-schaal, lijn/oppervlak, elevation-schaal, radius.
+     * Eén merkblauw #0070F2; rol-accenten Travel/Team/HR. Geen emoji → SVG.
+     * ═══════════════════════════════════════════════════════════════════════ */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap');
+
+    :root {
+      --font-head: 'Poppins', '72', 'Segoe UI', system-ui, sans-serif;
+      --font-body: 'Open Sans', '72', 'Segoe UI', system-ui, sans-serif;
+      --brand-050:#EAF1FE; --brand-100:#D6E6FE; --brand-500:#0070F2;
+      --brand-600:#0058C4; --brand-700:#0040A8; --brand-900:#0A2540;
+      --ink-900:#0F1F33; --ink-700:#324A63; --ink-500:#5B6B7B; --ink-400:#8A97A6;
+      --line:#E4EAF1; --bg:#F3F6FB; --surface:#FFFFFF;
+      --role-travel:#0070F2; --role-team:#1F9D63; --role-hr:#C8730B;
+      --r-lg:20px; --r-md:14px; --r-sm:10px;
+      --sh-1:0 1px 2px rgba(15,31,51,.06), 0 1px 3px rgba(15,31,51,.05);
+      --sh-2:0 6px 16px rgba(15,31,51,.08), 0 2px 5px rgba(15,31,51,.05);
+      --sh-3:0 22px 48px rgba(0,64,168,.18), 0 10px 20px rgba(15,31,51,.10);
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
+    html { -webkit-text-size-adjust: 100%; }
     body {
-      font-family: '72', 'SAP72', Arial, sans-serif;
-      background: #f5f6f7;
-      color: #32363a;
-      min-height: 100vh;
+      font-family: var(--font-body);
+      background: var(--bg); color: var(--ink-900); min-height: 100vh;
+      display: flex; flex-direction: column; -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
     }
+    h1, h2, .brand .name, .hero-stats .stat .n, .cta { font-family: var(--font-head); }
+    svg.ic { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    a { color: inherit; }
+    :focus-visible { outline: 3px solid color-mix(in srgb, var(--brand-500) 55%, transparent); outline-offset: 2px; border-radius: 6px; }
 
-    /* ── Shell header ── */
-    .shell-header {
-      background: #0a6ed1;
-      color: #fff;
-      padding: 0 2rem;
-      height: 3rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 2px 4px rgba(0,0,0,.2);
+    /* ── Hero ───────────────────────────────────────────────────────────── */
+    .hero {
+      position: relative; overflow: hidden; color: #fff;
+      background:
+        radial-gradient(900px 500px at 90% -20%, rgba(0,180,216,.35), transparent 60%),
+        radial-gradient(700px 500px at 0% 120%, rgba(0,64,168,.55), transparent 55%),
+        linear-gradient(135deg, var(--brand-500) 0%, var(--brand-700) 55%, var(--brand-900) 100%);
+      padding: 1.5rem 1.5rem 4.5rem;
     }
-    .shell-header .logo {
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: .5px;
-    }
-    .shell-header .subtitle {
-      font-size: .75rem;
-      opacity: .85;
-    }
+    .hero-inner { max-width: 1140px; margin: 0 auto; }
 
-    /* ── Page title ── */
-    .page-title {
-      background: #fff;
-      border-bottom: 1px solid #d9d9d9;
-      padding: 1.25rem 2rem .75rem;
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3rem; }
+    .brand { display: flex; align-items: center; gap: .7rem; }
+    .brand .logo {
+      width: 2.4rem; height: 2.4rem; border-radius: 12px;
+      background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.32);
+      display: flex; align-items: center; justify-content: center;
     }
-    .page-title h1 {
-      font-size: 1.375rem;
-      font-weight: 600;
-      color: #32363a;
-    }
-    .page-title p {
-      font-size: .875rem;
-      color: #6a6d70;
-      margin-top: .25rem;
-    }
+    .brand .logo svg { width: 1.35rem; height: 1.35rem; stroke: #fff; }
+    .brand .name { font-size: 1.05rem; font-weight: 700; letter-spacing: .2px; line-height: 1.1; }
+    .brand .tag { font-size: .72rem; opacity: .8; letter-spacing: .3px; }
+    .topbar .env { font-size: .72rem; font-weight: 600; letter-spacing: .4px; padding: .35rem .75rem; border-radius: 999px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.28); }
 
-    /* ── App grid ── */
-    .app-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-      padding: 2rem;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
+    .hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 2.5rem; align-items: center; }
+    .hero-copy .eyebrow { font-size: .75rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; opacity: .82; }
+    .hero-copy h1 { font-size: clamp(2rem, 4vw, 2.85rem); font-weight: 700; letter-spacing: -.8px; line-height: 1.1; margin: .7rem 0; }
+    .hero-copy p { font-size: 1.05rem; line-height: 1.6; opacity: .9; max-width: 32rem; }
+    .hero-stats { display: flex; gap: 2rem; margin-top: 1.75rem; }
+    .hero-stats .stat .n { font-size: 1.6rem; font-weight: 700; letter-spacing: -.5px; font-variant-numeric: tabular-nums; }
+    .hero-stats .stat .l { font-size: .76rem; opacity: .8; }
 
-    /* ── App card ── */
-    .app-card {
-      background: #fff;
-      border: 1px solid #d9d9d9;
-      border-radius: 6px;
-      padding: 1.75rem 1.5rem 1.5rem;
-      text-decoration: none;
-      color: inherit;
-      transition: box-shadow .15s, border-color .15s;
-      display: flex;
-      flex-direction: column;
-      gap: .75rem;
+    /* Route-motief (puur SVG, geen afbeelding/emoji) */
+    .hero-art {
+      position: relative; border-radius: var(--r-lg);
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.18);
+      backdrop-filter: blur(6px); padding: 1rem; box-shadow: var(--sh-3);
     }
-    .app-card:hover {
-      box-shadow: 0 4px 16px rgba(10,110,209,.15);
-      border-color: #0a6ed1;
-    }
+    .hero-art svg { display: block; width: 100%; height: auto; }
+    .route-line { stroke: rgba(255,255,255,.7); stroke-width: 1.6; stroke-dasharray: 4 5; fill: none; }
+    .route-anim { animation: dash 7s linear infinite; }
+    @keyframes dash { to { stroke-dashoffset: -90; } }
+    .node { fill: #fff; }
+    .node-ring { fill: none; stroke: rgba(255,255,255,.5); }
+    .node-label { fill: rgba(255,255,255,.92); font-size: 9px; font-weight: 600; font-family: inherit; letter-spacing: .3px; }
+    .grid-dots { fill: rgba(255,255,255,.16); }
 
-    .app-card .icon {
-      width: 3rem;
-      height: 3rem;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-    }
-    .icon-travel  { background: #e8f3fc; }
-    .icon-team    { background: #eaf5ea; }
-    .icon-hr      { background: #fef3e2; }
+    /* ── Kaartenraster ──────────────────────────────────────────────────── */
+    main { flex: 1; }
+    .grid { max-width: 1140px; margin: -3rem auto 0; padding: 0 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap: 1.5rem; }
 
-    .app-card h2 {
-      font-size: 1rem;
-      font-weight: 600;
+    .card {
+      position: relative; display: flex; flex-direction: column; gap: .85rem;
+      background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
+      padding: 1.85rem 1.6rem 1.6rem; text-decoration: none; color: inherit;
+      box-shadow: var(--sh-1); overflow: hidden;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
     }
-    .app-card .role-badge {
-      display: inline-block;
-      font-size: .7rem;
-      font-weight: 600;
-      padding: .2rem .6rem;
-      border-radius: 20px;
-      margin-bottom: .25rem;
-    }
-    .badge-travel { background: #e8f3fc; color: #0a6ed1; }
-    .badge-team   { background: #eaf5ea; color: #107e3e; }
-    .badge-hr     { background: #fef3e2; color: #c0392b; }
+    .card::before { content:''; position:absolute; inset:0 0 auto 0; height:4px; background: var(--accent); }
+    .card:hover { transform: translateY(-5px); box-shadow: var(--sh-3); border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+    .card-travel { --accent: var(--role-travel); }
+    .card-team   { --accent: var(--role-team); }
+    .card-hr     { --accent: var(--role-hr); }
 
-    .app-card p {
-      font-size: .875rem;
-      color: #6a6d70;
-      line-height: 1.5;
-    }
+    .card .top { display: flex; align-items: center; justify-content: space-between; }
+    .card .icon { width: 2.85rem; height: 2.85rem; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--accent) 12%, #fff); color: var(--accent); }
+    .card .icon svg { width: 1.45rem; height: 1.45rem; }
+    .badge { font-size: .68rem; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; padding: .28rem .7rem; border-radius: 999px; background: color-mix(in srgb, var(--accent) 12%, #fff); color: var(--accent); }
+    .card h2 { font-size: 1.2rem; font-weight: 700; letter-spacing: -.3px; }
+    .card .desc { font-size: .9rem; color: var(--ink-500); }
+    .features { list-style: none; display: flex; flex-direction: column; gap: .5rem; margin-top: .1rem; }
+    .features li { display: flex; align-items: center; gap: .6rem; font-size: .85rem; color: var(--ink-700); }
+    .features li svg { width: .95rem; height: .95rem; color: var(--accent); flex-shrink: 0; }
+    .cta { margin-top: auto; padding-top: 1.1rem; display: flex; align-items: center; gap: .45rem; font-size: .85rem; font-weight: 700; color: var(--accent); }
+    .cta svg { width: 1.05rem; height: 1.05rem; transition: transform .2s ease; }
+    .card:hover .cta svg { transform: translateX(5px); }
 
-    .app-card .features {
-      list-style: none;
-      margin-top: .25rem;
-      display: flex;
-      flex-direction: column;
-      gap: .3rem;
-    }
-    .app-card .features li {
-      font-size: .8rem;
-      color: #32363a;
-      display: flex;
-      align-items: center;
-      gap: .4rem;
-    }
-    .app-card .features li::before {
-      content: '✓';
-      color: #0a6ed1;
-      font-weight: 700;
-      font-size: .75rem;
-    }
+    /* ── API-sectie (ingeklapt) ─────────────────────────────────────────── */
+    .api { max-width: 1140px; margin: 2.5rem auto 0; padding: 0 1.5rem; }
+    .api details { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--sh-1); }
+    .api summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: .55rem; padding: .85rem 1.1rem; font-size: .78rem; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--ink-500); }
+    .api summary::-webkit-details-marker { display: none; }
+    .api summary svg { width: 1rem; height: 1rem; color: var(--brand-500); }
+    .api-links { display: flex; flex-wrap: wrap; gap: .5rem; padding: 0 1.1rem 1.1rem; }
+    .api-link { background: var(--brand-050); border: 1px solid transparent; border-radius: 8px; padding: .42rem .85rem; font-size: .78rem; color: var(--brand-600); text-decoration: none; transition: border-color .12s; }
+    .api-link:hover { border-color: var(--brand-500); }
 
-    .app-card .open-btn {
-      margin-top: auto;
-      padding-top: 1rem;
-      font-size: .8rem;
-      color: #0a6ed1;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: .3rem;
-    }
-    .open-btn::after { content: '→'; }
+    footer { text-align: center; padding: 2.5rem 1.5rem; font-size: .76rem; color: var(--ink-400); margin-top: 2.5rem; }
+    footer .dot { color: var(--line); margin: 0 .5rem; }
 
-    /* ── API section ── */
-    .api-section {
-      max-width: 1100px;
-      margin: 0 auto 2rem;
-      padding: 0 2rem;
+    @media (max-width: 860px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 1.75rem; }
+      .hero-art { order: -1; max-width: 420px; }
+      .grid { margin-top: -2.25rem; }
     }
-    .api-section h3 {
-      font-size: .875rem;
-      font-weight: 600;
-      color: #6a6d70;
-      margin-bottom: .75rem;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-    }
-    .api-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .5rem;
-    }
-    .api-link {
-      background: #fff;
-      border: 1px solid #d9d9d9;
-      border-radius: 4px;
-      padding: .4rem .9rem;
-      font-size: .8rem;
-      color: #0a6ed1;
-      text-decoration: none;
-      transition: background .1s;
-    }
-    .api-link:hover { background: #e8f3fc; }
-
-    /* ── Footer ── */
-    footer {
-      text-align: center;
-      padding: 1.5rem;
-      font-size: .75rem;
-      color: #9ca0a4;
-      border-top: 1px solid #e5e5e5;
+    @media (prefers-reduced-motion: reduce) {
+      .card, .cta svg { transition: none; }
+      .route-anim { animation: none; }
     }
   </style>
 </head>
 <body>
 
-  <header class="shell-header">
-    <span class="logo">✈ PrimePath Travel</span>
-    <span class="subtitle">Exploratory Travel Dashboard · SAP BTP &amp; CAP</span>
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="topbar">
+        <div class="brand">
+          <span class="logo"><svg class="ic" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></span>
+          <span>
+            <span class="name">PrimePath Travel</span><br>
+            <span class="tag">Exploratory Travel Dashboard</span>
+          </span>
+        </div>
+        <span class="env">SAP BTP · CAP</span>
+      </div>
+
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow">Eén platform · drie rollen</div>
+          <h1>Reisbeheer, goedkeuringen en rapportage op één plek.</h1>
+          <p>Kies het dashboard dat bij jouw rol past binnen PrimePath Travel. Alle reisdata, statussen en kerncijfers — centraal en up-to-date.</p>
+          <div class="hero-stats">
+            <div class="stat"><div class="n">3</div><div class="l">rol-dashboards</div></div>
+            <div class="stat"><div class="n">1</div><div class="l">gedeelde backend</div></div>
+            <div class="stat"><div class="n">TripPin</div><div class="l">live databron</div></div>
+          </div>
+        </div>
+
+        <div class="hero-art" aria-hidden="true">
+          <svg viewBox="0 0 420 300" role="img">
+            <!-- puntjesraster -->
+            <g class="grid-dots">
+              <!-- rij-gegenereerde puntjes -->
+              <circle cx="30" cy="40" r="1.4"/><circle cx="90" cy="40" r="1.4"/><circle cx="150" cy="40" r="1.4"/><circle cx="210" cy="40" r="1.4"/><circle cx="270" cy="40" r="1.4"/><circle cx="330" cy="40" r="1.4"/><circle cx="390" cy="40" r="1.4"/>
+              <circle cx="30" cy="100" r="1.4"/><circle cx="90" cy="100" r="1.4"/><circle cx="150" cy="100" r="1.4"/><circle cx="210" cy="100" r="1.4"/><circle cx="270" cy="100" r="1.4"/><circle cx="330" cy="100" r="1.4"/><circle cx="390" cy="100" r="1.4"/>
+              <circle cx="30" cy="160" r="1.4"/><circle cx="90" cy="160" r="1.4"/><circle cx="150" cy="160" r="1.4"/><circle cx="210" cy="160" r="1.4"/><circle cx="270" cy="160" r="1.4"/><circle cx="330" cy="160" r="1.4"/><circle cx="390" cy="160" r="1.4"/>
+              <circle cx="30" cy="220" r="1.4"/><circle cx="90" cy="220" r="1.4"/><circle cx="150" cy="220" r="1.4"/><circle cx="210" cy="220" r="1.4"/><circle cx="270" cy="220" r="1.4"/><circle cx="330" cy="220" r="1.4"/><circle cx="390" cy="220" r="1.4"/>
+            </g>
+            <!-- routes -->
+            <path class="route-line route-anim" d="M70 210 Q150 120 175 120"/>
+            <path class="route-line route-anim" d="M175 120 Q260 70 320 95"/>
+            <path class="route-line route-anim" d="M70 210 Q160 250 235 240"/>
+            <path class="route-line route-anim" d="M235 240 Q320 220 320 95"/>
+            <!-- knopen -->
+            <circle class="node-ring" cx="70" cy="210" r="9"/><circle class="node" cx="70" cy="210" r="4"/>
+            <circle class="node-ring" cx="175" cy="120" r="9"/><circle class="node" cx="175" cy="120" r="4"/>
+            <circle class="node-ring" cx="320" cy="95" r="9"/><circle class="node" cx="320" cy="95" r="4"/>
+            <circle class="node-ring" cx="235" cy="240" r="9"/><circle class="node" cx="235" cy="240" r="4"/>
+            <text class="node-label" x="58" y="234">SFO</text>
+            <text class="node-label" x="165" y="108">JFK</text>
+            <text class="node-label" x="312" y="83">LHR</text>
+            <text class="node-label" x="224" y="264">SIN</text>
+            <!-- vliegtuig op route -->
+            <g transform="translate(298 100) rotate(25) scale(.8)" fill="#fff">
+              <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
   </header>
 
-  <div class="page-title">
-    <h1>Travel Dashboard</h1>
-    <p>Kies jouw dashboard op basis van je rol binnen PrimePath Travel.</p>
-  </div>
+  <main>
+    <div class="grid">
 
-  <div class="app-grid">
-
-    <!-- Unified React Dashboard -->
-    <a class="app-card" href="/dashboard/" style="border-color:#0070F2; box-shadow:0 0 0 1px #0070F2;">
-      <div class="icon" style="background:#E8F2FF;">🖥️</div>
-      <div>
-        <span class="role-badge" style="background:#E8F2FF;color:#0070F2;">Alle Rollen</span>
-        <h2>Unified Dashboard</h2>
-      </div>
-      <p>Interactief SAP Fiori-stijl dashboard met persona-switcher voor alle drie rollen. Verbindt live met TripPin OData V4.</p>
-      <ul class="features">
-        <li>Travel Coördinator · Team Lead · HR/Admin</li>
-        <li>Live TripPin OData V4 integratie</li>
-        <li>Reizen, airlines, luchthavens, medewerkers</li>
-        <li>Goedkeuringsworkflow en PrimePath-velden</li>
-      </ul>
-      <span class="open-btn">Dashboard openen</span>
-    </a>
-
-    <!-- Travel Coördinator -->
-    <a class="app-card" href="/travel-login.html">
-      <div class="icon icon-travel">✈</div>
-      <div>
-        <span class="role-badge badge-travel">Travel Coördinator</span>
+      <!-- Travel Coördinator -->
+      <a class="card card-travel" href="/travel-login.html">
+        <div class="top">
+          <span class="icon"><svg class="ic" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></span>
+          <span class="badge">Travel Coördinator</span>
+        </div>
         <h2>Travel Dashboard</h2>
-      </div>
-      <p>Centraal beheer van alle reizen, statussen en interne velden.</p>
-      <ul class="features">
-        <li>Overzicht actieve reizen + KPI's</li>
-        <li>Filteren op datum, bestemming, status</li>
-        <li>Projectcode &amp; notities beheren</li>
-        <li>Alle medewerkers, airlines &amp; luchthavens</li>
-      </ul>
-      <span class="open-btn">Dashboard openen</span>
-    </a>
+        <p class="desc">Centraal beheer van alle reizen, statussen en interne velden.</p>
+        <ul class="features">
+          <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Overzicht actieve reizen + KPI's</li>
+          <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Filteren op datum, bestemming, status</li>
+          <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Projectcode &amp; notities beheren</li>
+          <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Medewerkers, airlines &amp; luchthavens</li>
+        </ul>
+        <span class="cta">Dashboard openen <svg class="ic" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
 
-    <!-- Team Lead -->
-    <a class="app-card" href="/team-login.html">
-      <div class="icon icon-team">👥</div>
-      <div>
-        <span class="role-badge badge-team">Team Lead</span>
+      <!-- Team Lead -->
+      <a class="card card-team" href="/team-login.html">
+        <div class="top">
+          <span class="icon"><svg class="ic" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+          <span class="badge">Team Lead</span>
+        </div>
         <h2>Team Dashboard</h2>
-      </div>
-      <p>Beschikbaarheid van teamleden en reisgoedkeuringen beheren.</p>
-      <ul class="features">
-        <li>Wie van mijn team is op reis?</li>
-        <li>Reizen goedkeuren of afkeuren</li>
-        <li>Openstaande goedkeuringen filteren</li>
-        <li>Reistijdlijn per medewerker</li>
-      </ul>
-      <span class="open-btn">Dashboard openen</span>
-    </a>
+        <p class="desc">Beschikbaarheid van teamleden en reisgoedkeuringen beheren.</p>
+        <ul class="features">
+          <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Wie van mijn team is op reis?</li>
+          <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Reizen goedkeuren of afkeuren</li>
+          <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Openstaande goedkeuringen filteren</li>
+          <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Reistijdlijn per medewerker</li>
+        </ul>
+        <span class="cta">Dashboard openen <svg class="ic" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
 
-    <!-- HR / Admin -->
-    <a class="app-card" href="/hr-login.html">
-      <div class="icon icon-hr">📊</div>
-      <div>
-        <span class="role-badge badge-hr">HR / Administratie</span>
+      <!-- HR / Admin -->
+      <a class="card card-hr" href="/hr-login.html">
+        <div class="top">
+          <span class="icon"><svg class="ic" viewBox="0 0 24 24"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg></span>
+          <span class="badge">HR / Administratie</span>
+        </div>
         <h2>HR Dashboard</h2>
-      </div>
-      <p>Statistieken en rapportage voor kwartaalanalyse en airlineonderhandelingen.</p>
-      <ul class="features">
-        <li>Meest gebruikte airlines (grafiek)</li>
-        <li>Aantal reizen per periode</li>
-        <li>Read-only medewerkeroverzicht</li>
-        <li>Exporteerbare rapportagedata</li>
-      </ul>
-      <span class="open-btn">Dashboard openen</span>
-    </a>
+        <p class="desc">Statistieken en rapportage voor kwartaalanalyse en airline-onderhandelingen.</p>
+        <ul class="features">
+          <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Meest gebruikte airlines (grafiek)</li>
+          <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Aantal reizen per periode</li>
+          <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Read-only medewerkeroverzicht</li>
+          <li><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>Rapportagedata per airline</li>
+        </ul>
+        <span class="cta">Dashboard openen <svg class="ic" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
 
-  </div>
-
-  <!-- OData API links -->
-  <div class="api-section">
-    <h3>OData API Endpoints</h3>
-    <div class="api-links">
-      <a class="api-link" href="/travel/$metadata">Travel Service (metadata)</a>
-      <a class="api-link" href="/travel/Trips">Trips</a>
-      <a class="api-link" href="/travel/People">People</a>
-      <a class="api-link" href="/travel/Airlines">Airlines</a>
-      <a class="api-link" href="/travel/Airports">Airports</a>
-      <a class="api-link" href="/travel/TravelExtensions">TravelExtensions</a>
-      <a class="api-link" href="/team/$metadata">Team Service (metadata)</a>
-      <a class="api-link" href="/hr/$metadata">HR Service (metadata)</a>
     </div>
-  </div>
+
+    <div class="api">
+      <details>
+        <summary><svg class="ic" viewBox="0 0 24 24"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg> OData API Endpoints</summary>
+        <div class="api-links">
+          <a class="api-link" href="/travel/$metadata">Travel Service (metadata)</a>
+          <a class="api-link" href="/travel/Trips">Trips</a>
+          <a class="api-link" href="/travel/People">People</a>
+          <a class="api-link" href="/travel/Airlines">Airlines</a>
+          <a class="api-link" href="/travel/Airports">Airports</a>
+          <a class="api-link" href="/travel/TravelExtensions">TravelExtensions</a>
+          <a class="api-link" href="/team/$metadata">Team Service (metadata)</a>
+          <a class="api-link" href="/hr/$metadata">HR Service (metadata)</a>
+        </div>
+      </details>
+    </div>
+  </main>
 
   <footer>
-    EhB Cloud Integration &nbsp;·&nbsp; In samenwerking met Flexso &nbsp;·&nbsp; Demo: 19 juni 2026
+    EhB Cloud Integration <span class="dot">·</span> In samenwerking met Flexso <span class="dot">·</span> Demo: 19 juni 2026
   </footer>
 
 </body>

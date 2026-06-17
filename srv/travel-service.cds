@@ -24,22 +24,48 @@ service TravelService {
   @readonly entity People as projection on shared.People {
     *,
     virtual null as OnTravel : Boolean,
+    virtual null as Email    : String,   // FV-07: eerste e-mailadres als scalair veld
     Trips: redirected to Trips
   };
   @readonly entity Trips    as projection on shared.Trips;
-  @readonly entity Airlines as projection on shared.Airlines;
-  @readonly entity Airports as projection on shared.Airports;
+  @readonly entity Airlines as projection on shared.Airlines {
+    *,
+    virtual null as TripCount : Integer   // FV-18: aantal boekingen (uit airline-stats)
+  };
+  // Let op: Location (complextype) wordt BEWUST niet geprojecteerd. Met '*' kwam het
+  // in het entity-type terecht en vroeg de Fiori-lijst het (deels) op -> CAP sloeg het
+  // plat naar 'Location_Address' wat TripPin niet kent -> 500/502. De stad komt via het
+  // virtuele City-veld (gevuld in de READ-handler uit een raw TripPin-call).
+  @readonly entity Airports as projection on shared.Airports {
+    IcaoCode,
+    IataCode,
+    Name,
+    virtual null as City : String   // FV-20: stad uit het geneste Location.City.Name
+  };
 
   // ── Eigen PrimePath-velden (volledig CRUD voor TravelAdmin) ───────────────
   // FA v4 §7.4: ProjectCode, ApprovalStatus, InternalNote
   // FV-05: StartsAt als virtueel veld voor sortering (ingevuld vanuit TripPin)
   // FV-15: TripName, TripBudget, TripDescription als virtuele TripPin-velden
+  // Bewust GEEN @odata.draft.enabled: de custom READ-handler vult hieronder
+  // virtuele TripPin-velden in; draft (shadow-entiteit + query-unie) zou daarmee
+  // conflicteren. UI-bewerking gebeurt daarom via bound actions i.p.v. inline-edit:
+  // de TeamLead via goedkeuren/afkeuren (team-service), de TravelAdmin via de
+  // 'bewerk'-actie hieronder (FV-17) — beide hergebruiken de before('UPDATE')-validatie.
   entity TravelExtensions as projection on p.TravelExtensions {
     *,
     virtual null as StartsAt        : DateTime,
+    virtual null as EndsAt          : DateTime,
     virtual null as TripName        : String,
     virtual null as TripBudget      : Decimal,
     virtual null as TripDescription : String
+  } actions {
+    // FV-17: TravelAdmin bewerkt de PrimePath-velden via een dialoog (lege velden = ongewijzigd).
+    action bewerk(
+      ProjectCode    : String,
+      ApprovalStatus : p.ApprovalStatus,
+      InternalNote   : String
+    ) returns TravelExtensions;
   };
 
   // FA v4 §10.3: beheer van team-koppelingen
@@ -54,6 +80,9 @@ service TravelService {
   // FV-03: aantal medewerkers momenteel op reis (actieve reis vandaag)
   function getOnTravelCount() returns Integer;
 
+  // V7: aantal komende reizen binnen 2 weken (StartsAt in de nabije toekomst)
+  function getUpcomingTripsCount() returns Integer;
+
   // FV-02: meest gebruikte airline (op basis van aantal boekingen)
   function getTopAirline() returns {
     AirlineCode : String;
@@ -61,10 +90,11 @@ service TravelService {
     TripCount   : Integer;
   };
 
-  // FV-06: airlinegebruik voor grafiek (taart- of staafdiagram)
+  // FV-06 + V8: airlinegebruik voor grafiek (aantal boekingen + totaal budget)
   function getAirlineStats() returns array of {
     AirlineCode : String;
     Name        : String;
     TripCount   : Integer;
+    TotalBudget : Decimal;
   };
 }

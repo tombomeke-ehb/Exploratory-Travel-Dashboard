@@ -10,6 +10,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const cds = require('@sap/cds');
+const { collectAllTrips, collectTripsForPerson } = require('./trippin-trips');
 
 // ── In-memory cache voor airline-statistieken ────────────────────────────────
 let _airlineStatsCache = null;
@@ -21,9 +22,38 @@ module.exports = cds.service.impl(async function () {
 
   // ── READ: TripPin doorsturen ───────────────────────────────────────────────
   this.on('READ', 'People',   req => TripPin.run(req.query));
-  this.on('READ', 'Trips',    req => TripPin.run(req.query));
-  this.on('READ', 'Airlines', req => TripPin.run(req.query));
   this.on('READ', 'Airports', req => TripPin.run(req.query));
+  // FV-18: verrijk de airlines met het aantal boekingen uit de (gecachte) airline-stats.
+  // Graceful: faalt de stats-call, dan blijft de lijst werken met TripCount 0.
+  this.on('READ', 'Airlines', async (req) => {
+    const airlines = await TripPin.run(req.query);
+    const arr = Array.isArray(airlines) ? airlines : (airlines ? [airlines] : []);
+    try {
+      const stats  = await this.send('getAirlineStats');
+      const byCode = Object.fromEntries((stats || []).map(s => [s.AirlineCode, s.TripCount]));
+      arr.forEach(a => { a.TripCount = byCode[a.AirlineCode] ?? 0; });
+    } catch (err) {
+      cds.log('hr-service').warn('Airline-boekingen niet gemerged:', err.message);
+    }
+    return Array.isArray(airlines) ? arr : arr[0];
+  });
+
+  // Trips: TripPin heeft geen top-level /Trips → aggregeer via People-navigatie
+  this.on('READ', 'Trips', async (req) => {
+    const { trips, byId } = await collectAllTrips(TripPin);
+    const keyParam = req.params?.[req.params.length - 1];
+    const keyId    = (keyParam && typeof keyParam === 'object') ? keyParam.TripId : keyParam;
+    if (keyId !== undefined && keyId !== null) {
+      return byId.get(Number(keyId)) ?? null;
+    }
+    // People('x')/Trips navigatie -> enkel de reizen van die persoon
+    const personParam = req.params?.find(p => p && typeof p === 'object' && p.UserName !== undefined);
+    if (personParam?.UserName) {
+      return await collectTripsForPerson(TripPin, personParam.UserName);
+    }
+    trips.$count = trips.length;
+    return trips;
+  });
 
   // ── FV-27: airline-statistieken voor grafiek ──────────────────────────────
   // Telt vluchten per airline via FlightNumber-prefix in PlanItems.
@@ -39,27 +69,33 @@ module.exports = cds.service.impl(async function () {
     const knownCodes = new Set(airlineArr.map(a => a.AirlineCode));
 
     const counts = {};
+    const budgets = {};   // V8: totaal reisbudget per airline
 
     try {
       const people    = await TripPin.run(SELECT.from('TripPinService.People'));
       const peopleArr = Array.isArray(people) ? people : (people ? [people] : []);
       const SAMPLE_SIZE = Math.min(peopleArr.length, 8);
 
-      for (const person of peopleArr.slice(0, SAMPLE_SIZE)) {
+      // Parallel over de gesamplede personen én hun reizen: scheelt veel tijd
+      // t.o.v. sequentiële remote-calls (de PlanItems-traversal is de bottleneck).
+      await Promise.all(peopleArr.slice(0, SAMPLE_SIZE).map(async (person) => {
         try {
           const tripsResp = await TripPin.send({
             method: 'GET',
-            path: `People('${person.UserName}')/Trips?$select=TripId`,
+            path: `People('${person.UserName}')/Trips?$select=TripId,Budget`,
           });
           const trips = Array.isArray(tripsResp?.value) ? tripsResp.value
                       : Array.isArray(tripsResp)        ? tripsResp
                       : [];
 
-          for (const trip of trips) {
+          await Promise.all(trips.map(async (trip) => {
+            const tripAirlines = new Set();
             try {
               const planResp = await TripPin.send({
                 method: 'GET',
-                path: `People('${person.UserName}')/Trips(${trip.TripId})/PlanItems?$select=FlightNumber`,
+                // Geen $select=FlightNumber: dat veld bestaat enkel op het Flight-subtype,
+                // niet op het PlanItem-basistype -> TripPin geeft anders een 'property not found'-fout.
+                path: `People('${person.UserName}')/Trips(${trip.TripId})/PlanItems`,
               });
               const items = Array.isArray(planResp?.value) ? planResp.value
                           : Array.isArray(planResp)        ? planResp
@@ -70,24 +106,36 @@ module.exports = cds.service.impl(async function () {
                   const match = item.FlightNumber.match(/^([A-Z]{2})/);
                   if (match && knownCodes.has(match[1])) {
                     counts[match[1]] = (counts[match[1]] || 0) + 1;
+                    tripAirlines.add(match[1]);
                   }
                 }
               }
-            } catch { /* negeer PlanItems-fouten per trip */ }
-          }
-        } catch { /* negeer fouten per persoon */ }
-      }
-    } catch { /* fallback */ }
+            } catch (err) {
+              cds.log('hr-service').warn(`PlanItems van reis ${trip.TripId} ('${person.UserName}') niet opgehaald:`, err.message);
+            }
+
+            // V8: reisbudget toekennen aan elke airline in deze reis (set → geen dubbeltelling)
+            const tripBudget = Number(trip.Budget?.Value ?? trip.Budget ?? 0) || 0;
+            tripAirlines.forEach(code => { budgets[code] = (budgets[code] || 0) + tripBudget; });
+          }));
+        } catch (err) {
+          cds.log('hr-service').warn(`Airline-stats van '${person.UserName}' niet opgehaald:`, err.message);
+        }
+      }));
+    } catch (err) {
+      cds.log('hr-service').warn('Airline-stats: ophalen van People mislukt; val terug op lege telling:', err.message);
+    }
 
     let result;
     if (Object.keys(counts).length === 0) {
-      result = airlineArr.map(a => ({ AirlineCode: a.AirlineCode, Name: a.Name, TripCount: 0 }));
+      result = airlineArr.map(a => ({ AirlineCode: a.AirlineCode, Name: a.Name, TripCount: 0, TotalBudget: 0 }));
     } else {
       result = Object.entries(counts)
         .map(([code, count]) => ({
           AirlineCode: code,
           Name:        airlineMap[code] ?? code,
           TripCount:   count,
+          TotalBudget: Math.round(budgets[code] || 0),
         }))
         .sort((a, b) => b.TripCount - a.TripCount);
     }
@@ -100,8 +148,15 @@ module.exports = cds.service.impl(async function () {
   // ── FV-28: aantal reizen in een periode ───────────────────────────────────
   this.on('getTripCountByPeriod', async (req) => {
     const { from, to } = req.data;
-    const trips = await TripPin.run(SELECT.from('TripPinService.Trips'));
-    const arr   = Array.isArray(trips) ? trips : (trips ? [trips] : []);
+
+    // Valideer de (optionele) datumparameters: een opgegeven waarde moet een geldige datum zijn.
+    if ((from != null && isNaN(new Date(from))) || (to != null && isNaN(new Date(to)))) {
+      return req.error(400, 'Ongeldige datumparameters: gebruik een geldige datum (ISO 8601).');
+    }
+
+    // TripPin heeft geen top-level Trips-entiteitset: gebruik de gedeelde
+    // aggregatie (reizen via People-navigatie), net als de Trips-READ-handler.
+    const { trips: arr } = await collectAllTrips(TripPin);
 
     const fromDate = from ? new Date(from) : null;
     const toDate   = to   ? new Date(to)   : null;
@@ -114,4 +169,8 @@ module.exports = cds.service.impl(async function () {
       return true;
     }).length;
   });
+
+  // Pre-warm de caches bij boot (niet-blokkerend) zodat het eerste verzoek snel is.
+  collectAllTrips(TripPin).catch(() => {});
+  this.send('getAirlineStats').catch(() => {});
 });
