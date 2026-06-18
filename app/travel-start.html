@@ -616,9 +616,12 @@
   var eurFmt = new Intl.NumberFormat('nl-BE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
 
   // ── Fetch helper ─────────────────────────────────────
+  // Centrale wrapper rond fetch() voor alle /travel-API-aanroepen.
+  // Voegt automatisch cookie-auth en JSON-accept toe.
+  // Bij 401/403 (sessie verlopen of onvoldoende rechten) redirect naar login.
   async function api(path) {
     var res = await fetch(SVC + '/' + path, {
-      credentials: 'include',
+      credentials: 'include',           // JWT-cookie meesturen bij elke request
       headers: { 'Accept': 'application/json' }
     });
     if (res.status === 401 || res.status === 403) {
@@ -629,6 +632,8 @@
     return res.json();
   }
 
+  // Converteert serverdata naar veilige HTML-tekst vóór innerHTML-injectie.
+  // Voorkomt XSS wanneer TripPin-velden speciale tekens bevatten.
   function esc(s) {
     if (s == null) return '';
     var d = document.createElement('div');
@@ -636,11 +641,15 @@
     return d.innerHTML;
   }
 
+  // Formatteert een ISO-datumstring naar nl-BE weergave (bijv. "5 juni 2025").
+  // Geeft '—' terug bij null/undefined of een ongeldige datum.
   function fmtDate(v) {
     if (!v) return '—';
     try { return dateFmt.format(new Date(v)); } catch { return String(v); }
   }
 
+  // Zet een ApprovalStatus-waarde om naar een gekleurde pill-badge.
+  // Mogelijke waarden: 'Approved' (groen), 'Rejected' (rood), overige (oranje).
   function statusPill(s) {
     var cls = s === 'Approved' ? 'pill-approved' : s === 'Rejected' ? 'pill-rejected' : 'pill-pending';
     var label = s === 'Approved' ? 'Goedgekeurd' : s === 'Rejected' ? 'Afgewezen' : 'In afwachting';
@@ -648,13 +657,17 @@
   }
 
   // ── Navigation ───────────────────────────────────────
+  // Koppelt de URL-hash aan de juiste view en triggert lazy data-loading.
+  // Het object `loaded` voorkomt dat een view meerdere keren data ophaalt.
   var views = ['dashboard', 'reisextensies', 'medewerkers', 'airlines', 'luchthavens'];
   var loaded = {};
 
   function navigate() {
+    // Stap 1: normaliseer de hash; val terug op 'dashboard' bij onbekende waarde
     var hash = (location.hash || '#dashboard').replace('#', '');
     if (views.indexOf(hash) === -1) hash = 'dashboard';
 
+    // Stap 2: activeer de juiste view en het bijbehorende sidebar-item
     views.forEach(function (v) {
       document.getElementById('view-' + v).classList.toggle('active', v === hash);
     });
@@ -662,6 +675,7 @@
       a.classList.toggle('active', a.getAttribute('data-view') === hash);
     });
 
+    // Stap 3: laad data voor de view, maar alleen de eerste keer (lazy loading)
     if (!loaded[hash]) {
       loaded[hash] = true;
       if (hash === 'dashboard') loadDashboard();
