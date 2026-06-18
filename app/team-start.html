@@ -639,11 +639,15 @@
       });
 
       // ── Reizen ───────────────────────────────────────────────
+      // Haalt reisextensies op (gecached) en toont ze.
+      // reizenFilter beperkt de weergave tot één specifieke gebruiker
+      // wanneer de gebruiker vanuit "Mijn Team" op "Reizen bekijken" klikte.
       var reizenData = null;
       var reizenFilter = null;
 
       function loadReizen() {
         var wrap = document.getElementById('reizenTableWrap');
+        // Cache aanwezig: direct renderen
         if (reizenData) { renderReizen(reizenData); return; }
         wrap.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
 
@@ -655,7 +659,9 @@
         });
       }
 
+      // Filtert en rendert de reizentabel met statusdropdown per rij.
       function renderReizen(data) {
+        // Stap 1: filter op TripID, projectcode of status via het zoekveld
         var q = (document.getElementById('reizenSearch').value || '').toLowerCase();
         var filtered = data.filter(function (r) {
           if (!q) return true;
@@ -663,13 +669,16 @@
         });
 
         var wrap = document.getElementById('reizenTableWrap');
+        // Stap 2: toon lege staat als er geen resultaten zijn
         if (filtered.length === 0) {
           wrap.innerHTML = '<table><thead><tr><th>TRIP ID</th><th>PROJECTCODE</th><th>GOEDKEURINGSSTATUS</th><th>INTERNE NOTITIE</th><th>ACTIE</th></tr></thead><tbody><tr><td colspan="5" class="empty-msg">Geen gegevens beschikbaar</td></tr></tbody></table>';
           return;
         }
 
+        // Stap 3: bouw tabelrijen met pill + statusdropdown per reis
         var html = '<table><thead><tr><th>TRIP ID</th><th>PROJECTCODE</th><th>GOEDKEURINGSSTATUS</th><th>INTERNE NOTITIE</th><th>ACTIE</th></tr></thead><tbody>';
         filtered.forEach(function (r) {
+          // Bepaal pill-kleur en -label op basis van ApprovalStatus
           var pillClass = r.ApprovalStatus === 'Approved' ? 'pill-green' : r.ApprovalStatus === 'Rejected' ? 'pill-red' : 'pill-orange';
           var pillLabel = r.ApprovalStatus === 'Approved' ? 'Goedgekeurd' : r.ApprovalStatus === 'Rejected' ? 'Afgewezen' : 'In afwachting';
           html += '<tr data-tripid="' + esc(r.TripID) + '">'
@@ -689,6 +698,7 @@
         html += '</tbody></table>';
         wrap.innerHTML = html;
 
+        // Stap 4: koppel change-listener op elke statusdropdown ná DOM-injectie
         wrap.querySelectorAll('.status-select').forEach(function (sel) {
           sel.addEventListener('change', function () {
             var tripId = sel.getAttribute('data-tripid');
@@ -699,7 +709,9 @@
         });
       }
 
+      // Stuurt een PATCH-verzoek om de ApprovalStatus van één reis bij te werken.
       function patchStatus(tripId, status, selectEl) {
+        // Stap 1: blokkeer de dropdown tijdens het verzoek (voorkomt dubbele submits)
         selectEl.disabled = true;
         fetch('/team/TravelExtensions(' + tripId + ')', {
           method: 'PATCH',
@@ -714,6 +726,7 @@
           if (!res.ok) throw new Error('HTTP ' + res.status);
           return res.json();
         }).then(function () {
+          // Stap 2: werk de pill in de DOM bij zonder de volledige tabel te herrenderen
           var pillEl = document.querySelector('[data-pill="' + tripId + '"]');
           if (pillEl) {
             var pillClass = status === 'Approved' ? 'pill-green' : status === 'Rejected' ? 'pill-red' : 'pill-orange';
@@ -721,12 +734,14 @@
             pillEl.className = 'pill ' + pillClass;
             pillEl.textContent = pillLabel;
           }
+          // Stap 3: update de lokale cache zodat toekomstige re-renders de nieuwe status tonen
           if (reizenData) {
             var ext = reizenData.find(function (r) { return String(r.TripID) === String(tripId); });
             if (ext) ext.ApprovalStatus = status;
           }
           selectEl.disabled = false;
           showToast('Status bijgewerkt', 'success');
+          // Stap 4: reset dashboard-cache zodat KPI's bij terugkeer herladen worden
           dashboardLoaded = false;
         }).catch(function (e) {
           selectEl.disabled = false;
@@ -739,11 +754,14 @@
       });
 
       // ── Banner dismiss ───────────────────────────────────────
+      // Verbergt de welkomstbanner wanneer de gebruiker hem wegklikt.
       document.getElementById('dismissBanner').addEventListener('click', function () {
         document.getElementById('welcomeBanner').classList.add('hidden');
       });
 
       // ── Logout ───────────────────────────────────────────────
+      // POST naar /auth/logout wist de httpOnly JWT-cookie server-side.
+      // Daarna redirect naar de landingspagina ongeacht of de request slaagt.
       document.getElementById('logoutBtn').addEventListener('click', function () {
         fetch('/auth/logout', { method: 'POST', credentials: 'include' }).catch(function () {}).then(function () {
           window.location.href = '/';
@@ -751,6 +769,7 @@
       });
 
       // ── Boot ─────────────────────────────────────────────────
+      // Start de app: verwerk de huidige hash en laad de bijbehorende beginview.
       navigate();
     })();
   </script>
