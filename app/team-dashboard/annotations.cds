@@ -101,6 +101,20 @@ annotate TeamService.TravelExtensions with @(
     { $Type: 'UI.DataField', Value: createdBy,  Label: 'Aangemaakt door' }
   ]}
 );
+annotate TeamService.Airlines with @(
+  UI.PresentationVariant: { SortOrder: [{ Property: Name, Descending: false }], Visualizations: ['@UI.LineItem'] },
+  UI.HeaderInfo: { TypeName: 'Airline', TypeNamePlural: 'Airlines', Title: { Value: Name }, Description: { Value: AirlineCode } },
+  UI.SelectionFields: [ AirlineCode ],
+  UI.LineItem: [
+    { $Type: 'UI.DataField', Value: AirlineCode, Label: 'IATA-code' },
+    { $Type: 'UI.DataField', Value: Name,        Label: 'Naam' }
+  ],
+  UI.Facets: [{ $Type: 'UI.ReferenceFacet', Label: 'Airline details', Target: '@UI.FieldGroup#AirlineInfo' }],
+  UI.FieldGroup#AirlineInfo: { Label: 'Airlinegegevens', Data: [
+    { $Type: 'UI.DataField', Value: AirlineCode, Label: 'IATA-code' },
+    { $Type: 'UI.DataField', Value: Name,        Label: 'Naam' }
+  ]}
+);
 annotate TeamService.TravelExtensions with {
   TripID         @title: 'Trip ID'            @readonly;
   ApprovalStatus @title: 'Goedkeuringsstatus';
