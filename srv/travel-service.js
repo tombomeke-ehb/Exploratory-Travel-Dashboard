@@ -46,9 +46,11 @@ module.exports = cds.service.impl(async function () {
     const savedWhere   = sel?.where;
     const savedOrderBy = sel?.orderBy;
     const savedSearch  = sel?.search;
+    const savedColumns = sel?.columns;
     if (sel) {
       if (Array.isArray(sel.where))   sel.where   = sel.where.filter(t => !t?.ref || !PEOPLE_VIRTUAL_FIELDS.has(t.ref[0]));
       if (Array.isArray(sel.orderBy)) sel.orderBy  = sel.orderBy.filter(o => !o?.ref || !PEOPLE_VIRTUAL_FIELDS.has(o.ref[0]));
+      if (Array.isArray(sel.columns)) sel.columns  = sel.columns.filter(c => !c?.ref || !PEOPLE_VIRTUAL_FIELDS.has(c.ref[0]));
       sel.search = undefined;
     }
 
@@ -66,6 +68,7 @@ module.exports = cds.service.impl(async function () {
       sel.where   = savedWhere;
       sel.orderBy = savedOrderBy;
       sel.search  = savedSearch;
+      sel.columns = savedColumns;
     }
 
     if (peopleArr.length === 0) return isOne ? null : peopleArr;
