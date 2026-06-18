@@ -23,8 +23,14 @@ module.exports = cds.service.impl(async function () {
   // FV-22: People met OnTravel statusbadge
   this.on('READ', 'People', async (req) => {
     const people = await TripPin.run(req.query);
-    const peopleArr = Array.isArray(people) ? people : (people ? [people] : []);
+    let peopleArr = Array.isArray(people) ? people : (people ? [people] : []);
     if (peopleArr.length === 0) return people;
+
+    // Teamfiltering (TA §7.2 / FA §4.2): een Team Lead ziet enkel de eigen teamleden.
+    // In development (dummy-auth) is `team` null → geen filter, alles zichtbaar.
+    const team = await _resolveTeamUserNames(req);
+    if (team) peopleArr = peopleArr.filter(p => team.has(p.UserName));
+    if (peopleArr.length === 0) return Array.isArray(people) ? [] : null;
 
     const now = new Date();
     await Promise.all(peopleArr.map(async (person) => {
@@ -60,7 +66,7 @@ module.exports = cds.service.impl(async function () {
 
   // Trips: TripPin heeft geen top-level /Trips → aggregeer via People-navigatie
   this.on('READ', 'Trips', async (req) => {
-    const { trips, byId } = await collectAllTrips(TripPin);
+    const { trips, byId, owners } = await collectAllTrips(TripPin);
     const keyParam = req.params?.[req.params.length - 1];
     const keyId    = (keyParam && typeof keyParam === 'object') ? keyParam.TripId : keyParam;
     if (keyId !== undefined && keyId !== null) {
@@ -71,8 +77,19 @@ module.exports = cds.service.impl(async function () {
     if (personParam?.UserName) {
       return await collectTripsForPerson(TripPin, personParam.UserName);
     }
-    trips.$count = trips.length;
-    return trips;
+
+    // Teamfiltering (TA §7.2 / FA §4.2): enkel reizen van eigen teamleden.
+    // `owners` (TripId → Set<UserName>) uit de cache, dus geen extra remote calls.
+    const team = await _resolveTeamUserNames(req);
+    let list = trips;
+    if (team) {
+      list = trips.filter(t => {
+        const ow = owners.get(t.TripId);
+        return ow && [...ow].some(u => team.has(u));
+      });
+    }
+    list.$count = list.length;
+    return list;
   });
 
   // ── FV-26: aantal openstaande goedkeuringen voor dit team ────────────────
@@ -209,6 +226,25 @@ async function _setApprovalStatus(req, status, TripPin) {
   return await cds.run(
     SELECT.one.from('primepath.TravelExtensions').where({ TripID: tripId })
   );
+}
+
+// Resolve de TripPin-UserNames van het team van de ingelogde TeamLead.
+// Retourneert een Set<UserName> om READ People/Trips op te filteren (TA §7.2, FA §4.2),
+// of `null` in development (dummy-auth / anonymous) zodat lokaal alles zichtbaar blijft.
+async function _resolveTeamUserNames(req) {
+  const localUserId = req.user?.id;
+  if (!localUserId || localUserId === 'anonymous') return null;   // dev: geen filter
+
+  const localUser = await cds.run(
+    SELECT.one.from('primepath.Users').where({ username: localUserId })
+  );
+  const teamLeadTripPin = localUser?.tripPinUserName;
+  if (!teamLeadTripPin) return new Set();   // account zonder TripPin-koppeling → leeg team
+
+  const teamMembers = await cds.run(
+    SELECT.from('primepath.UserMapping').where({ TeamLeadUserName: teamLeadTripPin })
+  );
+  return new Set((teamMembers || []).map(m => m.TripPinUserName));
 }
 
 // Verzamel alle TripIDs die toebehoren aan de opgegeven teamleden, via TripPin-navigatie.
