@@ -624,7 +624,7 @@
       credentials: 'include',           // JWT-cookie meesturen bij elke request
       headers: { 'Accept': 'application/json' }
     });
-    if (res.status === 401 || res.status === 403) {
+    if (res.status === 401) {
       window.location.href = LOGIN;
       throw new Error('unauthorized');
     }

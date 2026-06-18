@@ -608,7 +608,7 @@
         credentials: 'include',
         headers: { 'Accept': 'application/json' }
       });
-      if (res.status === 401 || res.status === 403) {
+      if (res.status === 401) {
         window.location.href = '/hr-login.html';
         throw new Error('unauthorized');
       }

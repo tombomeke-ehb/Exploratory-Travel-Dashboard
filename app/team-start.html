@@ -469,8 +469,7 @@
           headers: { 'Accept': 'application/json' }
         }, opts || {});
         return fetch('/team/' + resource, init).then(function (res) {
-          // Sessie verlopen of niet geautoriseerd: redirect naar login
-          if (res.status === 401 || res.status === 403) {
+          if (res.status === 401) {
             window.location.href = '/team-login.html';
             throw new Error('unauthorized');
           }
@@ -719,11 +718,15 @@
           headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
           body: JSON.stringify({ ApprovalStatus: status })
         }).then(function (res) {
-          if (res.status === 401 || res.status === 403) {
+          if (res.status === 401) {
             window.location.href = '/team-login.html';
             throw new Error('unauthorized');
           }
-          if (!res.ok) throw new Error('HTTP ' + res.status);
+          if (!res.ok) {
+            return res.json().catch(function () { return {}; }).then(function (body) {
+              throw new Error(body.error?.message || 'HTTP ' + res.status);
+            });
+          }
           return res.json();
         }).then(function () {
           // Stap 2: werk de pill in de DOM bij zonder de volledige tabel te herrenderen
