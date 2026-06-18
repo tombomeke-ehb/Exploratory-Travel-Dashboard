@@ -95,6 +95,7 @@ annotate TravelService.TravelExtensions with actions {
   );
 }
 annotate TravelService.People with @(
+  UI.PresentationVariant: { SortOrder: [{ Property: LastName, Descending: false }], Visualizations: ['@UI.LineItem'] },
   UI.HeaderInfo: {
     TypeName: 'Medewerker',
     TypeNamePlural: 'Medewerkers',
