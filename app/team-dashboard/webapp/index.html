@@ -92,20 +92,33 @@
     #container { position: absolute; inset: 0; }
   </style>
 </head>
+<!-- sapUiBody: vereiste UI5-klasse voor de juiste body-stijlen;
+     id="content" koppelt aan de CSS flex-kolomstructuur.          -->
 <body class="sapUiBody" id="content">
 
+  <!-- ═══ APPBAR ═══════════════════════════════════════════════════
+       PrimePath-huisstijlbalk boven de Fiori Elements-webapp.      -->
   <header class="pp-appbar">
+    <!-- Merklogo: vliegtuigicoon + bedrijfsnaam + apptitel -->
     <span class="pp-brand">
       <span class="mark"><svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></span>
       PrimePath Travel
       <span class="pp-app">Team Dashboard</span>
     </span>
     <span class="pp-actions">
+      <!-- Terugknop: navigeert naar team-start.html (het custom SPA-dashboard) -->
       <a class="pp-back" href="/team-start.html" title="Terug naar het dashboard"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Terug</a>
+      <!-- Afmeldknop: roept ppLogout() aan onderaan de pagina -->
       <button class="pp-logout" type="button" onclick="ppLogout()">Afmelden</button>
     </span>
   </header>
 
+  <!-- ═══ UI5 COMPONENT HOST ═══════════════════════════════════════
+       data-sap-ui-component laat ComponentSupport (zie bootstrap) de
+       Fiori Elements-app automatisch mounten zodra UI5 klaar is.
+       - data-name: namespace-alias uit resourceroots ("primepath.team")
+       - data-id: container-id waarvoor het component gerenderd wordt
+       - data-handle-validation: activeert UI5 client-side validatie   -->
   <div class="pp-app-host">
     <div data-sap-ui-component
       data-name="primepath.team"
@@ -116,6 +129,8 @@
     </div>
   </div>
 
+  <!-- ppLogout(): POST naar /auth/logout (verwijdert de httpOnly JWT-cookie)
+       en stuurt altijd terug naar de landingspagina, ook bij een netwerkfout. -->
   <script>
     function ppLogout(){ fetch('/auth/logout',{method:'POST',credentials:'include'}).finally(function(){ location.href='/'; }); }
   </script>
