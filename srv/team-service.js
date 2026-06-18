@@ -14,7 +14,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const cds = require('@sap/cds');
-const { collectAllTrips, collectTripsForPerson } = require('./trippin-trips');
+const { collectAllTrips, collectTripsForPerson, collectAllPeople, applyClientPaging } = require('./trippin-trips');
 
 module.exports = cds.service.impl(async function () {
   const TripPin = await cds.connect.to('TripPinService');
@@ -22,15 +22,23 @@ module.exports = cds.service.impl(async function () {
   // ── READ: TripPin doorsturen ───────────────────────────────────────────────
   // FV-22: People met OnTravel statusbadge
   this.on('READ', 'People', async (req) => {
-    const people = await TripPin.run(req.query);
-    let peopleArr = Array.isArray(people) ? people : (people ? [people] : []);
-    if (peopleArr.length === 0) return people;
+    // TripPin pagineert per 8 → haal alle pagina's op, anders mist het teamfilter
+    // teamleden die voorbij de eerste pagina staan (FV-22).
+    const isOne = !!req.query.SELECT?.one;
+    let peopleArr;
+    if (isOne) {
+      const p = await TripPin.run(req.query);   // single-entity read niet pagineren
+      peopleArr = p ? (Array.isArray(p) ? p : [p]) : [];
+    } else {
+      peopleArr = await collectAllPeople(TripPin, req.query);
+    }
+    if (peopleArr.length === 0) return isOne ? null : peopleArr;
 
     // Teamfiltering (TA §7.2 / FA §4.2): een Team Lead ziet enkel de eigen teamleden.
     // In development (dummy-auth) is `team` null → geen filter, alles zichtbaar.
     const team = await _resolveTeamUserNames(req);
     if (team) peopleArr = peopleArr.filter(p => team.has(p.UserName));
-    if (peopleArr.length === 0) return Array.isArray(people) ? [] : null;
+    if (peopleArr.length === 0) return isOne ? null : peopleArr;
 
     const now = new Date();
     await Promise.all(peopleArr.map(async (person) => {
@@ -60,7 +68,7 @@ module.exports = cds.service.impl(async function () {
       }
     }));
 
-    return Array.isArray(people) ? peopleArr : peopleArr[0];
+    return isOne ? peopleArr[0] : applyClientPaging(peopleArr, req.query);
   });
   this.on('READ', 'Airlines', req => TripPin.run(req.query));
 
