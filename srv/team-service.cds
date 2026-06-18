@@ -40,8 +40,9 @@ service TeamService {
     *,
     virtual null as StatusLabel : String   // Nederlandse vertaling van ApprovalStatus
   } actions {
-    action goedkeuren() returns TravelExtensions;
-    action afkeuren()  returns TravelExtensions;
+    action goedkeuren()    returns TravelExtensions;
+    action afkeuren()      returns TravelExtensions;
+    action inBehandeling() returns TravelExtensions;
   };
 
   // ── UserMapping: read-only (teamleden opzoeken) ───────────────────────────

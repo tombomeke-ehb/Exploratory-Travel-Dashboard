@@ -10,7 +10,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const cds = require('@sap/cds');
-const { collectAllTrips, collectTripsForPerson, collectAllPeople, applyClientPaging } = require('./trippin-trips');
+const { collectAllTrips, collectTripsForPerson, collectAllPeople, applyClientPaging, applyClientQuery } = require('./trippin-trips');
 
 // ── In-memory cache voor airline-statistieken ────────────────────────────────
 let _airlineStatsCache = null;
@@ -64,19 +64,35 @@ module.exports = cds.service.impl(async function () {
     // People('x')/Trips navigatie -> enkel de reizen van die persoon
     const personParam = req.params?.find(p => p && typeof p === 'object' && p.UserName !== undefined);
     if (personParam?.UserName) {
-      return await collectTripsForPerson(TripPin, personParam.UserName);
+      const personTrips = await collectTripsForPerson(TripPin, personParam.UserName);
+      const filtered = applyClientQuery(personTrips, req.query);
+      return applyClientPaging(filtered, req.query);
     }
-    trips.$count = trips.length;
-    return trips;
+    let list = applyClientQuery(trips, req.query);
+    list = applyClientPaging(list, req.query);
+    return list;
   });
 
   // ── READ TravelExtensions: StatusLabel vullen ────────────────────────────
   this.on('READ', 'TravelExtensions', async (req) => {
+    const savedSearch = req.query.SELECT?.search;
+    if (req.query.SELECT) req.query.SELECT.search = undefined;
+
     const result = await cds.run(req.query);
     const statusMap = { Pending: 'In behandeling', Approved: 'Goedgekeurd', Rejected: 'Afgekeurd' };
     const fill = e => { e.StatusLabel = statusMap[e.ApprovalStatus] ?? e.ApprovalStatus; return e; };
-    if (Array.isArray(result)) { result.forEach(fill); return result; }
-    if (result) fill(result);
+    if (!Array.isArray(result)) {
+      if (result) fill(result);
+      return result;
+    }
+    result.forEach(fill);
+
+    if (savedSearch) {
+      if (req.query.SELECT) req.query.SELECT.search = savedSearch;
+      const filtered = applyClientQuery(result, req.query);
+      filtered.$count = filtered.length;
+      return filtered;
+    }
     return result;
   });
 

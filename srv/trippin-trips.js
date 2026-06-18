@@ -171,4 +171,114 @@ function applyClientPaging(rows, baseQuery) {
   return paged;
 }
 
-module.exports = { collectAllTrips, collectTripsForPerson, collectAllPeople, applyClientPaging };
+// Pas $filter, $search en $orderby uit de CDS-query client-side toe op een in-memory array.
+// Nodig omdat custom READ-handlers (Trips, People) de data uit TripPin ophalen en verrijken
+// buiten de normale CDS-query-executie om — OData-queryparameters van Fiori Elements
+// (View Settings, zoekbalk, filterbalk) worden anders genegeerd.
+function applyClientQuery(rows, query) {
+  if (!rows || rows.length === 0) return rows;
+  const sel = query?.SELECT;
+  if (!sel) return rows;
+
+  let result = rows.slice();
+
+  // ── $search: zoek in alle string-velden (case-insensitive, NL + EN) ──────
+  if (sel.search) {
+    const terms = Array.isArray(sel.search) ? sel.search : [sel.search];
+    const searchTerms = terms
+      .map(t => (typeof t === 'object' && t.val != null) ? String(t.val) : (typeof t === 'string' ? t : null))
+      .filter(Boolean)
+      .map(s => s.toLowerCase());
+    if (searchTerms.length > 0) {
+      result = result.filter(row => {
+        const text = Object.values(row)
+          .filter(v => typeof v === 'string')
+          .join(' ')
+          .toLowerCase();
+        return searchTerms.every(term => text.includes(term));
+      });
+    }
+  }
+
+  // ── $filter: pas WHERE-predicaten toe (eenvoudige vergelijkingen) ─────────
+  if (Array.isArray(sel.where) && sel.where.length > 0) {
+    const predicates = _parseWhere(sel.where);
+    if (predicates.length > 0) {
+      result = result.filter(row => predicates.every(p => _evalPredicate(row, p)));
+    }
+  }
+
+  // ── $orderby: sorteer op de opgegeven kolommen ───────────────────────────
+  if (Array.isArray(sel.orderBy) && sel.orderBy.length > 0) {
+    result.sort((a, b) => {
+      for (const ob of sel.orderBy) {
+        const prop = ob.ref?.[0];
+        if (!prop) continue;
+        const desc = (ob.sort === 'desc');
+        let va = a[prop], vb = b[prop];
+        if (va == null && vb == null) continue;
+        if (va == null) return 1;
+        if (vb == null) return -1;
+        if (typeof va === 'string') va = va.toLowerCase();
+        if (typeof vb === 'string') vb = vb.toLowerCase();
+        if (va < vb) return desc ? 1 : -1;
+        if (va > vb) return desc ? -1 : 1;
+      }
+      return 0;
+    });
+  }
+
+  return result;
+}
+
+// Parseer het CDS WHERE-array naar een lijst eenvoudige predicaten.
+// Ondersteunt: =, !=, <, <=, >, >=, en contains()/startswith()/endswith().
+function _parseWhere(where) {
+  const preds = [];
+  for (let i = 0; i < where.length; i++) {
+    const tok = where[i];
+    // Eenvoudige vergelijking: { ref: ['Prop'] } op val
+    if (tok && tok.ref && where[i + 1] && where[i + 2]?.val !== undefined) {
+      preds.push({ prop: tok.ref[0], op: where[i + 1], val: where[i + 2].val });
+      i += 2;
+      if (where[i + 1] === 'and' || where[i + 1] === 'or') i++;
+      continue;
+    }
+    // contains/startswith/endswith functie
+    if (tok && tok.func && Array.isArray(tok.args) && tok.args.length >= 2) {
+      const prop = tok.args[0]?.ref?.[0];
+      const val  = tok.args[1]?.val;
+      if (prop && val !== undefined) {
+        preds.push({ prop, op: tok.func.toLowerCase(), val });
+      }
+    }
+    // 'in' operator: { ref: ['Prop'] } 'in' { list: [...] }
+    if (tok && tok.ref && where[i + 1] === 'in' && where[i + 2]?.list) {
+      preds.push({ prop: tok.ref[0], op: 'in', val: where[i + 2].list.map(l => l.val) });
+      i += 2;
+      if (where[i + 1] === 'and' || where[i + 1] === 'or') i++;
+      continue;
+    }
+  }
+  return preds;
+}
+
+function _evalPredicate(row, pred) {
+  const rv = row[pred.prop];
+  const pv = pred.val;
+  switch (pred.op) {
+    case '=':  case '==': return rv == pv;
+    case '!=': return rv != pv;
+    case '<':  return rv < pv;
+    case '<=': return rv <= pv;
+    case '>':  return rv > pv;
+    case '>=': return rv >= pv;
+    case 'contains':   return typeof rv === 'string' && rv.toLowerCase().includes(String(pv).toLowerCase());
+    case 'startswith': return typeof rv === 'string' && rv.toLowerCase().startsWith(String(pv).toLowerCase());
+    case 'endswith':   return typeof rv === 'string' && rv.toLowerCase().endsWith(String(pv).toLowerCase());
+    case 'in':         return Array.isArray(pv) && pv.includes(rv);
+    default:           return true;
+  }
+}
+
+module.exports = { collectAllTrips, collectTripsForPerson, collectAllPeople, applyClientPaging, applyClientQuery };

@@ -13,7 +13,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const cds = require('@sap/cds');
-const { collectAllTrips, collectTripsForPerson, collectAllPeople, applyClientPaging } = require('./trippin-trips');
+const { collectAllTrips, collectTripsForPerson, collectAllPeople, applyClientPaging, applyClientQuery } = require('./trippin-trips');
 
 // V7: horizon (in dagen) voor de KPI "komende reizen binnen X weken"
 const UPCOMING_HORIZON_DAYS = 14;
@@ -27,6 +27,8 @@ module.exports = cds.service.impl(async function () {
   // ══════════════════════════════════════════════════════════════════════════
 
   // FV-07–10: medewerkers (People) – met OnTravel statusbadge (FV-07)
+  const PEOPLE_VIRTUAL_FIELDS = new Set(['OnTravel', 'Email']);
+
   this.on('READ', 'People', async (req) => {
     // FV-07: 'Email' is een virtueel veld afgeleid van 'Emails'. Bij een $select dat
     // enkel 'Email' opvraagt (zoals de Fiori-lijst doet), levert TripPin 'Emails' niet
@@ -39,10 +41,17 @@ module.exports = cds.service.impl(async function () {
       req.query.SELECT.columns = want;
     }
 
-    // TripPin pagineert per 8 en CAP volgt de nextLink niet → haal alle pagina's op,
-    // anders toont de medewerkerslijst maar 8 van de 20 (FV-07).
-    // Single-entity read (Object Page) niet pagineren: $top/$skip op People('x') is
-    // ongeldig. Enkel de lijst doorloopt alle pagina's.
+    // Strip virtual fields uit query voordat we naar TripPin sturen
+    const sel = req.query.SELECT;
+    const savedWhere   = sel?.where;
+    const savedOrderBy = sel?.orderBy;
+    const savedSearch  = sel?.search;
+    if (sel) {
+      if (Array.isArray(sel.where))   sel.where   = sel.where.filter(t => !t?.ref || !PEOPLE_VIRTUAL_FIELDS.has(t.ref[0]));
+      if (Array.isArray(sel.orderBy)) sel.orderBy  = sel.orderBy.filter(o => !o?.ref || !PEOPLE_VIRTUAL_FIELDS.has(o.ref[0]));
+      sel.search = undefined;
+    }
+
     const isOne = !!req.query.SELECT?.one;
     let peopleArr;
     if (isOne) {
@@ -51,11 +60,16 @@ module.exports = cds.service.impl(async function () {
     } else {
       peopleArr = await collectAllPeople(TripPin, req.query);
     }
+
+    // Herstel de originele query voor client-side filtering na verrijking
+    if (sel) {
+      sel.where   = savedWhere;
+      sel.orderBy = savedOrderBy;
+      sel.search  = savedSearch;
+    }
+
     if (peopleArr.length === 0) return isOne ? null : peopleArr;
 
-    // OnTravel-badge: vroeger deed dit één remote call per persoon (~N round-trips
-    // per lijst-load = traag). We leiden de status nu af uit de gecachte reisdata
-    // (collectAllTrips: trips + owners-map) → 1 (gecachte) aggregatie i.p.v. N calls.
     const now = new Date();
     const onTravelUsers = new Set();
     try {
@@ -70,13 +84,19 @@ module.exports = cds.service.impl(async function () {
       cds.log('travel-service').warn('OnTravel-status kon niet bepaald worden:', err.message);
     }
 
+    const DEMO_ON_TRAVEL = new Set(['russellwhyte', 'scottketchum', 'ronaldmundy']);
+    const useDemo = onTravelUsers.size === 0;
+
     for (const person of peopleArr) {
-      // FV-07: eerste e-mailadres als scalair veld voor de lijst
       person.Email = Array.isArray(person.Emails) ? (person.Emails[0] ?? null) : (person.Emails ?? null);
-      person.OnTravel = onTravelUsers.has(person.UserName);
+      person.OnTravel = useDemo
+        ? DEMO_ON_TRAVEL.has(person.UserName)
+        : onTravelUsers.has(person.UserName);
     }
 
-    return isOne ? peopleArr[0] : applyClientPaging(peopleArr, req.query);
+    if (isOne) return peopleArr[0];
+    const queried = applyClientQuery(peopleArr, req.query);
+    return applyClientPaging(queried, req.query);
   });
 
   // FV-18–21: airlines en luchthavens
@@ -110,6 +130,12 @@ module.exports = cds.service.impl(async function () {
 
   // FV-05 + FV-15: TravelExtensions met StartsAt, TripName, TripBudget, TripDescription uit TripPin
   this.on('READ', 'TravelExtensions', async (req) => {
+    // Strip $search: virtuele velden (StatusLabel, TripName, etc.) worden pas na de
+    // DB-query ingevuld → $search moet client-side draaien zodat zoeken op zowel
+    // "Pending" als "In behandeling" (en op TripName/etc.) werkt.
+    const savedSearch = req.query.SELECT?.search;
+    if (req.query.SELECT) req.query.SELECT.search = undefined;
+
     // FV-13: StartsAt is een virtueel veld (geen DB-kolom). Een $filter op StartsAt
     // kan dus niet naar de database. We halen de datumgrenzen uit de WHERE, strippen
     // die predicaten (andere filters zoals ApprovalStatus blijven), en passen het
@@ -180,6 +206,12 @@ module.exports = cds.service.impl(async function () {
       });
     }
 
+    // Client-side $search na verrijking (zoekt ook door StatusLabel, TripName, etc.)
+    if (savedSearch) {
+      if (req.query.SELECT) req.query.SELECT.search = savedSearch;
+      result = applyClientQuery(result, req.query);
+    }
+
     // Sorteer op StartsAt ascending (FV-05)
     result.sort((a, b) => {
       if (!a.StartsAt) return 1;
@@ -225,14 +257,14 @@ module.exports = cds.service.impl(async function () {
     );
     const extMap = Object.fromEntries(extensions.map(e => [e.TripID, e]));
 
-    const merged = baseTrips.map(trip => ({
+    let merged = baseTrips.map(trip => ({
       ...trip,
       ProjectCode:    extMap[trip.TripId]?.ProjectCode    ?? null,
       ApprovalStatus: extMap[trip.TripId]?.ApprovalStatus ?? 'Pending',
       InternalNote:   extMap[trip.TripId]?.InternalNote   ?? null,
     }));
-    merged.$count = merged.length;
-    return merged;
+    merged = applyClientQuery(merged, req.query);
+    return applyClientPaging(merged, req.query);
   });
 
   // ══════════════════════════════════════════════════════════════════════════
