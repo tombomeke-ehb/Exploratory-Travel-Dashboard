@@ -36,9 +36,10 @@ annotate TravelService.TravelExtensions with @(
     Visualizations: ['@UI.LineItem']
   },
   UI.HeaderInfo: { TypeName: 'Reisextensie', TypeNamePlural: 'Reisextensies', Title: { Value: TripID } },
-  // FV-17: "Bewerken"-knop op de Object Page-toolbar -> opent een dialoog (bound action)
   UI.Identification: [
-    { $Type: 'UI.DataFieldForAction', Action: 'TravelService.bewerk', Label: 'Bewerken' }
+    { $Type: 'UI.DataFieldForAction', Action: 'TravelService.goedkeuren',    Label: 'Goedkeuren',       Criticality: #Positive },
+    { $Type: 'UI.DataFieldForAction', Action: 'TravelService.afkeuren',      Label: 'Afkeuren',         Criticality: #Negative },
+    { $Type: 'UI.DataFieldForAction', Action: 'TravelService.bewerkNotitie', Label: 'Notitie bewerken' }
   ],
   UI.SelectionFields: [ ApprovalStatus, StartsAt ],
   UI.LineItem: [
@@ -88,10 +89,9 @@ annotate TravelService.TravelExtensions with {
   InternalNote   @title: 'Interne notitie';
 }
 annotate TravelService.TravelExtensions with actions {
-  bewerk(
-    ProjectCode    @title: 'Projectcode',
-    ApprovalStatus @title: 'Goedkeuringsstatus',
-    InternalNote   @title: 'Interne notitie'
+  bewerkNotitie(
+    ProjectCode  @title: 'Projectcode',
+    InternalNote @title: 'Interne notitie'
   );
 }
 annotate TravelService.People with @(
