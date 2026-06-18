@@ -88,7 +88,9 @@ annotate TravelService.TravelExtensions with {
 }
 annotate TravelService.TravelExtensions with actions {
   bewerk(
-    ApprovalStatus @title: 'Goedkeuringsstatus' @Common.ValueListWithFixedValues
+    ProjectCode    @title: 'Projectcode'        @Common.ParameterDefaultValue: ProjectCode,
+    ApprovalStatus @title: 'Goedkeuringsstatus' @Common.ParameterDefaultValue: ApprovalStatus @Common.ValueListWithFixedValues,
+    InternalNote   @title: 'Interne notitie'    @Common.ParameterDefaultValue: InternalNote
   );
 }
 annotate TravelService.People with @(
