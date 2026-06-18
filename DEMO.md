@@ -27,7 +27,7 @@ cds watch        # in-memory, verse seed-data
    - Wijs **Airlinegebruik (top 5)** met boekingen + budget en **meest gebruikte airline**.
    - *Vermeld:* de datums in TripPin zijn 2014, daarom tonen sommige KPI's bewuste
      demo-fallbackwaarden — de logica is correct.
-3. Klik door naar **Reizen & extensies** (lijst, niveau 2):
+3. Klik door naar **Reisgoedkeuringen** (lijst, niveau 2):
    - Wijs de **gekleurde goedkeuringsstatus-badge** (groen/oranje/rood).
    - Open een reis (niveau 3): toon de secties **Reisgegevens / PrimePath / Wijzigingshistoriek**.
 4. Ga naar **Medewerkers**: wijs de **e-mail**-kolom; open een medewerker → **Reisoverzicht**

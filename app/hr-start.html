@@ -442,10 +442,10 @@
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         <span class="nav-label">Dashboard</span>
       </a>
-      <!-- Reisextensies: PrimePath-specifieke extensies per reis -->
-      <a class="nav-item" data-view="reisextensies" href="#reisextensies">
+      <!-- Reisgoedkeuringen: PrimePath-specifieke extensies per reis -->
+      <a class="nav-item" data-view="reisgoedkeuringen" href="#reisgoedkeuringen">
         <svg viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h6"/></svg>
-        <span class="nav-label">Reisextensies</span>
+        <span class="nav-label">Reisgoedkeuringen</span>
       </a>
       <!-- Reizen: alleen-lezen overzicht van alle TripPin-reizen -->
       <a class="nav-item" data-view="reizen" href="#reizen">
@@ -591,11 +591,20 @@
       </div>
     </div>
 
-    <!-- Reisextensies View -->
-    <div class="view" id="view-reisextensies">
-      <h2 class="view-title">Reisextensies</h2>
+    <!-- Reisgoedkeuringen View -->
+    <div class="view" id="view-reisgoedkeuringen">
+      <h2 class="view-title">Reisgoedkeuringen</h2>
       <p class="view-sub">PrimePath interne reisinformatie (alleen-lezen).</p>
-      <div id="extensiesTableWrap"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+      <div class="table-card">
+        <div class="table-toolbar">
+          <h2>Reisgoedkeuringen</h2>
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" class="search-input" id="goedkeuringenSearch" placeholder="Zoeken op Trip ID, projectcode, status…" />
+          </div>
+        </div>
+        <div id="extensiesTableWrap"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+      </div>
     </div>
 
     <!-- Luchthavens View -->
@@ -648,13 +657,14 @@
     function showError(el, msg) { el.innerHTML = '<div class="error-msg">' + esc(msg) + '</div>'; }
 
     // ── Navigation ──────────────────────────────────────────────────────────────
-    const views = ['dashboard', 'reizen', 'airlines', 'medewerkers', 'reisextensies', 'luchthavens'];
+    const views = ['dashboard', 'reisgoedkeuringen', 'reizen', 'airlines', 'medewerkers', 'luchthavens'];
     // loaded{}: cache-object — elke view wordt maar één keer geladen
     const loaded = {};
 
     function navigate() {
       // Stap 1: haal de hash op en valideer (onbekende hashes → dashboard)
-      const hash = (location.hash || '#dashboard').slice(1);
+      let hash = (location.hash || '#dashboard').slice(1);
+      if (hash === 'reisextensies') hash = 'reisgoedkeuringen';
       const view = views.includes(hash) ? hash : 'dashboard';
 
       // Stap 2: deactiveer alle views en activeer de gekozen view
@@ -713,6 +723,7 @@
     let peopleData = null;
     let airlinesData = null;
     let airlineStats = null;
+    let goedkeuringenData = null;
 
     // ── Loaders ──────────────────────────────────────────────────────────────────
     // Elke loader wordt eenmalig aangeroepen door navigate() via loaded{}.
@@ -809,19 +820,13 @@
         }
       },
 
-      async reisextensies() {
+      async reisgoedkeuringen() {
         const wrap = document.getElementById('extensiesTableWrap');
         try {
           const d = await api('TravelExtensions');
-          const exts = d.value || [];
-          if (exts.length === 0) { wrap.innerHTML = '<div class="empty-msg">Geen reisextensies gevonden.</div>'; return; }
-          const statusPill = s => s === 'Approved' ? '<span class="pill pill-green">Goedgekeurd</span>' : s === 'Rejected' ? '<span class="pill pill-red">Afgewezen</span>' : '<span class="pill pill-orange">In afwachting</span>';
-          const rows = exts.map(e => '<tr style="cursor:pointer" data-tripid="' + e.TripID + '"><td>' + esc(e.TripID) + '</td><td>' + esc(e.ProjectCode) + '</td><td>' + statusPill(e.ApprovalStatus) + '</td><td>' + esc(e.InternalNote || '') + '</td></tr>').join('');
-          wrap.innerHTML = '<table class="pp-table"><thead><tr><th>Trip ID</th><th>Projectcode</th><th>Status</th><th>Notitie</th></tr></thead><tbody>' + rows + '</tbody></table>';
-          wrap.querySelectorAll('tr[data-tripid]').forEach(tr => {
-            tr.addEventListener('click', () => { window.location.href = '/hr-dashboard/#/TravelExtensions(' + tr.dataset.tripid + ')'; });
-          });
-        } catch (e) { showError(wrap, 'Kon reisextensies niet laden.'); }
+          goedkeuringenData = d.value || [];
+          renderGoedkeuringenTable(goedkeuringenData);
+        } catch (e) { showError(wrap, 'Kon reisgoedkeuringen niet laden.'); }
       },
 
       async luchthavens() {
@@ -972,6 +977,35 @@
       });
     }
 
+    // renderGoedkeuringenTable(): toont read-only goedkeuringsrecords;
+    // klikken op een rij opent de Fiori-detailpagina van de goedkeuring
+    function renderGoedkeuringenTable(data) {
+      const wrap = document.getElementById('extensiesTableWrap');
+      if (!data.length) {
+        wrap.innerHTML = '<table><tbody><tr class="empty-row"><td colspan="5">Geen reisgoedkeuringen gevonden</td></tr></tbody></table>';
+        return;
+      }
+
+      const statusPill = s => s === 'Approved'
+        ? '<span class="pill pill-green">Goedgekeurd</span>'
+        : s === 'Rejected'
+          ? '<span class="pill pill-red">Afgewezen</span>'
+          : '<span class="pill pill-orange">In afwachting</span>';
+
+      const rows = data.map(e => '<tr class="clickable" data-tripid="' + esc(e.TripID) + '">'
+        + '<td>' + esc(e.TripID) + '</td>'
+        + '<td>' + esc(e.ProjectCode || '—') + '</td>'
+        + '<td>' + statusPill(e.ApprovalStatus) + '</td>'
+        + '<td>' + esc(e.InternalNote || '') + '</td>'
+        + '<td class="row-arrow">&#8250;</td>'
+        + '</tr>').join('');
+
+      wrap.innerHTML = '<table class="pp-table"><thead><tr><th>Trip ID</th><th>Projectcode</th><th>Status</th><th>Notitie</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>';
+      wrap.querySelectorAll('tr[data-tripid]').forEach(tr => {
+        tr.addEventListener('click', () => { window.location.href = '/hr-dashboard/#/TravelExtensions(' + tr.dataset.tripid + ')'; });
+      });
+    }
+
     // ── Search handlers ──────────────────────────────────────────────────────────
     // Beide handlers filteren de gecachede data client-side bij elke toetsaanslag;
     // lege zoekopdracht herstelt de volledige lijst zonder nieuwe API-aanroep
@@ -1000,6 +1034,20 @@
         (p.LastName || '').toLowerCase().includes(q)
       );
       renderPeopleTable(filtered);
+    });
+
+    // Reisgoedkeuringen: zoekt op Trip ID, projectcode, status en notitie
+    document.getElementById('goedkeuringenSearch').addEventListener('input', function () {
+      if (!goedkeuringenData) return;
+      const q = this.value.toLowerCase();
+      if (!q) { renderGoedkeuringenTable(goedkeuringenData); return; }
+      const filtered = goedkeuringenData.filter(e =>
+        String(e.TripID).toLowerCase().includes(q) ||
+        (e.ProjectCode || '').toLowerCase().includes(q) ||
+        (e.ApprovalStatus || '').toLowerCase().includes(q) ||
+        (e.InternalNote || '').toLowerCase().includes(q)
+      );
+      renderGoedkeuringenTable(filtered);
     });
 
     // ── Init ─────────────────────────────────────────────────────────────────────

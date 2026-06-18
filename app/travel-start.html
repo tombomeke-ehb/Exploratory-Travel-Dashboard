@@ -444,9 +444,9 @@
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         Dashboard
       </a></li>
-      <li><a href="#reisextensies" data-view="reisextensies">
+      <li><a href="#reisgoedkeuringen" data-view="reisgoedkeuringen">
         <svg viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h6"/></svg>
-        Reisextensies
+        Reisgoedkeuringen
       </a></li>
       <li><a href="#reizen" data-view="reizen">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
@@ -528,10 +528,10 @@
       </div>
     </div>
 
-    <!-- Reisextensies View -->
-    <div id="view-reisextensies" class="view">
+    <!-- Reisgoedkeuringen View -->
+    <div id="view-reisgoedkeuringen" class="view">
       <div class="view-header">
-        <h1>Reisextensies</h1>
+        <h1>Reisgoedkeuringen</h1>
         <p>Beheer PrimePath-specifieke reisinformatie: projectcodes, goedkeuringsstatus en notities.</p>
       </div>
       <div class="toolbar">
@@ -673,12 +673,13 @@
   // ── Navigation ───────────────────────────────────────
   // Koppelt de URL-hash aan de juiste view en triggert lazy data-loading.
   // Het object `loaded` voorkomt dat een view meerdere keren data ophaalt.
-  var views = ['dashboard', 'reisextensies', 'reizen', 'medewerkers', 'airlines', 'luchthavens'];
+  var views = ['dashboard', 'reisgoedkeuringen', 'reizen', 'medewerkers', 'airlines', 'luchthavens'];
   var loaded = {};
 
   function navigate() {
     // Stap 1: normaliseer de hash; val terug op 'dashboard' bij onbekende waarde
     var hash = (location.hash || '#dashboard').replace('#', '');
+    if (hash === 'reisextensies') hash = 'reisgoedkeuringen';
     if (views.indexOf(hash) === -1) hash = 'dashboard';
 
     // Stap 2: activeer de juiste view en het bijbehorende sidebar-item
@@ -693,7 +694,7 @@
     if (!loaded[hash]) {
       loaded[hash] = true;
       if (hash === 'dashboard') loadDashboard();
-      else if (hash === 'reisextensies') loadExtensies();
+      else if (hash === 'reisgoedkeuringen') loadExtensies();
       else if (hash === 'reizen') loadReizen();
       else if (hash === 'medewerkers') loadMedewerkers();
       else if (hash === 'airlines') loadAirlines();
@@ -749,7 +750,7 @@
     }
   }
 
-  // ── Reisextensies ────────────────────────────────────
+  // ── Reisgoedkeuringen ────────────────────────────────
   // Haalt alle TravelExtensions op (gecached in extensiesData).
   // Klikken op een rij opent de detail-drawer met de volledige reisinfo.
   var extensiesData = [];
@@ -761,7 +762,7 @@
       extensiesData = d.value || [];
       renderExtensies(extensiesData);
     } catch (e) {
-      container.innerHTML = '<div class="error-msg">Kon reisextensies niet laden.</div>';
+      container.innerHTML = '<div class="error-msg">Kon reisgoedkeuringen niet laden.</div>';
     }
   }
 
