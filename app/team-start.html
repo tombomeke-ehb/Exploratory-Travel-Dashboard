@@ -563,9 +563,12 @@
       }
 
       // ── Mijn Team ────────────────────────────────────────────
+      // Haalt de teamledenlijst op en slaat die op in teamData (eenmalige cache).
+      // Bij terugkeer naar de view wordt de cache hergebruikt zonder nieuwe fetch.
       var teamData = null;
       function loadTeam() {
         var wrap = document.getElementById('teamTableWrap');
+        // Cache aanwezig: direct renderen zonder netwerkaanroep
         if (teamData) { renderTeam(teamData); return; }
         wrap.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
 
@@ -577,7 +580,9 @@
         });
       }
 
+      // Filtert de gecachede teamdata op zoekterm en bouwt de tabel op.
       function renderTeam(data) {
+        // Stap 1: filter op naam of gebruikersnaam via het zoekveld
         var q = (document.getElementById('teamSearch').value || '').toLowerCase();
         var filtered = data.filter(function (p) {
           if (!q) return true;
@@ -585,11 +590,14 @@
         });
 
         var wrap = document.getElementById('teamTableWrap');
+        // Stap 2: toon lege staat als de gefilterde lijst leeg is
         if (filtered.length === 0) {
           wrap.innerHTML = '<table><thead><tr><th>VOORNAAM</th><th>FAMILIENAAM</th><th>STATUS</th><th>ACTIES</th></tr></thead><tbody><tr><td colspan="4" class="empty-msg">Geen gegevens beschikbaar</td></tr></tbody></table>';
           return;
         }
 
+        // Stap 3: bouw de tabelrijen op als HTML-string en injecteer in één keer
+        // (sneller dan individuele DOM-manipulatie per rij)
         var html = '<table><thead><tr><th>VOORNAAM</th><th>FAMILIENAAM</th><th>STATUS</th><th>ACTIES</th></tr></thead><tbody>';
         filtered.forEach(function (p) {
           var statusPill = p.OnTravel
@@ -606,14 +614,19 @@
         html += '</tbody></table>';
         wrap.innerHTML = html;
 
+        // Stap 4: koppel event listeners ná DOM-injectie
+        // (niet mogelijk vóór innerHTML omdat de elementen dan nog niet bestaan)
+
+        // "Reizen bekijken": sla gebruikersnaam op als filter, wis de reizencache en navigeer
         wrap.querySelectorAll('.btn-action').forEach(function (btn) {
           btn.addEventListener('click', function (e) {
-            e.stopPropagation();
+            e.stopPropagation();                      // voorkomt dat de rij-click ook vuurt
             reizenFilter = btn.getAttribute('data-user');
-            reizenData = null;
+            reizenData = null;                        // cache wissen zodat gefilterde data opnieuw laadt
             location.hash = '#reizen';
           });
         });
+        // Klikken op een rij opent het Fiori-detailscherm voor die persoon
         wrap.querySelectorAll('tr.clickable').forEach(function (tr) {
           tr.addEventListener('click', function () {
             window.location.href = '/team-dashboard/webapp/#/People(\'' + tr.dataset.username + '\')';
