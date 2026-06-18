@@ -300,21 +300,29 @@ module.exports = cds.service.impl(async function () {
   // ══════════════════════════════════════════════════════════════════════════
   // FE V4 vereist draft voor inline-edit, wat botst met de virtuele velden in de
   // READ-handler. Daarom een bound action die FE als dialoog rendert. We routeren
-  // via this.update zodat de before('UPDATE')-validatie + audit + managed-velden
-  // (modifiedBy/At) hergebruikt worden. Lege velden laten we ongemoeid.
-  this.on('bewerk', 'TravelExtensions', async (req) => {
-    const keyParam = req.params?.[req.params.length - 1];
-    const tripId = (keyParam && typeof keyParam === 'object') ? keyParam.TripID : keyParam;
-    if (tripId === undefined || tripId === null) return req.error(400, 'Geen reis geselecteerd.');
+  this.on('goedkeuren', 'TravelExtensions', async (req) => {
+    const tripId = _tripIdFromParams(req);
+    if (tripId == null) return req.error(400, 'Geen reis geselecteerd.');
+    await this.update('TravelExtensions', { TripID: tripId }).with({ ApprovalStatus: 'Approved' });
+    return await this.read('TravelExtensions', { TripID: tripId });
+  });
 
-    const { ProjectCode, ApprovalStatus, InternalNote } = req.data;
+  this.on('afkeuren', 'TravelExtensions', async (req) => {
+    const tripId = _tripIdFromParams(req);
+    if (tripId == null) return req.error(400, 'Geen reis geselecteerd.');
+    await this.update('TravelExtensions', { TripID: tripId }).with({ ApprovalStatus: 'Rejected' });
+    return await this.read('TravelExtensions', { TripID: tripId });
+  });
+
+  this.on('bewerkNotitie', 'TravelExtensions', async (req) => {
+    const tripId = _tripIdFromParams(req);
+    if (tripId == null) return req.error(400, 'Geen reis geselecteerd.');
+    const { ProjectCode, InternalNote } = req.data;
     const patch = {};
-    if (ProjectCode    !== undefined && ProjectCode    !== '') patch.ProjectCode    = ProjectCode;
-    if (ApprovalStatus !== undefined && ApprovalStatus !== '') patch.ApprovalStatus = ApprovalStatus;
-    if (InternalNote   !== undefined && InternalNote   !== '') patch.InternalNote   = InternalNote;
+    if (ProjectCode !== undefined && ProjectCode !== '') patch.ProjectCode = ProjectCode;
+    if (InternalNote !== undefined && InternalNote !== '') patch.InternalNote = InternalNote;
     if (Object.keys(patch).length === 0) return req.error(400, 'Geef minstens één veld op om te wijzigen.');
-
-    await this.update('TravelExtensions', { TripID: tripId }).with(patch);   // before('UPDATE') valideert + logt
+    await this.update('TravelExtensions', { TripID: tripId }).with(patch);
     return await this.read('TravelExtensions', { TripID: tripId });
   });
 
@@ -394,6 +402,12 @@ async function _countUpcomingTrips(TripPin, days) {
 }
 
 // ── In-memory cache voor airline-statistieken ────────────────────────────────
+function _tripIdFromParams(req) {
+  const p = req.params?.[req.params.length - 1];
+  if (p === undefined || p === null) return undefined;
+  return (typeof p === 'object') ? p.TripID : p;
+}
+
 let _airlineStatsCache = null;
 let _airlineStatsCacheTime = 0;
 const CACHE_TTL = 5 * 60 * 1000;
