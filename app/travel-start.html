@@ -448,6 +448,10 @@
         <svg viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h6"/></svg>
         Reisextensies
       </a></li>
+      <li><a href="#reizen" data-view="reizen">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        Reizen
+      </a></li>
       <li><a href="#medewerkers" data-view="medewerkers">
         <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Medewerkers
@@ -540,6 +544,16 @@
       <div id="extensiesContent">
         <div class="spinner-wrap"><div class="spinner"></div></div>
       </div>
+    </div>
+
+    <!-- Reizen View (alle TripPin-reizen) -->
+    <div id="view-reizen" class="view">
+      <div class="view-header">
+        <h1>Reizen</h1>
+        <p class="view-sub">Alle reizen uit de externe TripPin-databron.</p>
+      </div>
+      <div class="toolbar"><input type="text" id="reizenSearch" class="search-input" placeholder="Zoek op naam of beschrijving…"></div>
+      <div id="reizenTableWrap"><div class="spinner-wrap"><div class="spinner"></div></div></div>
     </div>
 
     <!-- Medewerkers View -->
@@ -659,7 +673,7 @@
   // ── Navigation ───────────────────────────────────────
   // Koppelt de URL-hash aan de juiste view en triggert lazy data-loading.
   // Het object `loaded` voorkomt dat een view meerdere keren data ophaalt.
-  var views = ['dashboard', 'reisextensies', 'medewerkers', 'airlines', 'luchthavens'];
+  var views = ['dashboard', 'reisextensies', 'reizen', 'medewerkers', 'airlines', 'luchthavens'];
   var loaded = {};
 
   function navigate() {
@@ -680,6 +694,7 @@
       loaded[hash] = true;
       if (hash === 'dashboard') loadDashboard();
       else if (hash === 'reisextensies') loadExtensies();
+      else if (hash === 'reizen') loadReizen();
       else if (hash === 'medewerkers') loadMedewerkers();
       else if (hash === 'airlines') loadAirlines();
       else if (hash === 'luchthavens') loadLuchthavens();
@@ -830,6 +845,47 @@
   // Haalt People-data op en toont beschikbaarheidsstatus per medewerker.
   // Klikken op een rij navigeert naar het Fiori-detailscherm.
   var medewerkersData = [];
+
+  var reizenData = null;
+  async function loadReizen() {
+    var wrap = document.getElementById('reizenTableWrap');
+    try {
+      var d = await api('Trips');
+      reizenData = d.value || [];
+      renderReizen(reizenData);
+    } catch (e) {
+      wrap.innerHTML = '<div class="error-msg">Kon reizen niet laden.</div>';
+    }
+  }
+  function renderReizen(data) {
+    var q = (document.getElementById('reizenSearch').value || '').toLowerCase();
+    var filtered = data.filter(function (t) {
+      return !q || (t.Name || '').toLowerCase().indexOf(q) !== -1 || (t.Description || '').toLowerCase().indexOf(q) !== -1;
+    });
+    var wrap = document.getElementById('reizenTableWrap');
+    if (filtered.length === 0) { wrap.innerHTML = '<div class="empty-msg">Geen reizen gevonden.</div>'; return; }
+    var rows = filtered.map(function (t) {
+      var start = t.StartsAt ? new Date(t.StartsAt).toLocaleDateString('nl-BE') : '—';
+      var end = t.EndsAt ? new Date(t.EndsAt).toLocaleDateString('nl-BE') : '—';
+      return '<tr data-tripid="' + t.TripId + '" style="cursor:pointer">'
+        + '<td>' + esc(t.TripId) + '</td>'
+        + '<td><strong>' + esc(t.Name) + '</strong></td>'
+        + '<td>' + start + '</td>'
+        + '<td>' + end + '</td>'
+        + '<td>' + esc(t.Budget) + '</td>'
+        + '<td>' + esc(t.Description || '') + '</td>'
+        + '</tr>';
+    }).join('');
+    wrap.innerHTML = '<table class="pp-table"><thead><tr><th>Trip ID</th><th>Naam</th><th>Vertrek</th><th>Aankomst</th><th>Budget</th><th>Beschrijving</th></tr></thead><tbody>' + rows + '</tbody></table>';
+    wrap.querySelectorAll('tr[data-tripid]').forEach(function (tr) {
+      tr.addEventListener('click', function () {
+        window.location.href = '/travel-dashboard/#/Trips(' + tr.dataset.tripid + ')';
+      });
+    });
+  }
+  document.getElementById('reizenSearch').addEventListener('input', function () {
+    if (reizenData) renderReizen(reizenData);
+  });
 
   async function loadMedewerkers() {
     var container = document.getElementById('medewerkersContent');
