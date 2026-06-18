@@ -41,11 +41,17 @@
     data-sap-ui-oninit="module:sap/ui/core/ComponentSupport">
   </script>
   <style>
-    /* Body als kolom: een echte headerbalk (in-flow) + de UI5-app eronder.
-       Geen zwevende overlay meer, dus geen overlap met de Fiori-toolbar. */
+    /* ── Paginastructuur ─────────────────────────────────────────────
+       Body als flex-kolom: de appbar neemt een vaste hoogte (48px),
+       de UI5-app vult de resterende ruimte. Geen zwevende overlay,
+       zodat er geen overlap is met de interne Fiori-toolbar.         */
     html, body, #content { height: 100%; margin: 0; }
     body#content { display: flex; flex-direction: column; }
 
+    /* ── Appbar ──────────────────────────────────────────────────────
+       PrimePath-huisstijlbalk boven de Fiori Elements-app; bevat het
+       merklogo, de apptitel, een terugknop en een afmeldknop.
+       z-index: 5 houdt de balk boven eventuele UI5-overlays.         */
     .pp-appbar {
       flex: 0 0 48px;
       display: flex; align-items: center; justify-content: space-between;
@@ -56,24 +62,32 @@
       box-shadow: 0 2px 12px rgba(0,64,168,.18);
       z-index: 5;
     }
+    /* Merklogo: vliegtuigicoon in een glazig blokje + vetgedrukte naam */
     .pp-appbar .pp-brand { display: flex; align-items: center; gap: .5rem; font-size: 13px; font-weight: 700; letter-spacing: .3px; }
     .pp-appbar .pp-brand .mark { width: 26px; height: 26px; border-radius: 8px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.32); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; }
     .pp-appbar .pp-brand .mark svg { width: 13px; height: 13px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    /* Apptitel: gescheiden van de merknaam met een verticale streep */
     .pp-appbar .pp-app { font-weight: 600; opacity: .82; font-size: 12px; border-left: 1px solid rgba(255,255,255,.3); padding-left: .55rem; }
     .pp-appbar .pp-actions { display: flex; align-items: center; gap: 8px; }
+    /* Gedeelde basisstijl voor links en knoppen in de appbar */
     .pp-appbar a, .pp-appbar button {
       font-family: inherit; font-size: 12px; font-weight: 600; line-height: 1; white-space: nowrap;
       padding: 7px 12px; border-radius: 8px; cursor: pointer; text-decoration: none; border: 1px solid transparent;
     }
+    /* Terugknop: glazige witte stijl, links een pijlicoon */
     .pp-appbar .pp-back {
       background: rgba(255,255,255,.16); color: #fff; border-color: rgba(255,255,255,.35);
       display: inline-flex; align-items: center; gap: 5px;
     }
     .pp-appbar .pp-back svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
     .pp-appbar .pp-back:hover { background: rgba(255,255,255,.28); }
+    /* Afmeldknop: wit op blauw (inverse van de appbar) */
     .pp-appbar .pp-logout { background: #fff; color: #0058C4; }
     .pp-appbar .pp-logout:hover { background: #EAF2FF; }
 
+    /* ── App-host ────────────────────────────────────────────────────
+       Flex-item dat de resterende viewport-hoogte inneemt. De inner
+       #container is absoluut gepositioneerd zodat UI5 inset: 0 vult. */
     .pp-app-host { flex: 1 1 auto; min-height: 0; position: relative; }
     #container { position: absolute; inset: 0; }
   </style>
