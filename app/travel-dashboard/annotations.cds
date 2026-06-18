@@ -42,7 +42,7 @@ annotate TravelService.TravelExtensions with @(
     { $Type: 'UI.DataFieldForAction', Action: 'TravelService.inBehandeling', Label: 'Terugzetten'                                },
     { $Type: 'UI.DataFieldForAction', Action: 'TravelService.bewerkNotitie', Label: 'Notitie bewerken'                           }
   ],
-  UI.SelectionFields: [ ApprovalStatus, StartsAt ],
+  UI.SelectionFields: [ ApprovalStatus, StartsAt, EndsAt ],
   UI.LineItem: [
     { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
     { $Type: 'UI.DataField', Value: StartsAt,        Label: 'Vertrekdatum' },
@@ -86,7 +86,8 @@ annotate TravelService.TravelExtensions with @(
 annotate TravelService.TravelExtensions with {
   TripID              @title: 'Trip ID';
   ProjectCode         @title: 'Projectcode';
-  ApprovalStatus      @title: 'Goedkeuringsstatus';
+  ApprovalStatus      @title: 'Goedkeuringsstatus'
+    @Common.ValueListWithFixedValues;
   InternalNote        @title: 'Interne notitie';
   StatusLabel         @title: 'Goedkeuringsstatus';
 }
