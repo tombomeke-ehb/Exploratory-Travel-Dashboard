@@ -10,7 +10,15 @@
       "TravelService": {
         "uri": "/travel/",
         "type": "OData",
-        "settings": { "odataVersion": "4.0" }
+        "settings": {
+          "odataVersion": "4.0",
+          "annotations": ["localAnnotations"]
+        }
+      },
+      "localAnnotations": {
+        "uri": "annotations/annotation0.xml",
+        "type": "ODataAnnotation",
+        "settings": { "localUri": "annotations/annotation0.xml" }
       }
     }
   },

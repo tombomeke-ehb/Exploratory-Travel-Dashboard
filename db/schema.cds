@@ -13,7 +13,7 @@ using { managed } from '@sap/cds/common';
 
 // ── ApprovalStatus enum ───────────────────────────────────────────────────────
 // FA v4 §7.4: drie mogelijke waarden
-type ApprovalStatus : String(20) enum {
+@assert.range type ApprovalStatus : String(20) enum {
   Pending  = 'Pending';   // In behandeling
   Approved = 'Approved';  // Goedgekeurd
   Rejected = 'Rejected';  // Afgekeurd
