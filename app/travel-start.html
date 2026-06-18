@@ -689,16 +689,22 @@
   window.addEventListener('hashchange', navigate);
 
   // ── Dashboard ────────────────────────────────────────
+  // Hulpfunctie om de tekstinhoud van een KPI-element in één regel te zetten.
   function setText(id, val) { document.getElementById(id).textContent = val; }
 
   async function loadDashboard() {
+    // Stap 1: laad de drie eenvoudige KPI's parallel via CAP-functieroepen
+    // (fire-and-forget: elke .catch() vult een streepje in bij fout)
     api('getActiveTripsCount()').then(function (d) { setText('kpiActive', d.value ?? '—'); }).catch(function () { setText('kpiActive', '—'); });
     api('getOnTravelCount()').then(function (d) { setText('kpiOnTravel', d.value ?? '—'); }).catch(function () { setText('kpiOnTravel', '—'); });
     api('getUpcomingTripsCount()').then(function (d) { setText('kpiUpcoming', d.value ?? '—'); }).catch(function () { setText('kpiUpcoming', '—'); });
 
     try {
+      // Stap 2: laad airlinestatistieken en sorteer op TripCount (hoogste eerst)
       var d = await api('getAirlineStats()');
       var sorted = (d.value || []).slice().sort(function (a, b) { return (b.TripCount || 0) - (a.TripCount || 0); });
+
+      // Stap 3: vul de KPI "meest gebruikte airline" met de eerste in de ranking
       var top = sorted[0];
       if (top && (top.TripCount || 0) > 0) {
         setText('kpiTopAirline', top.Name || top.AirlineCode || '—');
@@ -707,6 +713,8 @@
         setText('kpiTopAirline', '—');
       }
 
+      // Stap 4: render de top-5 als horizontale balkengrafiek
+      // Elke balk wordt als percentage van het maximum berekend
       var rows = sorted.slice(0, 5);
       var chart = document.getElementById('airlineChart');
       if (!rows.length) { chart.innerHTML = '<div class="empty-msg">Geen airlinegegevens beschikbaar.</div>'; return; }
