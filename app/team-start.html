@@ -629,7 +629,7 @@
         // Klikken op een rij opent het Fiori-detailscherm voor die persoon
         wrap.querySelectorAll('tr.clickable').forEach(function (tr) {
           tr.addEventListener('click', function () {
-            window.location.href = '/team-dashboard/webapp/#/People(\'' + tr.dataset.username + '\')';
+            window.location.href = '/team-dashboard/#/People(\'' + tr.dataset.username + '\')';
           });
         });
       }
@@ -692,7 +692,7 @@
             + '<option value="Rejected"' + (r.ApprovalStatus === 'Rejected' ? ' selected' : '') + '>Afgewezen</option>'
             + '</select></td>'
             + '<td>' + esc(r.InternalNote || '—') + '</td>'
-            + '<td><a class="btn-action" href="/team-dashboard/webapp/#/TravelExtensions(' + esc(r.TripID) + ')" target="_blank">Openen in Fiori</a></td>'
+            + '<td><a class="btn-action" href="/team-dashboard/#/TravelExtensions(' + esc(r.TripID) + ')" target="_blank">Openen in Fiori</a></td>'
             + '</tr>';
         });
         html += '</tbody></table>';
