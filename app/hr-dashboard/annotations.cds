@@ -16,6 +16,7 @@ annotate HRService.Airlines with @(
   ]}
 );
 annotate HRService.Trips with @(
+  UI.PresentationVariant: { SortOrder: [{ Property: StartsAt, Descending: false }], Visualizations: ['@UI.LineItem'] },
   UI.HeaderInfo: { TypeName: 'Reis', TypeNamePlural: 'Reizen', Title: { Value: Name }, Description: { Value: StartsAt } },
   UI.SelectionFields: [ StartsAt, EndsAt ],
   UI.LineItem: [
