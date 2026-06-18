@@ -13,7 +13,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const cds = require('@sap/cds');
-const { collectAllTrips, collectTripsForPerson } = require('./trippin-trips');
+const { collectAllTrips, collectTripsForPerson, collectAllPeople, applyClientPaging } = require('./trippin-trips');
 
 // V7: horizon (in dagen) voor de KPI "komende reizen binnen X weken"
 const UPCOMING_HORIZON_DAYS = 14;
@@ -39,9 +39,19 @@ module.exports = cds.service.impl(async function () {
       req.query.SELECT.columns = want;
     }
 
-    const people = await TripPin.run(req.query);
-    const peopleArr = Array.isArray(people) ? people : (people ? [people] : []);
-    if (peopleArr.length === 0) return people;
+    // TripPin pagineert per 8 en CAP volgt de nextLink niet → haal alle pagina's op,
+    // anders toont de medewerkerslijst maar 8 van de 20 (FV-07).
+    // Single-entity read (Object Page) niet pagineren: $top/$skip op People('x') is
+    // ongeldig. Enkel de lijst doorloopt alle pagina's.
+    const isOne = !!req.query.SELECT?.one;
+    let peopleArr;
+    if (isOne) {
+      const p = await TripPin.run(req.query);
+      peopleArr = p ? (Array.isArray(p) ? p : [p]) : [];
+    } else {
+      peopleArr = await collectAllPeople(TripPin, req.query);
+    }
+    if (peopleArr.length === 0) return isOne ? null : peopleArr;
 
     // OnTravel-badge: vroeger deed dit één remote call per persoon (~N round-trips
     // per lijst-load = traag). We leiden de status nu af uit de gecachte reisdata
@@ -66,7 +76,7 @@ module.exports = cds.service.impl(async function () {
       person.OnTravel = onTravelUsers.has(person.UserName);
     }
 
-    return Array.isArray(people) ? peopleArr : peopleArr[0];
+    return isOne ? peopleArr[0] : applyClientPaging(peopleArr, req.query);
   });
 
   // FV-18–21: airlines en luchthavens

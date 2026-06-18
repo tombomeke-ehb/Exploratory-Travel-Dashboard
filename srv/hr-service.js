@@ -10,7 +10,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const cds = require('@sap/cds');
-const { collectAllTrips, collectTripsForPerson } = require('./trippin-trips');
+const { collectAllTrips, collectTripsForPerson, collectAllPeople, applyClientPaging } = require('./trippin-trips');
 
 // ── In-memory cache voor airline-statistieken ────────────────────────────────
 let _airlineStatsCache = null;
@@ -21,7 +21,12 @@ module.exports = cds.service.impl(async function () {
   const TripPin = await cds.connect.to('TripPinService');
 
   // ── READ: TripPin doorsturen ───────────────────────────────────────────────
-  this.on('READ', 'People',   req => TripPin.run(req.query));
+  // FV-29: alle medewerkers (TripPin pagineert per 8; haal alle pagina's op).
+  this.on('READ', 'People', async (req) => {
+    if (req.query?.SELECT?.one) return TripPin.run(req.query);   // detail (1 record)
+    const all = await collectAllPeople(TripPin, req.query);
+    return applyClientPaging(all, req.query);
+  });
   this.on('READ', 'Airports', req => TripPin.run(req.query));
   // FV-18: verrijk de airlines met het aantal boekingen uit de (gecachte) airline-stats.
   // Graceful: faalt de stats-call, dan blijft de lijst werken met TripCount 0.
