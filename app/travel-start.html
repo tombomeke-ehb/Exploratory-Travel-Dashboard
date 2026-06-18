@@ -735,6 +735,8 @@
   }
 
   // ── Reisextensies ────────────────────────────────────
+  // Haalt alle TravelExtensions op (gecached in extensiesData).
+  // Klikken op een rij opent de detail-drawer met de volledige reisinfo.
   var extensiesData = [];
 
   async function loadExtensies() {
@@ -771,6 +773,7 @@
     html += '</tbody></table></div>';
     container.innerHTML = html;
 
+    // Koppel click-listener ná DOM-injectie; opent drawer met het bijbehorende object
     container.querySelectorAll('tr.clickable').forEach(function (tr) {
       tr.addEventListener('click', function () {
         var id = tr.getAttribute('data-tripid');
@@ -791,6 +794,8 @@
   });
 
   // ── Drawer ───────────────────────────────────────────
+  // Vult de drawer met de reisdetails en schuift hem open.
+  // Twee secties: TripPin-basisvelden + PrimePath-uitbreidingsvelden.
   function openDrawer(item) {
     document.getElementById('drawerTitle').textContent = 'Reis ' + item.TripID;
     var body = document.getElementById('drawerBody');
@@ -805,6 +810,7 @@
       + '<div class="drawer-field"><div class="label">Goedkeuringsstatus</div><div class="value">' + statusPill(item.ApprovalStatus) + '</div></div>'
       + '<div class="drawer-field"><div class="label">Interne notitie</div><div class="value">' + esc(item.InternalNote || '—') + '</div></div>'
       + '</div>';
+    // Stel de Fiori-link in op het correcte TravelExtensions-record
     document.getElementById('drawerFioriLink').href = '/travel-dashboard/webapp/#/TravelExtensions(' + item.TripID + ')';
     document.getElementById('drawerOverlay').classList.add('open');
     document.getElementById('drawer').classList.add('open');
@@ -815,11 +821,14 @@
     document.getElementById('drawer').classList.remove('open');
   }
 
+  // Drie manieren om de drawer te sluiten: kruisknop, overlay-klik, Escape-toets
   document.getElementById('drawerClose').addEventListener('click', closeDrawer);
   document.getElementById('drawerOverlay').addEventListener('click', closeDrawer);
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDrawer(); });
 
   // ── Medewerkers ──────────────────────────────────────
+  // Haalt People-data op en toont beschikbaarheidsstatus per medewerker.
+  // Klikken op een rij navigeert naar het Fiori-detailscherm.
   var medewerkersData = [];
 
   async function loadMedewerkers() {
@@ -874,6 +883,8 @@
   });
 
   // ── Airlines ─────────────────────────────────────────
+  // Sorteerbare tabel; airlineSort slaat de actieve kolom en richting op.
+  // renderAirlines() sorteert de lokale cache client-side (geen nieuwe fetch).
   var airlinesData = [];
   var airlineSort = { col: 'Name', asc: true };
 
@@ -890,6 +901,7 @@
 
   function renderAirlines() {
     var container = document.getElementById('airlinesContent');
+    // Sorteer een kopie (slice) van de cache op de actieve kolom
     var data = airlinesData.slice();
     data.sort(function (a, b) {
       var va = a[airlineSort.col], vb = b[airlineSort.col];
@@ -905,6 +917,7 @@
       return;
     }
 
+    // Hulpfuncties voor gesorteerde kolomheaders (klasse + pijlicoon)
     function thClass(col) { return 'sortable' + (airlineSort.col === col ? ' sorted' : ''); }
     function arrow(col) {
       if (airlineSort.col !== col) return '<span class="sort-arrow">&#9650;</span>';
@@ -927,6 +940,7 @@
       });
     });
 
+    // Klikken op een sorteerbare kolomheader wisselt richting of stelt nieuwe kolom in
     container.querySelectorAll('th.sortable').forEach(function (th) {
       th.addEventListener('click', function () {
         var col = th.getAttribute('data-col');
@@ -938,6 +952,7 @@
   }
 
   // ── Luchthavens ──────────────────────────────────────
+  // Zoekbare tabel op naam, ICAO, IATA of stad (client-side filter op de cache).
   var luchthavensData = [];
 
   async function loadLuchthavens() {
@@ -984,12 +999,15 @@
   });
 
   // ── Logout ───────────────────────────────────────────
+  // POST naar /auth/logout wist de httpOnly JWT-cookie server-side.
+  // Daarna redirect naar de landingspagina ongeacht of het verzoek slaagt.
   document.getElementById('logoutBtn').addEventListener('click', async function () {
     try { await fetch('/auth/logout', { method: 'POST', credentials: 'include' }); } catch (e) {}
     window.location.href = '/';
   });
 
   // ── Init ─────────────────────────────────────────────
+  // Start de app: verwerk de huidige hash en laad de bijbehorende beginview.
   navigate();
 })();
 </script>
