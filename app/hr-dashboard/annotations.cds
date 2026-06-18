@@ -41,7 +41,7 @@ annotate HRService.TravelExtensions with @(
   UI.LineItem: [
     { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
     { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
-    { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
+    { $Type: 'UI.DataField', Value: StatusLabel,    Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
         { $Eq: [{ $Path: 'ApprovalStatus' }, 'Approved'] }, 3,
         { $If: [{ $Eq: [{ $Path: 'ApprovalStatus' }, 'Rejected'] }, 1, 2] }
     ]}} },
@@ -53,7 +53,7 @@ annotate HRService.TravelExtensions with @(
   UI.FieldGroup#ExtInfo: { Label: 'Reisextensie details', Data: [
     { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
     { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
-    { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
+    { $Type: 'UI.DataField', Value: StatusLabel,    Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
         { $Eq: [{ $Path: 'ApprovalStatus' }, 'Approved'] }, 3,
         { $If: [{ $Eq: [{ $Path: 'ApprovalStatus' }, 'Rejected'] }, 1, 2] }
     ]}} },

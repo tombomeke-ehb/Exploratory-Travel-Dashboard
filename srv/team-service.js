@@ -218,20 +218,28 @@ module.exports = cds.service.impl(async function () {
     await _assertTeamOwnership(req, tripId, TripPin);
   });
 
-  // ── READ TravelExtensions: teamfiltering ────────────────────────────────────
+  // ── READ TravelExtensions: teamfiltering + StatusLabel vullen ───────────────
   this.on('READ', 'TravelExtensions', async (req) => {
     const result = await cds.run(req.query);
-    if (!Array.isArray(result)) return result;
+    const statusMap = { Pending: 'In behandeling', Approved: 'Goedgekeurd', Rejected: 'Afgekeurd' };
+    const fill = e => { e.StatusLabel = statusMap[e.ApprovalStatus] ?? e.ApprovalStatus; return e; };
+    if (!Array.isArray(result)) {
+      if (result) fill(result);
+      return result;
+    }
 
+    let list = result;
     const team = await _resolveTeamUserNames(req);
-    if (!team) return result;
+    if (team) {
+      const teamTripIds = await _collectTeamTripIds(TripPin,
+        [...team].map(u => ({ TripPinUserName: u }))
+      );
+      list = list.filter(e => teamTripIds.has(Number(e.TripID)));
+    }
 
-    const teamTripIds = await _collectTeamTripIds(TripPin,
-      [...team].map(u => ({ TripPinUserName: u }))
-    );
-    const filtered = result.filter(e => teamTripIds.has(Number(e.TripID)));
-    filtered.$count = filtered.length;
-    return filtered;
+    list.forEach(fill);
+    list.$count = list.length;
+    return list;
   });
 
 
@@ -298,9 +306,14 @@ async function _setApprovalStatus(req, status, TripPin) {
   await cds.run(
     UPDATE('primepath.TravelExtensions').set({ ApprovalStatus: status }).where({ TripID: tripId })
   );
-  return await cds.run(
+  const rec = await cds.run(
     SELECT.one.from('primepath.TravelExtensions').where({ TripID: tripId })
   );
+  if (rec) {
+    const statusMap = { Pending: 'In behandeling', Approved: 'Goedgekeurd', Rejected: 'Afgekeurd' };
+    rec.StatusLabel = statusMap[rec.ApprovalStatus] ?? rec.ApprovalStatus;
+  }
+  return rec;
 }
 
 // Resolve de TripPin-UserNames van het team van de ingelogde TeamLead.
