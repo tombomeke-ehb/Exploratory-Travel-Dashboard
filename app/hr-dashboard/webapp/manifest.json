@@ -80,6 +80,26 @@
           "pattern": "Airlines({key}):?query:",
           "name": "AirlinesObjectPage",
           "target": "AirlinesObjectPage"
+        },
+        {
+          "pattern": "TravelExtensions:?query:",
+          "name": "TravelExtensionsList",
+          "target": "TravelExtensionsList"
+        },
+        {
+          "pattern": "TravelExtensions({key}):?query:",
+          "name": "TravelExtensionsObjectPage",
+          "target": "TravelExtensionsObjectPage"
+        },
+        {
+          "pattern": "Airports:?query:",
+          "name": "AirportsList",
+          "target": "AirportsList"
+        },
+        {
+          "pattern": "Airports({key}):?query:",
+          "name": "AirportsObjectPage",
+          "target": "AirportsObjectPage"
         }
       ],
       "targets": {
@@ -157,6 +177,58 @@
           "options": {
             "settings": {
               "entitySet": "Airlines",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "TravelExtensionsList": {
+          "type": "Component",
+          "id": "TravelExtensionsList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "entitySet": "TravelExtensions",
+              "variantManagement": "Page",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "TravelExtensions": { "detail": { "route": "TravelExtensionsObjectPage" } }
+              }
+            }
+          }
+        },
+        "TravelExtensionsObjectPage": {
+          "type": "Component",
+          "id": "TravelExtensionsObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "entitySet": "TravelExtensions",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "AirportsList": {
+          "type": "Component",
+          "id": "AirportsList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "entitySet": "Airports",
+              "variantManagement": "Page",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "Airports": { "detail": { "route": "AirportsObjectPage" } }
+              }
+            }
+          }
+        },
+        "AirportsObjectPage": {
+          "type": "Component",
+          "id": "AirportsObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "entitySet": "Airports",
               "editableHeaderContent": false
             }
           }

@@ -457,6 +457,14 @@
         <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         <span class="nav-label">Medewerkers</span>
       </a>
+      <a class="nav-item" data-view="reisextensies" href="#reisextensies">
+        <svg viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h6"/></svg>
+        <span class="nav-label">Reisextensies</span>
+      </a>
+      <a class="nav-item" data-view="luchthavens" href="#luchthavens">
+        <svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M9 6h.01M15 6h.01M9 10h.01M15 10h.01M9 14h.01M15 14h.01"/></svg>
+        <span class="nav-label">Luchthavens</span>
+      </a>
     </div>
   </nav>
 
@@ -582,6 +590,20 @@
       </div>
     </div>
 
+    <!-- Reisextensies View -->
+    <div class="view" id="view-reisextensies">
+      <h2 class="view-title">Reisextensies</h2>
+      <p class="view-sub">PrimePath interne reisinformatie (alleen-lezen).</p>
+      <div id="extensiesTableWrap"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- Luchthavens View -->
+    <div class="view" id="view-luchthavens">
+      <h2 class="view-title">Luchthavens</h2>
+      <p class="view-sub">Overzicht van luchthavens uit de TripPin-databron.</p>
+      <div id="luchthavensTableWrap"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+    </div>
+
     <div class="footer">EhB Cloud Integration &middot; In samenwerking met Flexso &middot; Demo: 19 juni 2026</div>
   </main>
 
@@ -625,7 +647,7 @@
     function showError(el, msg) { el.innerHTML = '<div class="error-msg">' + esc(msg) + '</div>'; }
 
     // ── Navigation ──────────────────────────────────────────────────────────────
-    const views = ['dashboard', 'reizen', 'airlines', 'medewerkers'];
+    const views = ['dashboard', 'reizen', 'airlines', 'medewerkers', 'reisextensies', 'luchthavens'];
     // loaded{}: cache-object — elke view wordt maar één keer geladen
     const loaded = {};
 
@@ -784,6 +806,35 @@
         } catch (e) {
           showError(wrap, 'Kon medewerkers niet laden.');
         }
+      },
+
+      async reisextensies() {
+        const wrap = document.getElementById('extensiesTableWrap');
+        try {
+          const d = await api('TravelExtensions');
+          const exts = d.value || [];
+          if (exts.length === 0) { wrap.innerHTML = '<div class="empty-msg">Geen reisextensies gevonden.</div>'; return; }
+          const statusPill = s => s === 'Approved' ? '<span class="pill pill-green">Goedgekeurd</span>' : s === 'Rejected' ? '<span class="pill pill-red">Afgewezen</span>' : '<span class="pill pill-orange">In afwachting</span>';
+          const rows = exts.map(e => '<tr style="cursor:pointer" data-tripid="' + e.TripID + '"><td>' + esc(e.TripID) + '</td><td>' + esc(e.ProjectCode) + '</td><td>' + statusPill(e.ApprovalStatus) + '</td><td>' + esc(e.InternalNote || '') + '</td></tr>').join('');
+          wrap.innerHTML = '<table class="pp-table"><thead><tr><th>Trip ID</th><th>Projectcode</th><th>Status</th><th>Notitie</th></tr></thead><tbody>' + rows + '</tbody></table>';
+          wrap.querySelectorAll('tr[data-tripid]').forEach(tr => {
+            tr.addEventListener('click', () => { window.location.href = '/hr-dashboard/#/TravelExtensions(' + tr.dataset.tripid + ')'; });
+          });
+        } catch (e) { showError(wrap, 'Kon reisextensies niet laden.'); }
+      },
+
+      async luchthavens() {
+        const wrap = document.getElementById('luchthavensTableWrap');
+        try {
+          const d = await api('Airports?$orderby=Name');
+          const airports = d.value || [];
+          if (airports.length === 0) { wrap.innerHTML = '<div class="empty-msg">Geen luchthavens gevonden.</div>'; return; }
+          const rows = airports.map(a => '<tr style="cursor:pointer" data-icao="' + esc(a.IcaoCode) + '"><td>' + esc(a.IcaoCode) + '</td><td>' + esc(a.IataCode) + '</td><td><strong>' + esc(a.Name) + '</strong></td></tr>').join('');
+          wrap.innerHTML = '<table class="pp-table"><thead><tr><th>ICAO</th><th>IATA</th><th>Naam</th></tr></thead><tbody>' + rows + '</tbody></table>';
+          wrap.querySelectorAll('tr[data-icao]').forEach(tr => {
+            tr.addEventListener('click', () => { window.location.href = '/hr-dashboard/#/Airports(\'' + tr.dataset.icao + '\')'; });
+          });
+        } catch (e) { showError(wrap, 'Kon luchthavens niet laden.'); }
       }
     };
 
