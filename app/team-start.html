@@ -362,8 +362,12 @@
       <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span>Mijn Team</span>
     </a>
+    <a class="nav-item" data-view="reisgoedkeuringen" href="#reisgoedkeuringen">
+      <svg viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h6"/></svg>
+      <span>Reisgoedkeuringen</span>
+    </a>
     <a class="nav-item" data-view="reizen" href="#reizen">
-      <svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect x="2" y="6" width="20" height="14" rx="2"/></svg>
       <span>Reizen</span>
     </a>
     <a class="nav-item" data-view="airlines" href="#airlines">
@@ -433,13 +437,13 @@
       </div>
     </section>
 
-    <!-- Reizen view -->
-    <section class="view" id="view-reizen">
-      <h1 class="view-title">Reizen</h1>
+    <!-- Reisgoedkeuringen view (was: Reizen) -->
+    <section class="view" id="view-reisgoedkeuringen">
+      <h1 class="view-title">Reisgoedkeuringen</h1>
       <p class="view-sub">Reisextensies van je teamleden. Pas de goedkeuringsstatus aan.</p>
 
       <div class="toolbar">
-        <span class="toolbar-title">Reisextensies</span>
+        <span class="toolbar-title">Reisgoedkeuringen</span>
         <div class="search-wrap">
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           <input class="search-input" type="text" id="reizenSearch" placeholder="Zoek op Trip ID / status…" />
@@ -447,6 +451,25 @@
       </div>
       <div class="table-card">
         <div id="reizenTableWrap">
+          <div class="spinner-wrap"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reizen view (TripPin-reizen van het team) -->
+    <section class="view" id="view-reizen">
+      <h1 class="view-title">Reizen</h1>
+      <p class="view-sub">Overzicht van de reizen van je teamleden (read-only, uit TripPin).</p>
+
+      <div class="toolbar">
+        <span class="toolbar-title">Reizen</span>
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input class="search-input" type="text" id="tripsSearch" placeholder="Zoek op naam, beschrijving…" />
+        </div>
+      </div>
+      <div class="table-card">
+        <div id="tripsTableWrap">
           <div class="spinner-wrap"><div class="spinner"></div></div>
         </div>
       </div>
@@ -519,7 +542,7 @@
       // ── Navigation ───────────────────────────────────────────
       // Koppelt de URL-hash (#dashboard, #mijn-team, #reizen) aan de
       // bijbehorende view-sectie en triggert lazy data-loading.
-      var views = { dashboard: 'view-dashboard', 'mijn-team': 'view-mijn-team', reizen: 'view-reizen', airlines: 'view-airlines' };
+      var views = { dashboard: 'view-dashboard', 'mijn-team': 'view-mijn-team', reisgoedkeuringen: 'view-reisgoedkeuringen', reizen: 'view-reizen', airlines: 'view-airlines' };
 
       function navigate() {
         // Stap 1: normaliseer de hash naar een bekende view-sleutel
@@ -539,7 +562,8 @@
         // Stap 4: laad data voor de actieve view (elke view laadt slechts één keer)
         if (hash === 'dashboard') loadDashboard();
         if (hash === 'mijn-team') loadTeam();
-        if (hash === 'reizen') loadReizen();
+        if (hash === 'reisgoedkeuringen') loadReizen();
+        if (hash === 'reizen') loadTrips();
         if (hash === 'airlines') loadAirlines();
       }
 
@@ -628,13 +652,11 @@
         // Stap 4: koppel event listeners ná DOM-injectie
         // (niet mogelijk vóór innerHTML omdat de elementen dan nog niet bestaan)
 
-        // "Reizen bekijken": sla gebruikersnaam op als filter, wis de reizencache en navigeer
+        // "Reizen bekijken": opent de Fiori People Object Page met de reistijdlijn
         wrap.querySelectorAll('.btn-action').forEach(function (btn) {
           btn.addEventListener('click', function (e) {
-            e.stopPropagation();                      // voorkomt dat de rij-click ook vuurt
-            reizenFilter = btn.getAttribute('data-user');
-            reizenData = null;                        // cache wissen zodat gefilterde data opnieuw laadt
-            location.hash = '#reizen';
+            e.stopPropagation();
+            window.location.href = '/team-dashboard/#/People(\'' + btn.getAttribute('data-user') + '\')';
           });
         });
         // Klikken op een rij opent het Fiori-detailscherm voor die persoon
@@ -772,6 +794,58 @@
       // Verbergt de welkomstbanner wanneer de gebruiker hem wegklikt.
       document.getElementById('dismissBanner').addEventListener('click', function () {
         document.getElementById('welcomeBanner').classList.add('hidden');
+      });
+
+      // ── Reizen (TripPin Trips) ────────────────────────────────
+      var tripsData = null;
+      function loadTrips() {
+        var wrap = document.getElementById('tripsTableWrap');
+        if (tripsData) { renderTrips(tripsData); return; }
+        wrap.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+        odata('Trips').then(function (d) {
+          tripsData = d.value || [];
+          renderTrips(tripsData);
+        }).catch(function () {
+          wrap.innerHTML = '<div class="error-msg">Kon reizen niet laden.</div>';
+        });
+      }
+
+      function renderTrips(data) {
+        var q = (document.getElementById('tripsSearch').value || '').toLowerCase();
+        var filtered = data.filter(function (t) {
+          if (!q) return true;
+          return (String(t.TripId) + ' ' + (t.Name || '') + ' ' + (t.Description || '')).toLowerCase().indexOf(q) !== -1;
+        });
+        var wrap = document.getElementById('tripsTableWrap');
+        if (filtered.length === 0) {
+          wrap.innerHTML = '<table><thead><tr><th>REIS-ID</th><th>NAAM</th><th>VERTREK</th><th>AANKOMST</th><th>BUDGET</th><th>BESCHRIJVING</th></tr></thead><tbody><tr><td colspan="6" class="empty-msg">Geen reizen gevonden</td></tr></tbody></table>';
+          return;
+        }
+        var html = '<table><thead><tr><th>REIS-ID</th><th>NAAM</th><th>VERTREK</th><th>AANKOMST</th><th>BUDGET</th><th>BESCHRIJVING</th></tr></thead><tbody>';
+        filtered.forEach(function (t) {
+          var start = t.StartsAt ? dateFmt.format(new Date(t.StartsAt)) : '—';
+          var end = t.EndsAt ? dateFmt.format(new Date(t.EndsAt)) : '—';
+          var budget = t.Budget != null ? new Intl.NumberFormat('nl-BE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(Number(t.Budget)) : '—';
+          html += '<tr class="clickable" data-tripid="' + esc(t.TripId) + '">'
+            + '<td>' + esc(t.TripId) + '</td>'
+            + '<td>' + esc(t.Name) + '</td>'
+            + '<td>' + esc(start) + '</td>'
+            + '<td>' + esc(end) + '</td>'
+            + '<td>' + esc(budget) + '</td>'
+            + '<td>' + esc(t.Description || '') + '</td>'
+            + '</tr>';
+        });
+        html += '</tbody></table>';
+        wrap.innerHTML = html;
+        wrap.querySelectorAll('tr.clickable').forEach(function (tr) {
+          tr.addEventListener('click', function () {
+            window.location.href = '/team-dashboard/#/Trips(' + tr.dataset.tripid + ')';
+          });
+        });
+      }
+
+      document.getElementById('tripsSearch').addEventListener('input', function () {
+        if (tripsData) renderTrips(tripsData);
       });
 
       // ── Logout ───────────────────────────────────────────────
