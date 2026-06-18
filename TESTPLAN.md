@@ -69,7 +69,7 @@ Open **http://localhost:4004**.
 - [ ] Rechtsboven de **PrimePath-balk** met **← Overzicht** en **Afmelden**.
 
 **Lijsten & detail:**
-- [ ] **Reizen & extensies** (TravelExtensions): de kolom **Goedkeuringsstatus** is een **gekleurde badge** — Pending=oranje, Approved=groen, Rejected=rood.
+- [ ] **Reisgoedkeuringen** (TravelExtensions): de kolom **Goedkeuringsstatus** is een **gekleurde badge** — Pending=oranje, Approved=groen, Rejected=rood.
 - [ ] Lijst is gesorteerd op **vertrekdatum oplopend** (PresentationVariant).
 - [ ] **Medewerkers**: kolommen incl. **E-mail** (FV-07) en een **status**-badge.
 - [ ] Klik op een medewerker (bv. `russellwhyte`) → detailpagina met **Persoonsgegevens** (incl. e-mail) en **Reisoverzicht** dat **enkel diens eigen reizen** toont (russellwhyte = **3** reizen, niet alle 13).

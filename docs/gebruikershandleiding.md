@@ -29,7 +29,7 @@ Daaronder een **airlinegebruik-grafiek** (top 5 met boekingen en budget).
 
 Navigatiekaarten leiden naar de Fiori-lijsten (niveau 2).
 
-### Reisextensies (niveau 2)
+### Reisgoedkeuringen (niveau 2)
 
 De hoofdlijst van het Travel Dashboard. Elke rij is een PrimePath-reisextensie gekoppeld aan een TripPin-reis.
 
@@ -109,7 +109,7 @@ Overzicht van alle reizen (read-only). Filters op vertrek- en aankomstdatum.
 
 Lijst van alle medewerkers. Klik voor de detailpagina met reisoverzicht.
 
-### Reisextensies
+### Reisgoedkeuringen
 
 Read-only overzicht van alle PrimePath-reisextensies met statusbadge.
 

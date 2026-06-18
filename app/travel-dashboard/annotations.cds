@@ -35,7 +35,7 @@ annotate TravelService.TravelExtensions with @(
     }],
     Visualizations: ['@UI.LineItem']
   },
-  UI.HeaderInfo: { TypeName: 'Reisextensie', TypeNamePlural: 'Reisextensies', Title: { Value: TripID } },
+  UI.HeaderInfo: { TypeName: 'Reisgoedkeuring', TypeNamePlural: 'Reisgoedkeuringen', Title: { Value: TripID } },
   UI.Identification: [
     { $Type: 'UI.DataFieldForAction', Action: 'TravelService.goedkeuren',    Label: 'Goedkeuren',        Criticality: #Positive },
     { $Type: 'UI.DataFieldForAction', Action: 'TravelService.afkeuren',      Label: 'Afkeuren',          Criticality: #Negative },
