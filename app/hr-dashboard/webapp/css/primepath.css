@@ -7,13 +7,27 @@
  * ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ── 1. SAP Theming variabelen ─────────────────────────────────────────── */
+/* Overschrijft de sap_horizon CSS-custom-properties met de PrimePath-huisstijl.
+   UI5 leest deze variabelen op via :root; alle controls erven ze automatisch
+   zonder dat afzonderlijke selectors per component nodig zijn.
+   Groepering:
+     - Merkkleur + interactiestaten (brand / highlight / active / focus)
+     - Paginaachtergronden (shell, canvas, tegel, lijst)
+     - Typografie (tekst, titels, labels, iconen)
+     - Knoppen (emphasized: primaire actieknop)
+     - Links
+     - Invoervelden (focus-ring, hover, rand, achtergrond)
+     - Afrondingsradii (globaal / knop / veld / tegel)
+     - Semantische kleuren (success / warning / error / info / neutral)       */
 :root {
+  /* Merkkleur: PrimePath-blauw als primaire interactiekleur */
   --sapBrandColor:                        #0070F2;
   --sapHighlightColor:                    #0070F2;
   --sapSelectedColor:                     #0070F2;
   --sapActiveColor:                       #0058C4;
   --sapContent_FocusColor:                #0058C4;
 
+  /* Paginaachtergrond: lichtblauw canvas + shellgradiënt */
   --sapBackgroundColor:                   #F3F6FB;
   --sapShellColor:                        #0A2540;
   --sapShell_Background:                  linear-gradient(135deg, #0070F2 0%, #0040A8 55%, #0A2540 100%);
@@ -21,6 +35,7 @@
   --sapShell_BorderColor:                 rgba(255,255,255,.12);
   --sapShell_Hover_Background:            rgba(255,255,255,.14);
 
+  /* Kaart- en lijstachtergronden: wit met blauwe hover */
   --sapGroup_ContentBackground:           #FFFFFF;
   --sapTile_Background:                   #FFFFFF;
   --sapList_Background:                   #FFFFFF;
@@ -29,31 +44,37 @@
   --sapList_SelectionBackgroundColor:     #D6E6FE;
   --sapList_HighlightColor:               #0070F2;
 
+  /* Typografie: donkerblauw tekst, grijze labels */
   --sapTextColor:                         #0F1F33;
   --sapTitleColor:                        #0F1F33;
   --sapContent_LabelColor:                #5B6B7B;
   --sapContent_NonInteractiveIconColor:   #5B6B7B;
 
+  /* Emphasized button: primaire actieknop (blauw) */
   --sapButton_Emphasized_Background:      #0070F2;
   --sapButton_Emphasized_Hover_Background:#0058C4;
   --sapButton_Emphasized_Active_Background:#0040A8;
   --sapButton_Emphasized_TextColor:       #FFFFFF;
   --sapButton_Emphasized_BorderColor:     #0070F2;
 
+  /* Links: blauw met donkere hover/active-staat */
   --sapLink_TextColor:                    #0070F2;
   --sapLink_Hover_Color:                  #0058C4;
   --sapLink_Active_Color:                 #0040A8;
 
+  /* Invoervelden: blauwe focus-ring, lichtgrijze rand */
   --sapField_Focus_BorderColor:           #0070F2;
   --sapField_Hover_BorderColor:           #0058C4;
   --sapField_BorderColor:                 #E4EAF1;
   --sapField_Background:                  #FFFFFF;
 
+  /* Afrondingsradii: licht afgerond (10px element, 14px tegels) */
   --sapElement_BorderCornerRadius:        10px;
   --sapButton_BorderCornerRadius:         10px;
   --sapField_BorderCornerRadius:          8px;
   --sapTile_BorderCornerRadius:           14px;
 
+  /* Semantische statuskleuren (success/warning/error/info/neutral) */
   --sapSuccessColor:                      #0E8345;
   --sapWarningColor:                      #D97706;
   --sapErrorColor:                        #C41E3A;
@@ -62,6 +83,11 @@
 }
 
 /* ── 2. Shell / navigatiebalk (gradient uit huisstijl) ─────────────────── */
+/* Overschrijft de SAP Fiori Launchpad-shellbalk (sapUshell*) en de mobiele
+   appbalk (sapMShellHeader) met de PrimePath-gradiënt.
+   !important is vereist: UI5 injecteert inline-stijlen en scoped selectors
+   die anders hogere specificiteit hebben dan dit stylesheet.
+   De border + box-shadow simuleren de dieptescheiding van de pagina-canvas. */
 .sapUshellShellHead,
 .sapUshellHead,
 .sapFioriShellCont .sapUshellShellHead,
@@ -82,6 +108,10 @@
 }
 
 /* ── 3. Pagina-canvas ───────────────────────────────────────────────────── */
+/* Geeft de hele paginaachtergrond de lichtblauwe PrimePath-canvaskleur.
+   Alle containers die UI5 als achtergrond gebruikt — body, DynamicPage,
+   ObjectPage, MPage — worden gelijkgetrokken zodat er geen witte vlekken
+   zichtbaar zijn tijdens lazy-loading van subviews.                        */
 .sapUiBody,
 .sapMPage,
 .sapMPageBgStandard,
@@ -94,6 +124,13 @@
 }
 
 /* ── 4. DynamicPage header & filterbalk ─────────────────────────────────── */
+/* DynamicPage is de standaard Fiori Elements List Report-layout.
+   - Title: wit kaartpaneel met onderscheiding via border-bottom; geen shadow
+     (die valt al van het kaartcontainer-niveau).
+   - Header (filterbalk): lichte elevatie (1px shadow) + ruime padding zodat
+     filtervelden niet te krap op elkaar staan.
+   - Titeltekst: vetgedrukt donkerblauw, iets kleiner dan sap_horizon default
+     voor een compactere look op hogere schermresoluties.                    */
 .sapFDynamicPageTitle,
 .sapFDynamicPageHeader {
   background: #FFFFFF !important;
@@ -119,6 +156,12 @@
 }
 
 /* ── 5. MDC-tabel als kaart met elevation ──────────────────────────────── */
+/* sap.ui.mdc.Table is de Fiori Elements-tabel in List Reports.
+   Wordt omgezet naar een "card"-patroon: witte achtergrond, afgeronde hoeken
+   (14px), lichte drop shadow, en margin om ademruimte te geven t.o.v. het
+   paginacanvas. Hover vergroot de shadow subtiel (micro-interactie).
+   De toolbar bovenaan de tabel (.sapMTB) krijgt een eigen border-bottom om
+   de scheiding met de tabelrijen te verduidelijken.                         */
 .sapUiMdcTable {
   background: #FFFFFF !important;
   border: 1px solid #E4EAF1 !important;
@@ -149,6 +192,13 @@
 }
 
 /* ── 6. ResponsiveTable ─────────────────────────────────────────────────── */
+/* sap.m.Table (ResponsiveTable): wordt gebruikt binnen MDC Table of los als
+   List Report-tabel op kleinere schermen.
+   - Kolomkoppen: lichtblauwe achtergrond, uppercase labels voor leesbaarheid.
+   - Rijen: subtiele border-bottom + smooth hover-transitie naar blauw.
+   - Geselecteerde rij: blauwe inset-border links (3px) + lichtblauwe achtergrond
+     — visuele indicatie die niet afhankelijk is van achtergrondkleur alleen.
+   - Cellen: compacte padding (10px/12px), tabular-nums via sectie 19.         */
 .sapMListTblHeader,
 .sapMListTblHeaderCell {
   background: #F3F6FB !important;
@@ -190,6 +240,11 @@
 }
 
 /* ── 7. GridTable ───────────────────────────────────────────────────────── */
+/* sap.ui.table.Table (GridTable): gebruik voor grote datasets met vaste
+   kolombreedte. Zelfde kaartstijl als de MDC Table (sectie 5), maar de
+   HTML-structuur verschilt — vandaar aparte selectors.
+   Kolomkopteksten worden gelijkgetrokken met de ResponsiveTable-stijl
+   (uppercase, grijs, 11px) voor visuele consistentie.                      */
 .sapUiTable {
   background: #FFFFFF !important;
   border: 1px solid #E4EAF1 !important;
@@ -222,6 +277,13 @@
 }
 
 /* ── 8. Object Page ─────────────────────────────────────────────────────── */
+/* sap.uxap.ObjectPage: de detailpagina voor een enkelvoudig record (bijv.
+   een reis of medewerker). Secties en subsecties worden als witte kaarten
+   getoond met een lichte shadow, analoog aan de tabelkaarten.
+   - Sectietitels: vetgedrukt donkerblauw (15px).
+   - Subsectietitels: uppercase grijs (11px) — visuele hiërarchie.
+   - Headertitel en headerinhoud: wit met border-bottom, consistent met
+     de DynamicPage-header (sectie 4).                                      */
 .sapUxAPObjectPageSection,
 .sapUxAPObjectPageSubSection {
   background: #FFFFFF !important;
@@ -254,6 +316,11 @@
 }
 
 /* ── 9. Veldlabels & invoer ────────────────────────────────────────────── */
+/* sap.m.Label en sap.m.Input / sap.m.SearchField.
+   Labels: uppercase (11px, 600) in grijsblauw — zelfde stijl als kolomkoppen.
+   Inputvelden: wit met lichtgrijze rand; bij focus een blauwe 3px glow-ring
+   (rgba zodat de ring zacht overloopt) en border-color = brandcolor.
+   Transitie op border/shadow voorkomt abrupte visuele sprong bij focus.    */
 .sapMLabel {
   font-size: 11px !important;
   font-weight: 600 !important;
@@ -279,6 +346,15 @@
 }
 
 /* ── 10. Status-badges ──────────────────────────────────────────────────── */
+/* sap.m.ObjectStatus: toont ApprovalStatus, TravelStatus e.d. als pill-badge.
+   De basisstijl (.sapMObjStatus) geeft de pill-vorm (border-radius: 999px)
+   en lijnhoogte. Daarna wordt elke semantische staat apart gestyled:
+     - Success: groen (ECFDF5/0E8345, mintrand)  → Goedgekeurd / Actief
+     - Error:   rood  (FEF2F2/C41E3A, roze rand) → Afgekeurd / Geannuleerd
+     - Warning: geel  (FFFBEB/D97706, amberrand) → In behandeling
+     - Neutral: grijs (F3F6FB/5B6B7B, lichtrand)  → Onbekend / Concept
+   Alle varianten gebruiken een gekleurde rand zodat de state ook
+   leesbaar blijft zonder kleuronderscheid (toegankelijkheid).              */
 .sapMObjStatus {
   font-weight: 600 !important;
   font-size: 12px !important;
@@ -319,6 +395,14 @@
 }
 
 /* ── 11. Knoppen ─────────────────────────────────────────────────────────── */
+/* sap.m.Button in emphasized- en default-variant.
+   Emphasized (primaire actie):
+     - Blauw (#0070F2) + hover donkerder (#0058C4) + shadow voor diepte.
+     - Active: schaalverkleining (scale(.97)) geeft een "indruk"-effect.
+   Default (normale knop):
+     - Alleen border-radius en font-grootte worden aangepast; kleur/border
+       komen uit de SAP-theming-variabelen (sectie 1) en worden niet
+       opnieuw gedeclareerd om theming-consistentie te bewaren.             */
 .sapMBtnEmphasized .sapMBtnInner {
   background: #0070F2 !important;
   border-color: #0070F2 !important;
@@ -347,6 +431,10 @@
 }
 
 /* ── 12. Filterbar ───────────────────────────────────────────────────────── */
+/* sap.ui.mdc.FilterBar en sap.m.FilterBar: de filterbalk boven de tabel
+   in List Reports. Krijgt een witte achtergrond met border-bottom om
+   visueel los te staan van de DynamicPage-header erboven.
+   De padding (8px 20px) stemt overeen met de DynamicPage-header (sectie 4). */
 .sapUiMdcFilterBar,
 .sapMFilterBar {
   background: #FFFFFF !important;
@@ -355,6 +443,12 @@
 }
 
 /* ── 13. Dialogen & popovers ─────────────────────────────────────────────── */
+/* sap.m.Dialog en sap.m.Popover: modale overlays voor bevestigingen,
+   formulieren en contextmenu's.
+   De zware drop shadow (22px / 10px, blauwgetint) geeft de dialoog een
+   duidelijke "boven de pagina"-perceptie. De border (1px #E4EAF1) is subtiel
+   maar nodig op lichte achtergronden om de dialoogrand zichtbaar te houden.
+   De titeltekst volgt het kaartpatroon (700 gewicht, donkerblauw).         */
 .sapMPopover,
 .sapMDialog {
   border-radius: 14px !important;
@@ -370,6 +464,11 @@
 }
 
 /* ── 14. Tabs (IconTabBar) ───────────────────────────────────────────────── */
+/* sap.m.IconTabBar: wordt gebruikt in Fiori Elements voor subviews en
+   subdetails van een ObjectPage.
+   - Balk: witte achtergrond + onderlijnrand (analoog aan de filterbalk).
+   - Actief tabblad: blauwe tekst + 2px border-bottom als indicator;
+     geen achtergrondkleur om de actieve tab niet te zwaar te maken.        */
 .sapMITB {
   background: #FFFFFF !important;
   border-bottom: 1px solid #E4EAF1 !important;
@@ -385,12 +484,22 @@
 }
 
 /* ── 15. Breadcrumbs ─────────────────────────────────────────────────────── */
+/* sap.m.Breadcrumbs: navigatiepath bovenaan een ObjectPage.
+   Links worden blauw (#0070F2) gestyled in 12px zodat ze compact blijven
+   maar wel klikbaar ogen; hover/active komen uit de theming-variabelen
+   (sectie 1, --sapLink_Hover_Color) en zijn dus niet hier herhaald.        */
 .sapMBreadcrumbs .sapMLink {
   color: #0070F2 !important;
   font-size: 12px !important;
 }
 
 /* ── 16. Zoekveldje ──────────────────────────────────────────────────────── */
+/* sap.m.SearchField: staat typisch in de tabelwerkbalk voor globale
+   zoekfunctionaliteit.
+   - Rustende staat: lichtblauwe achtergrond (#F3F6FB) met grijsblauwe rand —
+     onderscheidt het zoekveld van een gewone inputknop.
+   - Focus: zelfde blauwe glow-ring als invoervelden (sectie 9) voor
+     consistente focus-UX door de hele app.                                  */
 .sapMSFB,
 .sapMSF .sapMSFB {
   background: #F3F6FB !important;
@@ -411,6 +520,12 @@
 }
 
 /* ── 17. Roltag ───────────────────────────────────────────────────────────── */
+/* sap.fe.DraftBadge / DraftIndicator: de "concept"-badge in Fiori Elements
+   die aangeeft dat een record nog niet is opgeslagen.
+   Wordt omgezet naar dezelfde pill-stijl als de status-badges (sectie 10):
+   border-radius: 999px, 11px tekst, 600 gewicht.
+   Achtergrond- en tekstkleur worden bepaald door SAP Fiori; alleen de vorm
+   wordt hier genormaliseerd.                                                 */
 .sapFeDraftBadge,
 .sapFeDraftIndicator {
   border-radius: 999px !important;
@@ -420,6 +535,12 @@
 }
 
 /* ── 18. Focus-visible ───────────────────────────────────────────────────── */
+/* Toegankelijkheid: zichtbare focusstijl voor toetsenbord- en
+   schakelaargebruikers. :focus-visible is nauwkeuriger dan :focus
+   — het wordt alleen getoond bij toetsenbordnavigatie, niet bij muisklik.
+   De blauwe outline (3px, semi-transparant rgba) volgt dezelfde tint als de
+   focus-ring in invoervelden (sectie 9) voor visuele consistentie.
+   outline-offset: -2px plaatst de ring iets binnenin de componentrand.     */
 .sapMBtn:focus-visible .sapMBtnInner,
 .sapMLink:focus-visible,
 .sapMListTblRow:focus-visible {
@@ -429,12 +550,20 @@
 }
 
 /* ── 19. Tabular nummers ─────────────────────────────────────────────────── */
+/* font-variant-numeric: tabular-nums zorgt dat alle cijfers in tabelcellen
+   een gelijke breedte hebben. Dit voorkomt dat kolommen met wisselende
+   waarden (bijv. kosten, aantallen, datums) visueel verschuiven bij sorteren
+   of vernieuwen. Van toepassing op zowel ResponsiveTable- als GridTable-cellen. */
 .sapMListTblCell,
 .sapUiTableCell {
   font-variant-numeric: tabular-nums !important;
 }
 
 /* ── 20. Scrollbars ──────────────────────────────────────────────────────── */
+/* Webkit-scrollbars (Chrome, Edge, Safari): smal (6px), transparante track,
+   afgeronde grijsblauwe thumb. ::-webkit-scrollbar-* werkt niet in Firefox
+   (die gebruikt scrollbar-width: thin in de native browser-stijl).
+   Dit is puur cosmetisch en tast de functionaliteit niet aan.              */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #8A97A6; border-radius: 999px; }

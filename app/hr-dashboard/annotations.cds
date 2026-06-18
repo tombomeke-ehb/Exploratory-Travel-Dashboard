@@ -34,6 +34,49 @@ annotate HRService.Trips with @(
     { $Type: 'UI.DataField', Value: Budget,   Label: 'Budget' }
   ]}
 );
+annotate HRService.TravelExtensions with @(
+  UI.HeaderInfo: { TypeName: 'Reisextensie', TypeNamePlural: 'Reisextensies', Title: { Value: TripID } },
+  UI.SelectionFields: [ ApprovalStatus ],
+  UI.LineItem: [
+    { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
+    { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
+    { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
+        { $Eq: [{ $Path: 'ApprovalStatus' }, 'Approved'] }, 3,
+        { $If: [{ $Eq: [{ $Path: 'ApprovalStatus' }, 'Rejected'] }, 1, 2] }
+    ]}} },
+    { $Type: 'UI.DataField', Value: InternalNote,   Label: 'Interne notitie' }
+  ],
+  UI.Facets: [
+    { $Type: 'UI.ReferenceFacet', Label: 'Reisextensie', Target: '@UI.FieldGroup#ExtInfo' }
+  ],
+  UI.FieldGroup#ExtInfo: { Label: 'Reisextensie details', Data: [
+    { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
+    { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
+    { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
+        { $Eq: [{ $Path: 'ApprovalStatus' }, 'Approved'] }, 3,
+        { $If: [{ $Eq: [{ $Path: 'ApprovalStatus' }, 'Rejected'] }, 1, 2] }
+    ]}} },
+    { $Type: 'UI.DataField', Value: InternalNote,   Label: 'Interne notitie' },
+    { $Type: 'UI.DataField', Value: modifiedAt,     Label: 'Laatst gewijzigd op' },
+    { $Type: 'UI.DataField', Value: modifiedBy,     Label: 'Laatst gewijzigd door' }
+  ]}
+);
+annotate HRService.Airports with @(
+  UI.PresentationVariant: { SortOrder: [{ Property: Name, Descending: false }], Visualizations: ['@UI.LineItem'] },
+  UI.HeaderInfo: { TypeName: 'Luchthaven', TypeNamePlural: 'Luchthavens', Title: { Value: Name }, Description: { Value: IataCode } },
+  UI.SelectionFields: [ IcaoCode, IataCode ],
+  UI.LineItem: [
+    { $Type: 'UI.DataField', Value: IcaoCode, Label: 'ICAO-code' },
+    { $Type: 'UI.DataField', Value: IataCode, Label: 'IATA-code' },
+    { $Type: 'UI.DataField', Value: Name,     Label: 'Naam' }
+  ],
+  UI.Facets: [{ $Type: 'UI.ReferenceFacet', Label: 'Luchthaven details', Target: '@UI.FieldGroup#AirportInfo' }],
+  UI.FieldGroup#AirportInfo: { Label: 'Luchthavens', Data: [
+    { $Type: 'UI.DataField', Value: IcaoCode, Label: 'ICAO-code' },
+    { $Type: 'UI.DataField', Value: IataCode, Label: 'IATA-code' },
+    { $Type: 'UI.DataField', Value: Name,     Label: 'Naam' }
+  ]}
+);
 annotate HRService.People with @(
   UI.PresentationVariant: { SortOrder: [{ Property: LastName, Descending: false }], Visualizations: ['@UI.LineItem'] },
   UI.HeaderInfo: { TypeName: 'Medewerker', TypeNamePlural: 'Medewerkers', Title: { Value: LastName }, Description: { Value: UserName } },

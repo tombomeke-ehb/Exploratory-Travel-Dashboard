@@ -72,6 +72,16 @@
           "target": "PeopleObjectPage"
         },
         {
+          "pattern": "Airlines:?query:",
+          "name": "AirlinesList",
+          "target": "AirlinesList"
+        },
+        {
+          "pattern": "Airlines({key}):?query:",
+          "name": "AirlinesObjectPage",
+          "target": "AirlinesObjectPage"
+        },
+        {
           "pattern": "TravelExtensions:?query:",
           "name": "TravelExtensionsList",
           "target": "TravelExtensionsList"
@@ -131,6 +141,32 @@
           "options": {
             "settings": {
               "entitySet": "People",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "AirlinesList": {
+          "type": "Component",
+          "id": "AirlinesList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "entitySet": "Airlines",
+              "variantManagement": "Page",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "Airlines": { "detail": { "route": "AirlinesObjectPage" } }
+              }
+            }
+          }
+        },
+        "AirlinesObjectPage": {
+          "type": "Component",
+          "id": "AirlinesObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "entitySet": "Airlines",
               "editableHeaderContent": false
             }
           }

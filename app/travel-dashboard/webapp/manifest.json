@@ -90,6 +90,16 @@
           "target": "AirlinesObjectPage"
         },
         {
+          "pattern": "Trips:?query:",
+          "name": "TripsList",
+          "target": "TripsList"
+        },
+        {
+          "pattern": "Trips({key}):?query:",
+          "name": "TripsObjectPage",
+          "target": "TripsObjectPage"
+        },
+        {
           "pattern": "Airports:?query:",
           "name": "AirportsList",
           "target": "AirportsList"
@@ -175,6 +185,32 @@
           "options": {
             "settings": {
               "entitySet": "Airlines",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "TripsList": {
+          "type": "Component",
+          "id": "TripsList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "entitySet": "Trips",
+              "variantManagement": "Page",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "Trips": { "detail": { "route": "TripsObjectPage" } }
+              }
+            }
+          }
+        },
+        "TripsObjectPage": {
+          "type": "Component",
+          "id": "TripsObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "entitySet": "Trips",
               "editableHeaderContent": false
             }
           }
