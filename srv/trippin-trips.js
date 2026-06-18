@@ -79,6 +79,14 @@ async function collectAllTrips(TripPin) {
     );
   }
 
+  // Standaard chronologisch sorteren (StartsAt oplopend), zodat de Trips-lijsten
+  // overeenkomen met de UI.PresentationVariant; reizen zonder datum achteraan.
+  trips.sort((a, b) => {
+    if (!a.StartsAt) return 1;
+    if (!b.StartsAt) return -1;
+    return new Date(a.StartsAt) - new Date(b.StartsAt);
+  });
+
   const result = { trips, byId, owners };
 
   // Cache-poisoning vermijden: een leeg resultaat komt zo goed als altijd door een
