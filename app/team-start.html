@@ -459,12 +459,17 @@
       var dateFmt = new Intl.DateTimeFormat('nl-BE', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
       // ── Data fetch helper ────────────────────────────────────
+      // Centrale wrapper rond fetch() voor alle /team-API-aanroepen.
+      // Voegt automatisch cookie-auth en JSON-accept toe.
+      // Bij 401/403 (sessie verlopen of onvoldoende rechten) wordt
+      // de gebruiker direct doorgestuurd naar de loginpagina.
       function odata(resource, opts) {
         var init = Object.assign({
-          credentials: 'include',
+          credentials: 'include',                       // JWT-cookie meesturen bij elke request
           headers: { 'Accept': 'application/json' }
         }, opts || {});
         return fetch('/team/' + resource, init).then(function (res) {
+          // Sessie verlopen of niet geautoriseerd: redirect naar login
           if (res.status === 401 || res.status === 403) {
             window.location.href = '/team-login.html';
             throw new Error('unauthorized');
@@ -475,12 +480,16 @@
       }
 
       // ── Toast ────────────────────────────────────────────────
+      // Toont een tijdelijke feedbackmelding rechtsonder (3 seconden).
+      // type = 'success' (groen) of 'error' (rood).
       function showToast(message, type) {
         var container = document.getElementById('toastContainer');
+        // Stap 1: maak het toast-element aan en voeg het toe aan de container
         var el = document.createElement('div');
         el.className = 'toast ' + (type || 'success');
         el.textContent = message;
         container.appendChild(el);
+        // Stap 2: na 3 seconden fade-out animatie starten, daarna uit DOM verwijderen
         setTimeout(function () {
           el.classList.add('out');
           setTimeout(function () { el.remove(); }, 250);
@@ -488,6 +497,8 @@
       }
 
       // ── Escape HTML ──────────────────────────────────────────
+      // Converteert serverdata naar veilige HTML-tekst vóór innerHTML-injectie.
+      // Voorkomt XSS wanneer TripPin-velden speciale tekens bevatten.
       function esc(s) {
         if (s == null) return '';
         var d = document.createElement('div');
@@ -496,20 +507,26 @@
       }
 
       // ── Navigation ───────────────────────────────────────────
+      // Koppelt de URL-hash (#dashboard, #mijn-team, #reizen) aan de
+      // bijbehorende view-sectie en triggert lazy data-loading.
       var views = { dashboard: 'view-dashboard', 'mijn-team': 'view-mijn-team', reizen: 'view-reizen' };
 
       function navigate() {
+        // Stap 1: normaliseer de hash naar een bekende view-sleutel
         var hash = (location.hash || '#dashboard').slice(1).split('?')[0];
         if (!views[hash]) hash = 'dashboard';
 
+        // Stap 2: deactiveer alle actieve views en nav-items
         document.querySelectorAll('.view').forEach(function (v) { v.classList.remove('active'); });
         document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); });
 
+        // Stap 3: activeer de juiste view en het bijbehorende nav-item
         var viewEl = document.getElementById(views[hash]);
         if (viewEl) viewEl.classList.add('active');
         var navEl = document.querySelector('.nav-item[data-view="' + hash + '"]');
         if (navEl) navEl.classList.add('active');
 
+        // Stap 4: laad data voor de actieve view (elke view laadt slechts één keer)
         if (hash === 'dashboard') loadDashboard();
         if (hash === 'mijn-team') loadTeam();
         if (hash === 'reizen') loadReizen();
@@ -518,17 +535,22 @@
       window.addEventListener('hashchange', navigate);
 
       // ── Dashboard ────────────────────────────────────────────
+      // Laadt de drie KPI-waarden parallel.
+      // De vlag dashboardLoaded voorkomt dubbele fetches bij terugkeer naar de view.
+      // Na een statuswijziging wordt de vlag gereset zodat KPI's herladen worden.
       var dashboardLoaded = false;
       function loadDashboard() {
         if (dashboardLoaded) return;
         dashboardLoaded = true;
 
+        // KPI 1: openstaande goedkeuringen via de CAP-functieroep
         odata('getPendingCount()').then(function (d) {
           document.getElementById('kpiPending').textContent = d.value != null ? d.value : '—';
         }).catch(function () {
           document.getElementById('kpiPending').textContent = '—';
         });
 
+        // KPI 2 & 3: teamleden op reis en totaal, afgeleid uit de People-lijst
         odata('People').then(function (d) {
           var people = d.value || [];
           var onTravel = people.filter(function (p) { return p.OnTravel === true; }).length;
@@ -541,9 +563,12 @@
       }
 
       // ── Mijn Team ────────────────────────────────────────────
+      // Haalt de teamledenlijst op en slaat die op in teamData (eenmalige cache).
+      // Bij terugkeer naar de view wordt de cache hergebruikt zonder nieuwe fetch.
       var teamData = null;
       function loadTeam() {
         var wrap = document.getElementById('teamTableWrap');
+        // Cache aanwezig: direct renderen zonder netwerkaanroep
         if (teamData) { renderTeam(teamData); return; }
         wrap.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
 
@@ -555,7 +580,9 @@
         });
       }
 
+      // Filtert de gecachede teamdata op zoekterm en bouwt de tabel op.
       function renderTeam(data) {
+        // Stap 1: filter op naam of gebruikersnaam via het zoekveld
         var q = (document.getElementById('teamSearch').value || '').toLowerCase();
         var filtered = data.filter(function (p) {
           if (!q) return true;
@@ -563,11 +590,14 @@
         });
 
         var wrap = document.getElementById('teamTableWrap');
+        // Stap 2: toon lege staat als de gefilterde lijst leeg is
         if (filtered.length === 0) {
           wrap.innerHTML = '<table><thead><tr><th>VOORNAAM</th><th>FAMILIENAAM</th><th>STATUS</th><th>ACTIES</th></tr></thead><tbody><tr><td colspan="4" class="empty-msg">Geen gegevens beschikbaar</td></tr></tbody></table>';
           return;
         }
 
+        // Stap 3: bouw de tabelrijen op als HTML-string en injecteer in één keer
+        // (sneller dan individuele DOM-manipulatie per rij)
         var html = '<table><thead><tr><th>VOORNAAM</th><th>FAMILIENAAM</th><th>STATUS</th><th>ACTIES</th></tr></thead><tbody>';
         filtered.forEach(function (p) {
           var statusPill = p.OnTravel
@@ -584,14 +614,19 @@
         html += '</tbody></table>';
         wrap.innerHTML = html;
 
+        // Stap 4: koppel event listeners ná DOM-injectie
+        // (niet mogelijk vóór innerHTML omdat de elementen dan nog niet bestaan)
+
+        // "Reizen bekijken": sla gebruikersnaam op als filter, wis de reizencache en navigeer
         wrap.querySelectorAll('.btn-action').forEach(function (btn) {
           btn.addEventListener('click', function (e) {
-            e.stopPropagation();
+            e.stopPropagation();                      // voorkomt dat de rij-click ook vuurt
             reizenFilter = btn.getAttribute('data-user');
-            reizenData = null;
+            reizenData = null;                        // cache wissen zodat gefilterde data opnieuw laadt
             location.hash = '#reizen';
           });
         });
+        // Klikken op een rij opent het Fiori-detailscherm voor die persoon
         wrap.querySelectorAll('tr.clickable').forEach(function (tr) {
           tr.addEventListener('click', function () {
             window.location.href = '/team-dashboard/webapp/#/People(\'' + tr.dataset.username + '\')';
@@ -604,11 +639,15 @@
       });
 
       // ── Reizen ───────────────────────────────────────────────
+      // Haalt reisextensies op (gecached) en toont ze.
+      // reizenFilter beperkt de weergave tot één specifieke gebruiker
+      // wanneer de gebruiker vanuit "Mijn Team" op "Reizen bekijken" klikte.
       var reizenData = null;
       var reizenFilter = null;
 
       function loadReizen() {
         var wrap = document.getElementById('reizenTableWrap');
+        // Cache aanwezig: direct renderen
         if (reizenData) { renderReizen(reizenData); return; }
         wrap.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
 
@@ -620,7 +659,9 @@
         });
       }
 
+      // Filtert en rendert de reizentabel met statusdropdown per rij.
       function renderReizen(data) {
+        // Stap 1: filter op TripID, projectcode of status via het zoekveld
         var q = (document.getElementById('reizenSearch').value || '').toLowerCase();
         var filtered = data.filter(function (r) {
           if (!q) return true;
@@ -628,13 +669,16 @@
         });
 
         var wrap = document.getElementById('reizenTableWrap');
+        // Stap 2: toon lege staat als er geen resultaten zijn
         if (filtered.length === 0) {
           wrap.innerHTML = '<table><thead><tr><th>TRIP ID</th><th>PROJECTCODE</th><th>GOEDKEURINGSSTATUS</th><th>INTERNE NOTITIE</th><th>ACTIE</th></tr></thead><tbody><tr><td colspan="5" class="empty-msg">Geen gegevens beschikbaar</td></tr></tbody></table>';
           return;
         }
 
+        // Stap 3: bouw tabelrijen met pill + statusdropdown per reis
         var html = '<table><thead><tr><th>TRIP ID</th><th>PROJECTCODE</th><th>GOEDKEURINGSSTATUS</th><th>INTERNE NOTITIE</th><th>ACTIE</th></tr></thead><tbody>';
         filtered.forEach(function (r) {
+          // Bepaal pill-kleur en -label op basis van ApprovalStatus
           var pillClass = r.ApprovalStatus === 'Approved' ? 'pill-green' : r.ApprovalStatus === 'Rejected' ? 'pill-red' : 'pill-orange';
           var pillLabel = r.ApprovalStatus === 'Approved' ? 'Goedgekeurd' : r.ApprovalStatus === 'Rejected' ? 'Afgewezen' : 'In afwachting';
           html += '<tr data-tripid="' + esc(r.TripID) + '">'
@@ -654,6 +698,7 @@
         html += '</tbody></table>';
         wrap.innerHTML = html;
 
+        // Stap 4: koppel change-listener op elke statusdropdown ná DOM-injectie
         wrap.querySelectorAll('.status-select').forEach(function (sel) {
           sel.addEventListener('change', function () {
             var tripId = sel.getAttribute('data-tripid');
@@ -664,7 +709,9 @@
         });
       }
 
+      // Stuurt een PATCH-verzoek om de ApprovalStatus van één reis bij te werken.
       function patchStatus(tripId, status, selectEl) {
+        // Stap 1: blokkeer de dropdown tijdens het verzoek (voorkomt dubbele submits)
         selectEl.disabled = true;
         fetch('/team/TravelExtensions(' + tripId + ')', {
           method: 'PATCH',
@@ -679,6 +726,7 @@
           if (!res.ok) throw new Error('HTTP ' + res.status);
           return res.json();
         }).then(function () {
+          // Stap 2: werk de pill in de DOM bij zonder de volledige tabel te herrenderen
           var pillEl = document.querySelector('[data-pill="' + tripId + '"]');
           if (pillEl) {
             var pillClass = status === 'Approved' ? 'pill-green' : status === 'Rejected' ? 'pill-red' : 'pill-orange';
@@ -686,12 +734,14 @@
             pillEl.className = 'pill ' + pillClass;
             pillEl.textContent = pillLabel;
           }
+          // Stap 3: update de lokale cache zodat toekomstige re-renders de nieuwe status tonen
           if (reizenData) {
             var ext = reizenData.find(function (r) { return String(r.TripID) === String(tripId); });
             if (ext) ext.ApprovalStatus = status;
           }
           selectEl.disabled = false;
           showToast('Status bijgewerkt', 'success');
+          // Stap 4: reset dashboard-cache zodat KPI's bij terugkeer herladen worden
           dashboardLoaded = false;
         }).catch(function (e) {
           selectEl.disabled = false;
@@ -704,11 +754,14 @@
       });
 
       // ── Banner dismiss ───────────────────────────────────────
+      // Verbergt de welkomstbanner wanneer de gebruiker hem wegklikt.
       document.getElementById('dismissBanner').addEventListener('click', function () {
         document.getElementById('welcomeBanner').classList.add('hidden');
       });
 
       // ── Logout ───────────────────────────────────────────────
+      // POST naar /auth/logout wist de httpOnly JWT-cookie server-side.
+      // Daarna redirect naar de landingspagina ongeacht of de request slaagt.
       document.getElementById('logoutBtn').addEventListener('click', function () {
         fetch('/auth/logout', { method: 'POST', credentials: 'include' }).catch(function () {}).then(function () {
           window.location.href = '/';
@@ -716,6 +769,7 @@
       });
 
       // ── Boot ─────────────────────────────────────────────────
+      // Start de app: verwerk de huidige hash en laad de bijbehorende beginview.
       navigate();
     })();
   </script>

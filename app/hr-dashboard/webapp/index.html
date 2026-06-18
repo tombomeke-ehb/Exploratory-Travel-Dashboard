@@ -4,12 +4,17 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HR Dashboard – PrimePath Travel</title>
+  <!-- XHR-patch: onderschept alle UI5-netwerkreacties en stuurt door naar
+       de loginpagina bij 401/403 (verlopen of ontbrekende JWT-cookie).
+       UI5 gebruikt XMLHttpRequest (niet fetch), dus we patchen XHR additief:
+       de originele open()-methode wordt bewaard en daarna opnieuw aangeroepen. -->
   <script>
-    // TA §6.2: bij een 401/403 tijdens gebruik (verlopen sessie) -> terug naar login.
-    // UI5 gebruikt XMLHttpRequest, niet fetch; daarom patchen we XHR (additief).
     (function () {
       var LOGIN = '/hr-login.html';
       var open = XMLHttpRequest.prototype.open;
+      // Stap 1: sla de originele XHR.open op
+      // Stap 2: overschrijf met een wrapper die een load-listener toevoegt
+      // Stap 3: de listener controleert de statuscode na elke respons
       XMLHttpRequest.prototype.open = function () {
         this.addEventListener('load', function () {
           if (this.status === 401 || this.status === 403) window.location.replace(LOGIN);
@@ -18,6 +23,14 @@
       };
     })();
   </script>
+
+  <!-- UI5-bootstrap: laadt SAP UI5 v1.136.0 van de CDN en koppelt de Fiori-app.
+       - data-sap-ui-theme: sap_horizon = moderne Fiori-huisstijl
+       - data-sap-ui-resourceroots: registreert de namespace "primepath.hr" op "./"
+         zodat UI5 de Component.js en alle views op het juiste pad vindt
+       - data-sap-ui-async: true = asynchroon laden voor betere performance
+       - data-sap-ui-oninit: start ComponentSupport zodat de data-sap-ui-component
+         div hieronder automatisch als UI5-component wordt gemount              -->
   <script id="sap-ui-bootstrap"
     src="https://sapui5.hana.ondemand.com/1.136.0/resources/sap-ui-core.js"
     data-sap-ui-theme="sap_horizon"
@@ -28,11 +41,17 @@
     data-sap-ui-oninit="module:sap/ui/core/ComponentSupport">
   </script>
   <style>
-    /* Body als kolom: een echte headerbalk (in-flow) + de UI5-app eronder.
-       Geen zwevende overlay meer, dus geen overlap met de Fiori-toolbar. */
+    /* ── Paginastructuur ─────────────────────────────────────────────
+       Body als flex-kolom: de appbar neemt een vaste hoogte (48px),
+       de UI5-app vult de resterende ruimte. Geen zwevende overlay,
+       zodat er geen overlap is met de interne Fiori-toolbar.         */
     html, body, #content { height: 100%; margin: 0; }
     body#content { display: flex; flex-direction: column; }
 
+    /* ── Appbar ──────────────────────────────────────────────────────
+       PrimePath-huisstijlbalk boven de Fiori Elements-app; bevat het
+       merklogo, de apptitel, een terugknop en een afmeldknop.
+       z-index: 5 houdt de balk boven eventuele UI5-overlays.         */
     .pp-appbar {
       flex: 0 0 48px;
       display: flex; align-items: center; justify-content: space-between;
@@ -43,42 +62,63 @@
       box-shadow: 0 2px 12px rgba(0,64,168,.18);
       z-index: 5;
     }
+    /* Merklogo: vliegtuigicoon in een glazig blokje + vetgedrukte naam */
     .pp-appbar .pp-brand { display: flex; align-items: center; gap: .5rem; font-size: 13px; font-weight: 700; letter-spacing: .3px; }
     .pp-appbar .pp-brand .mark { width: 26px; height: 26px; border-radius: 8px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.32); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; }
     .pp-appbar .pp-brand .mark svg { width: 13px; height: 13px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    /* Apptitel: gescheiden van de merknaam met een verticale streep */
     .pp-appbar .pp-app { font-weight: 600; opacity: .82; font-size: 12px; border-left: 1px solid rgba(255,255,255,.3); padding-left: .55rem; }
     .pp-appbar .pp-actions { display: flex; align-items: center; gap: 8px; }
+    /* Gedeelde basisstijl voor links en knoppen in de appbar */
     .pp-appbar a, .pp-appbar button {
       font-family: inherit; font-size: 12px; font-weight: 600; line-height: 1; white-space: nowrap;
       padding: 7px 12px; border-radius: 8px; cursor: pointer; text-decoration: none; border: 1px solid transparent;
     }
+    /* Terugknop: glazige witte stijl, links een pijlicoon */
     .pp-appbar .pp-back {
       background: rgba(255,255,255,.16); color: #fff; border-color: rgba(255,255,255,.35);
       display: inline-flex; align-items: center; gap: 5px;
     }
     .pp-appbar .pp-back svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
     .pp-appbar .pp-back:hover { background: rgba(255,255,255,.28); }
+    /* Afmeldknop: wit op blauw (inverse van de appbar) */
     .pp-appbar .pp-logout { background: #fff; color: #0058C4; }
     .pp-appbar .pp-logout:hover { background: #EAF2FF; }
 
+    /* ── App-host ────────────────────────────────────────────────────
+       Flex-item dat de resterende viewport-hoogte inneemt. De inner
+       #container is absoluut gepositioneerd zodat UI5 inset: 0 vult. */
     .pp-app-host { flex: 1 1 auto; min-height: 0; position: relative; }
     #container { position: absolute; inset: 0; }
   </style>
 </head>
+<!-- sapUiBody: vereiste UI5-klasse voor de juiste body-stijlen;
+     id="content" koppelt aan de CSS flex-kolomstructuur.          -->
 <body class="sapUiBody" id="content">
 
+  <!-- ═══ APPBAR ═══════════════════════════════════════════════════
+       PrimePath-huisstijlbalk boven de Fiori Elements-webapp.      -->
   <header class="pp-appbar">
+    <!-- Merklogo: vliegtuigicoon + bedrijfsnaam + apptitel -->
     <span class="pp-brand">
       <span class="mark"><svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></span>
       PrimePath Travel
       <span class="pp-app">HR Dashboard</span>
     </span>
     <span class="pp-actions">
+      <!-- Terugknop: navigeert naar hr-start.html (het custom SPA-dashboard) -->
       <a class="pp-back" href="/hr-start.html" title="Terug naar het dashboard"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Terug</a>
+      <!-- Afmeldknop: roept ppLogout() aan onderaan de pagina -->
       <button class="pp-logout" type="button" onclick="ppLogout()">Afmelden</button>
     </span>
   </header>
 
+  <!-- ═══ UI5 COMPONENT HOST ═══════════════════════════════════════
+       data-sap-ui-component laat ComponentSupport (zie bootstrap) de
+       Fiori Elements-app automatisch mounten zodra UI5 klaar is.
+       - data-name: namespace-alias uit resourceroots ("primepath.hr")
+       - data-id: container-id waarvoor het component gerenderd wordt
+       - data-handle-validation: activeert UI5 client-side validatie   -->
   <div class="pp-app-host">
     <div data-sap-ui-component
       data-name="primepath.hr"
@@ -89,6 +129,8 @@
     </div>
   </div>
 
+  <!-- ppLogout(): POST naar /auth/logout (verwijdert de httpOnly JWT-cookie)
+       en stuurt altijd terug naar de landingspagina, ook bij een netwerkfout. -->
   <script>
     function ppLogout(){ fetch('/auth/logout',{method:'POST',credentials:'include'}).finally(function(){ location.href='/'; }); }
   </script>

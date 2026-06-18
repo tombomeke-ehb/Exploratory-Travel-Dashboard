@@ -7,6 +7,10 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap');
 
+    /* ── Design tokens ───────────────────────────────────────────
+       Huisstijl-variabelen gedeeld door alle drie dashboards.
+       --brand-* = blauw merkpallet; --ink-* = tekstgrijzen;
+       --sh-* = schaduwlagen (1 = subtiel, 3 = diep/hover).       */
     :root {
       --font-head: 'Poppins', '72', 'Segoe UI', system-ui, sans-serif;
       --font-body: 'Open Sans', '72', 'Segoe UI', system-ui, sans-serif;
@@ -37,6 +41,7 @@
       --sh-2: 0 6px 16px rgba(15,31,51,.08), 0 2px 5px rgba(15,31,51,.05);
       --sh-3: 0 22px 48px rgba(0,64,168,.18), 0 10px 20px rgba(15,31,51,.10);
 
+      /* Semantische statuskleuren: success / warning / error + achtergrond */
       --pp-success: #0E8345;
       --pp-success-bg: #E3F5E8;
       --pp-warning: #D97706;
@@ -49,8 +54,10 @@
       --transition-bounce: .4s cubic-bezier(.34,1.56,.64,1);
     }
 
+    /* ── Reset ───────────────────────────────────────────────── */
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* ── Toegankelijkheid: zichtbare focusring ───────────────── */
     :focus-visible {
       outline: 3px solid color-mix(in srgb, var(--brand-500) 45%, transparent);
       outline-offset: 2px;
@@ -66,7 +73,9 @@
 
     h1, h2, h3, h4, h5, h6 { font-family: var(--font-head); }
 
-    /* ── Header ──────────────────────────────────────────── */
+    /* ── Header ─────────────────────────────────────────────────
+       Vaste balk bovenaan (z-index 100); gradiënt van blauw naar
+       donkerblauw zodat de header visueel boven de content zweeft. */
     .header {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       height: 52px;
@@ -107,7 +116,10 @@
     }
     .logout-btn:hover { background: rgba(255,255,255,.25); border-color: rgba(255,255,255,.5); transform: translateY(-1px); }
 
-    /* ── Sidebar ─────────────────────────────────────────── */
+    /* ── Sidebar ─────────────────────────────────────────────────
+       Vaste zijbalk naast de header (top: 52px = headerhoogte).
+       Op mobiel verborgen via translateX(-100%); schuift open
+       met de klasse `.open` (toegevoegd via JS bij kleine schermen). */
     .sidebar {
       position: fixed; top: 52px; left: 0; bottom: 0; width: 256px;
       background: var(--surface);
@@ -146,14 +158,18 @@
     }
     .nav-item:hover svg { transform: scale(1.1); }
 
-    /* ── Content ─────────────────────────────────────────── */
+    /* ── Content ─────────────────────────────────────────────────
+       Offset van sidebar (margin-left: 256px) + header (margin-top: 52px).
+       Op mobiel valt de offset weg zodra de sidebar verborgen is.   */
     .content {
       margin-left: 256px; margin-top: 52px;
       padding: 2rem 2.5rem;
       min-height: calc(100vh - 52px);
     }
 
-    /* ── Section titles ──────────────────────────────────── */
+    /* ── Section titles ─────────────────────────────────────────
+       Kleine, hoofdlettergetypeerde tussentitels die secties
+       in een view scheiden (bijv. "Kerncijfers", "Airlinegebruik"). */
     .section-title {
       font-family: var(--font-head); font-size: .6875rem; font-weight: 700;
       color: var(--ink-400); text-transform: uppercase; letter-spacing: .8px;
@@ -161,7 +177,11 @@
     }
     .section-title:first-child { margin-top: 0; }
 
-    /* ── KPI cards ───────────────────────────────────────── */
+    /* ── KPI cards ──────────────────────────────────────────────
+       Responsief raster van statistiekkaarten. Elke kaart heeft:
+       - --accent: CSS-variabele voor de eigen accentkleur per KPI
+       - ::before: 4px accentsstreep bovenaan die verschijnt bij hover
+       - .kpi-icon: gekleurd ikoonicoontje (12% van --accent tint)    */
     .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
     .kpi-card {
       position: relative; background: var(--surface);
@@ -200,7 +220,10 @@
     }
     .kpi-sub { font-size: .75rem; color: var(--ink-400); margin-top: .45rem; font-weight: 500; }
 
-    /* ── Data table ──────────────────────────────────────── */
+    /* ── Data table ─────────────────────────────────────────────
+       Kaart met tabel; .table-toolbar bevat de titel en zoekbalk.
+       Klikbare rijen (.clickable) navigeren naar de Fiori-detailpagina.
+       Kolomhoofden met .sortable reageren op klik (zie JS renderer).  */
     .table-card {
       background: var(--surface); border: 1px solid var(--line);
       border-radius: var(--r-md); box-shadow: var(--sh-1);
@@ -263,7 +286,10 @@
     .empty-row td { text-align: center; color: var(--ink-400); padding: 3rem 1rem; font-style: italic; }
     .empty-row:hover td { background: transparent; }
 
-    /* ── Pill badges ──────────────────────────────────────── */
+    /* ── Pill badges ────────────────────────────────────────────
+       Kleurige statuslabels (groen / oranje / rood). Het ::before-
+       puntje erft de tekststijlkleur, zodat elke kleurvariant
+       automatisch het juiste bolletje krijgt.                        */
     .pill {
       display: inline-flex; align-items: center; gap: .35rem;
       padding: .3rem .75rem; border-radius: 999px;
@@ -276,7 +302,10 @@
     .pill-orange { color: var(--pp-warning); background: var(--pp-warning-bg); }
     .pill-red { color: var(--pp-error); background: var(--pp-error-bg); }
 
-    /* ── Airline bar chart ────────────────────────────────── */
+    /* ── Airline bar chart ──────────────────────────────────────
+       Horizontale balkengrafiek met 3 kolommen per rij:
+       naam (10rem) · balktrack (1fr) · metadata (7rem).
+       .bar-fill krijgt via JS inline style="width:X%" ingesteld.     */
     .airline-chart {
       background: var(--surface); border: 1px solid var(--line);
       border-radius: var(--r-md); padding: 1.5rem;
@@ -303,10 +332,14 @@
       font-variant-numeric: tabular-nums; font-weight: 500;
     }
 
-    /* ── Airlines split layout ───────────────────────────── */
+    /* ── Airlines split layout ──────────────────────────────────
+       Tweekolomsraster voor de Airlines-view: tabel links,
+       grafiek rechts. Valt terug op één kolom op mobiel.            */
     .airlines-split { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
 
-    /* ── Loading spinner ─────────────────────────────────── */
+    /* ── Loading spinner ────────────────────────────────────────
+       Gecentreerde laadanimatie die getoond wordt terwijl data
+       via de API opgehaald wordt; vervangen door tabel of fout.     */
     .spinner-wrap { display: flex; justify-content: center; align-items: center; padding: 3rem; }
     .spinner {
       width: 32px; height: 32px; border: 3px solid var(--line);
@@ -315,7 +348,9 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Error message ───────────────────────────────────── */
+    /* ── Foutmelding ────────────────────────────────────────────
+       Rode kaartmelding bij een mislukt API-verzoek; geïnjecteerd
+       door showError() in de juiste container-div.                  */
     .error-msg {
       color: var(--pp-error); background: var(--pp-error-bg);
       padding: 1rem 1.25rem; border-radius: var(--r-sm);
@@ -326,7 +361,11 @@
     /* ── Muted helper ────────────────────────────────────── */
     .muted { color: var(--ink-400); font-size: .82rem; }
 
-    /* ── View containers ─────────────────────────────────── */
+    /* ── View containers ────────────────────────────────────────
+       Elke view is standaard verborgen (display:none) en krijgt
+       display:block + fadeIn-animatie zodra navigate() hem activeert.
+       KPI-kaarten en tabelkaarten hebben een gespreide slideUp-delay
+       voor een getrapt inkomsteffect (stagger: 0.05 s per kaart).  */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: none; }
@@ -350,12 +389,17 @@
       font-family: var(--font-body); font-weight: 500;
     }
 
-    /* ── Reduced motion ──────────────────────────────────── */
+    /* ── Reduced motion ─────────────────────────────────────────
+       Accessibility: schakel alle animaties uit voor gebruikers die
+       dat in hun OS instellen (prefers-reduced-motion: reduce).     */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
     }
 
-    /* ── Responsive ──────────────────────────────────────── */
+    /* ── Responsive ─────────────────────────────────────────────
+       Onder 1024px verbergt de sidebar (translateX(-100%)); de
+       content-margin vervalt, KPI-grid en airlines-split worden
+       enkelvoudig, en de zoekbalk neemt de volledige breedte in.   */
     @media (max-width: 1024px) {
       .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); }
@@ -368,35 +412,47 @@
 </head>
 <body>
 
-  <!-- ═══ HEADER ═══ -->
+  <!-- ═══ HEADER ═══════════════════════════════════════════════
+       Vaste balk met merklogo (vliegtuigicoon), paginatitel,
+       een link naar de Fiori-webapp en de afmeldknop.              -->
   <header class="header">
     <div class="header-left">
+      <!-- Logocontainer: bounce-animatie bij hover via CSS -->
       <div class="header-logo">
         <svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
       </div>
       <span class="header-title">PrimePath Travel <span>| HR Dashboard</span></span>
     </div>
     <div class="header-right">
+      <!-- Snelkoppeling naar de Fiori Elements-webapp van het HR-dashboard -->
       <a href="/hr-dashboard/webapp/">Overzicht</a>
+      <!-- Afmeldknop: POST naar /auth/logout en redirect naar landingspagina -->
       <button class="logout-btn" id="logoutBtn" type="button">Afmelden</button>
     </div>
   </header>
 
-  <!-- ═══ SIDEBAR ═══ -->
+  <!-- ═══ SIDEBAR ════════════════════════════════════════════════
+       Navigatiebalk met vier views. Elk nav-item heeft een
+       data-view-attribuut dat navigate() gebruikt om de juiste
+       view te activeren en de hash in de URL bij te werken.        -->
   <nav class="sidebar">
     <div class="sidebar-nav">
+      <!-- Dashboard: standaard actief bij het laden van de pagina -->
       <a class="nav-item active" data-view="dashboard" href="#dashboard">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         <span class="nav-label">Dashboard</span>
       </a>
+      <!-- Reizen: alleen-lezen overzicht van alle TripPin-reizen -->
       <a class="nav-item" data-view="reizen" href="#reizen">
         <svg viewBox="0 0 24 24"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect x="2" y="6" width="20" height="14" rx="2"/></svg>
         <span class="nav-label">Reizen</span>
       </a>
+      <!-- Airlines: tabel + balkengrafiek van airlinegebruik -->
       <a class="nav-item" data-view="airlines" href="#airlines">
         <svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
         <span class="nav-label">Airlines</span>
       </a>
+      <!-- Medewerkers: lijst van TripPin People-entiteiten -->
       <a class="nav-item" data-view="medewerkers" href="#medewerkers">
         <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         <span class="nav-label">Medewerkers</span>
@@ -404,16 +460,21 @@
     </div>
   </nav>
 
-  <!-- ═══ CONTENT ═══ -->
+  <!-- ═══ CONTENT ════════════════════════════════════════════════
+       Vier views die afwisselend actief zijn; navigate() toont
+       de juiste view op basis van de URL-hash.                    -->
   <main class="content">
 
-    <!-- ── Dashboard view ── -->
+    <!-- ── Dashboard view ──────────────────────────────────────
+         Drie KPI-kaarten (reizen / medewerkers / top airline)
+         plus een balkengrafiek van het airlinegebruik (top 5).   -->
     <div class="view active" id="view-dashboard">
       <h1 style="font-size:1.5rem; font-weight:700; letter-spacing:-.3px; margin-bottom:.25rem;">Dashboard</h1>
       <p style="font-size:.875rem; color:var(--ink-500); margin-bottom:1.75rem;">HR-overzicht van reizen, medewerkers en airlinegebruik.</p>
 
       <div class="section-title">Kerncijfers</div>
       <div class="kpi-grid">
+        <!-- KPI 1: totaal aantal reizen uit TripPin -->
         <div class="kpi-card" style="--accent: var(--brand-500);">
           <div class="kpi-head">
             <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect x="2" y="6" width="20" height="14" rx="2"/></svg></div>
@@ -422,6 +483,7 @@
           <div class="kpi-value" id="kpiTrips">…</div>
           <div class="kpi-sub">in de databron</div>
         </div>
+        <!-- KPI 2: aantal geregistreerde medewerkers (People) -->
         <div class="kpi-card" style="--accent: var(--pp-warning);">
           <div class="kpi-head">
             <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
@@ -430,6 +492,7 @@
           <div class="kpi-value" id="kpiPeople">…</div>
           <div class="kpi-sub">geregistreerde medewerkers</div>
         </div>
+        <!-- KPI 3: meest gebruikte airline op basis van getAirlineStats() -->
         <div class="kpi-card" style="--accent: var(--pp-success);">
           <div class="kpi-head">
             <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></div>
@@ -441,44 +504,55 @@
       </div>
 
       <div class="section-title">Airlinegebruik (top 5)</div>
+      <!-- Grafiekcontainer: spinner staat er standaard in; JS vervangt dit -->
       <div class="airline-chart" id="dashboardAirlineChart">
         <div class="spinner-wrap"><div class="spinner"></div></div>
       </div>
     </div>
 
-    <!-- ── Reizen view ── -->
+    <!-- ── Reizen view ──────────────────────────────────────────
+         Alleen-lezen tabel van alle TripPin-reizen met zoekbalk.
+         Klikken op een rij opent de Fiori-detailpagina van de reis. -->
     <div class="view" id="view-reizen">
       <h1 style="font-size:1.5rem; font-weight:700; letter-spacing:-.3px; margin-bottom:.25rem;">Reizen</h1>
       <p style="font-size:.875rem; color:var(--ink-500); margin-bottom:1.75rem;">Overzicht van alle reizen in het systeem (alleen-lezen).</p>
       <div class="table-card">
         <div class="table-toolbar">
           <h2>Reizen</h2>
+          <!-- Zoekbalk: filtert de reizentabel live bij elke toetsaanslag -->
           <div class="search-wrap">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             <input type="text" class="search-input" id="reizenSearch" placeholder="Zoeken op naam, beschrijving…" />
           </div>
         </div>
+        <!-- Tabelbody: ingevuld door renderTripsTable(); start met spinner -->
         <div id="reizenTableWrap">
           <div class="spinner-wrap"><div class="spinner"></div></div>
         </div>
       </div>
     </div>
 
-    <!-- ── Airlines view ── -->
+    <!-- ── Airlines view ────────────────────────────────────────
+         Tweekolomsindeling: links een tabel met sorteerbare kolommen,
+         rechts een balkengrafiek van het airlinegebruik.            -->
     <div class="view" id="view-airlines">
       <h1 style="font-size:1.5rem; font-weight:700; letter-spacing:-.3px; margin-bottom:.25rem;">Airlines</h1>
       <p style="font-size:.875rem; color:var(--ink-500); margin-bottom:1.75rem;">Luchtvaartmaatschappijen en hun gebruik binnen het bedrijf.</p>
       <div class="airlines-split">
+        <!-- Linkse kolom: airlines-tabel met klikbare rijen -->
         <div class="table-card">
           <div class="table-toolbar">
             <h2>Airlines</h2>
           </div>
+          <!-- Tabelbody: ingevuld door renderAirlinesTable() -->
           <div id="airlinesTableWrap">
             <div class="spinner-wrap"><div class="spinner"></div></div>
           </div>
         </div>
+        <!-- Rechtse kolom: balkengrafiek van airlinegebruik -->
         <div>
           <div class="section-title">Airlinegebruik</div>
+          <!-- Grafiekcontainer: ingevuld door renderAirlineChart() -->
           <div class="airline-chart" id="airlinesBarChart">
             <div class="spinner-wrap"><div class="spinner"></div></div>
           </div>
@@ -486,18 +560,22 @@
       </div>
     </div>
 
-    <!-- ── Medewerkers view ── -->
+    <!-- ── Medewerkers view ──────────────────────────────────────
+         Tabel van alle TripPin People-entiteiten met zoekbalk.
+         Klikken op een rij opent de Fiori-detailpagina.            -->
     <div class="view" id="view-medewerkers">
       <h1 style="font-size:1.5rem; font-weight:700; letter-spacing:-.3px; margin-bottom:.25rem;">Medewerkers</h1>
       <p style="font-size:.875rem; color:var(--ink-500); margin-bottom:1.75rem;">Overzicht van alle geregistreerde medewerkers.</p>
       <div class="table-card">
         <div class="table-toolbar">
           <h2>Medewerkers</h2>
+          <!-- Zoekbalk: filtert op gebruikersnaam, voor- of achternaam -->
           <div class="search-wrap">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             <input type="text" class="search-input" id="medewerkersSearch" placeholder="Zoeken op naam, gebruikersnaam…" />
           </div>
         </div>
+        <!-- Tabelbody: ingevuld door renderPeopleTable() -->
         <div id="medewerkersTableWrap">
           <div class="spinner-wrap"><div class="spinner"></div></div>
         </div>
@@ -509,9 +587,13 @@
 
   <script>
     // ── Helpers ──────────────────────────────────────────────────────────────────
+
+    // Datum- en valutaformatters voor nl-BE locale
     const dateFmt = new Intl.DateTimeFormat('nl-BE', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const eurFmt  = new Intl.NumberFormat('nl-BE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
 
+    // esc(): XSS-preventie — zet willekeurige stringwaarden om naar veilige HTML-tekst
+    // via het textContent-kanaal van een tijdelijk DOM-element (nooit innerHTML als invoer)
     function esc(s) {
       if (s == null) return '';
       const d = document.createElement('div');
@@ -519,6 +601,8 @@
       return d.innerHTML;
     }
 
+    // api(): centrale fetch-wrapper die het JWT-cookie meestuurt en bij 401/403
+    // automatisch terugstuurt naar de HR-loginpagina
     async function api(path) {
       const res = await fetch('/hr/' + path, {
         credentials: 'include',
@@ -532,41 +616,55 @@
       return res.json();
     }
 
+    // setText(): snelle tekstupdate voor KPI-waarden op ID
     function setText(id, val) { document.getElementById(id).textContent = val; }
 
+    // showSpinner() / showError(): vervangen de containerinhoud door een
+    // laadanimatie of een rode foutmelding (esc() voorkomt HTML-injectie)
     function showSpinner(el) { el.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>'; }
     function showError(el, msg) { el.innerHTML = '<div class="error-msg">' + esc(msg) + '</div>'; }
 
     // ── Navigation ──────────────────────────────────────────────────────────────
     const views = ['dashboard', 'reizen', 'airlines', 'medewerkers'];
+    // loaded{}: cache-object — elke view wordt maar één keer geladen
     const loaded = {};
 
     function navigate() {
+      // Stap 1: haal de hash op en valideer (onbekende hashes → dashboard)
       const hash = (location.hash || '#dashboard').slice(1);
       const view = views.includes(hash) ? hash : 'dashboard';
 
+      // Stap 2: deactiveer alle views en activeer de gekozen view
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
       document.getElementById('view-' + view).classList.add('active');
 
+      // Stap 3: sync het actieve nav-item in de sidebar
       document.querySelectorAll('.nav-item').forEach(n => {
         n.classList.toggle('active', n.dataset.view === view);
       });
 
+      // Stap 4: laad de data lazy — alleen de eerste keer dat een view actief wordt
       if (!loaded[view]) {
         loaded[view] = true;
         loaders[view]();
       }
     }
 
+    // Heractiveer navigate() bij elke hash-wijziging (voor- en achteruitknop)
     window.addEventListener('hashchange', navigate);
 
     // ── Logout ──────────────────────────────────────────────────────────────────
+    // POST naar /auth/logout (verwijdert de httpOnly-cookie) en stuur terug
+    // naar de landingspagina; fout bij de fetch wordt genegeerd (redirect volgt toch)
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       try { await fetch('/auth/logout', { method: 'POST', credentials: 'include' }); } catch (e) {}
       window.location.href = '/';
     });
 
     // ── Airline bar-chart renderer ──────────────────────────────────────────────
+    // Stap 1: sorteer stats op TripCount (aflopend) en neem de top 5
+    // Stap 2: bereken het percentage t.o.v. de hoogste waarde (= 100% balk)
+    // Stap 3: genereer HTML-rijen en zet die in de container
     function renderAirlineChart(container, stats) {
       const sorted = stats.slice().sort((a, b) => (b.TripCount || 0) - (a.TripCount || 0));
       const rows = sorted.slice(0, 5);
@@ -584,30 +682,38 @@
       }).join('');
     }
 
-    // ── Data stores ─────────────────────────────────────────────────────────────
+    // ── Data stores ──────────────────────────────────────────────────────────────
+    // Gedeelde cache voor de vier views; null = nog niet geladen.
+    // Dashboard vult tripsData/peopleData/airlineStats alvast in,
+    // zodat de andere views deze data niet opnieuw hoeven op te halen.
     let tripsData = null;
     let peopleData = null;
     let airlinesData = null;
     let airlineStats = null;
 
-    // ── Loaders ─────────────────────────────────────────────────────────────────
+    // ── Loaders ──────────────────────────────────────────────────────────────────
+    // Elke loader wordt eenmalig aangeroepen door navigate() via loaded{}.
+    // Hergebruik van al gecachede data (tripsData, peopleData, …) voorkomt
+    // overbodige API-verzoeken bij het navigeren tussen views.
     const loaders = {
 
-      // ── DASHBOARD ───────────────────────────────────────────────────────────
+      // ── DASHBOARD ─────────────────────────────────────────────────────────────
+      // KPI 1 & 2 worden parallel opgehaald (los .then()); KPI 3 + chart
+      // worden sequentieel ingeladen via await (chart hangt af van de stats).
       async dashboard() {
-        // KPI: Totaal reizen
+        // KPI 1: totaal aantal reizen — parallel gestart, vult ook tripsData
         api('Trips').then(d => {
           tripsData = d.value || [];
           setText('kpiTrips', tripsData.length);
         }).catch(() => setText('kpiTrips', '—'));
 
-        // KPI: Medewerkers
+        // KPI 2: aantal medewerkers — parallel gestart, vult ook peopleData
         api('People').then(d => {
           peopleData = d.value || [];
           setText('kpiPeople', peopleData.length);
         }).catch(() => setText('kpiPeople', '—'));
 
-        // KPI: Meest gebruikte airline + chart
+        // KPI 3 + chart: sequentieel via await; chart gebruikt dezelfde airlineStats
         const chartEl = document.getElementById('dashboardAirlineChart');
         try {
           const d = await api('getAirlineStats()');
@@ -627,7 +733,8 @@
         }
       },
 
-      // ── REIZEN ──────────────────────────────────────────────────────────────
+      // ── REIZEN ────────────────────────────────────────────────────────────────
+      // Hergebruikt tripsData als die al geladen is via het dashboard
       async reizen() {
         const wrap = document.getElementById('reizenTableWrap');
         try {
@@ -641,7 +748,8 @@
         }
       },
 
-      // ── AIRLINES ────────────────────────────────────────────────────────────
+      // ── AIRLINES ──────────────────────────────────────────────────────────────
+      // Laadt zowel de airlines-tabel als de balkengrafiek; hergebruikt caches
       async airlines() {
         const tableWrap = document.getElementById('airlinesTableWrap');
         const chartWrap = document.getElementById('airlinesBarChart');
@@ -663,7 +771,8 @@
         }
       },
 
-      // ── MEDEWERKERS ─────────────────────────────────────────────────────────
+      // ── MEDEWERKERS ───────────────────────────────────────────────────────────
+      // Hergebruikt peopleData als die al geladen is via het dashboard
       async medewerkers() {
         const wrap = document.getElementById('medewerkersTableWrap');
         try {
@@ -678,8 +787,12 @@
       }
     };
 
-    // ── Table renderers ─────────────────────────────────────────────────────────
+    // ── Table renderers ──────────────────────────────────────────────────────────
+    // Elke renderer bouwt de HTML-string op met esc() voor alle datavelden,
+    // injecteert die in de container en hangt daarna click-listeners vast.
 
+    // renderTripsTable(): formatteert budget (eurFmt) en datums (dateFmt);
+    // klikken op een rij opent de Fiori-detailpagina van de reis
     function renderTripsTable(data) {
       const wrap = document.getElementById('reizenTableWrap');
       if (!data.length) {
@@ -712,9 +825,14 @@
       });
     }
 
+    // airlinesSortCol / airlinesSortAsc: sorteerstaat voor de airlines-tabel;
+    // null = geen sortering actief (initieel gesorteerd op naam door de API)
     let airlinesSortCol = null;
     let airlinesSortAsc = true;
 
+    // renderAirlinesTable(): client-side sortering op de drie kolommen;
+    // klikken op een header wisselt richting of stelt een nieuwe kolom in;
+    // klikken op een rij opent de Fiori-detailpagina van de airline
     function renderAirlinesTable(data) {
       const wrap = document.getElementById('airlinesTableWrap');
       if (!data.length) {
@@ -772,6 +890,8 @@
       });
     }
 
+    // renderPeopleTable(): vertaalt Gender-waarden naar Nederlands;
+    // klikken op een rij opent de Fiori-detailpagina van de medewerker
     function renderPeopleTable(data) {
       const wrap = document.getElementById('medewerkersTableWrap');
       if (!data.length) {
@@ -800,7 +920,11 @@
       });
     }
 
-    // ── Search handlers ─────────────────────────────────────────────────────────
+    // ── Search handlers ──────────────────────────────────────────────────────────
+    // Beide handlers filteren de gecachede data client-side bij elke toetsaanslag;
+    // lege zoekopdracht herstelt de volledige lijst zonder nieuwe API-aanroep
+
+    // Reizen: zoekt op naam, beschrijving en TripId
     document.getElementById('reizenSearch').addEventListener('input', function () {
       if (!tripsData) return;
       const q = this.value.toLowerCase();
@@ -813,6 +937,7 @@
       renderTripsTable(filtered);
     });
 
+    // Medewerkers: zoekt op gebruikersnaam, voornaam en familienaam
     document.getElementById('medewerkersSearch').addEventListener('input', function () {
       if (!peopleData) return;
       const q = this.value.toLowerCase();
@@ -825,7 +950,8 @@
       renderPeopleTable(filtered);
     });
 
-    // ── Init ────────────────────────────────────────────────────────────────────
+    // ── Init ─────────────────────────────────────────────────────────────────────
+    // Initiële navigatie op basis van de huidige URL-hash (of standaard dashboard)
     navigate();
   </script>
 </body>
