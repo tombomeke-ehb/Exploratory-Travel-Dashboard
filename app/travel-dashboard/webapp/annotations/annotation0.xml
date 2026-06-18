@@ -4,9 +4,18 @@
   </edmx:Reference>
   <edmx:DataServices>
     <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="local">
+      <Annotations Target="Travel.bewerk(Travel.TravelExtensions)/ProjectCode">
+        <Annotation Term="Common.Label" String="Projectcode"/>
+        <Annotation Term="Common.ParameterDefaultValue" Path="ProjectCode"/>
+      </Annotations>
       <Annotations Target="Travel.bewerk(Travel.TravelExtensions)/ApprovalStatus">
-        <Annotation Term="Common.ValueListWithFixedValues" Bool="true"/>
         <Annotation Term="Common.Label" String="Goedkeuringsstatus"/>
+        <Annotation Term="Common.ValueListWithFixedValues" Bool="true"/>
+        <Annotation Term="Common.ParameterDefaultValue" Path="ApprovalStatus"/>
+      </Annotations>
+      <Annotations Target="Travel.bewerk(Travel.TravelExtensions)/InternalNote">
+        <Annotation Term="Common.Label" String="Interne notitie"/>
+        <Annotation Term="Common.ParameterDefaultValue" Path="InternalNote"/>
       </Annotations>
     </Schema>
   </edmx:DataServices>
