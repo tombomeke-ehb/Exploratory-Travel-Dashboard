@@ -423,7 +423,7 @@
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Header: vaste balk bovenaan met merklogo, paginatitel en logout-knop -->
   <header class="header">
     <div class="header-left">
       <span class="header-logo"><svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></span>
@@ -435,7 +435,8 @@
     </div>
   </header>
 
-  <!-- Sidebar -->
+  <!-- Sidebar: vaste navigatie links met links naar de vijf views.
+       data-view wordt gebruikt door navigate() om de actieve view te bepalen. -->
   <nav class="sidebar">
     <div class="sidebar-label">Navigatie</div>
     <ul class="sidebar-nav">
@@ -462,10 +463,11 @@
     </ul>
   </nav>
 
-  <!-- Content -->
+  <!-- Content: hoofdgebied naast de sidebar; elke .view is standaard verborgen
+       en krijgt de .active-klasse via navigate() op basis van de URL-hash -->
   <main class="content">
 
-    <!-- Dashboard View -->
+    <!-- Dashboard View: KPI-kerncijfers + airlinegrafiek -->
     <div id="view-dashboard" class="view active">
       <div class="view-header">
         <h1>Dashboard</h1>
@@ -590,7 +592,9 @@
     <div class="footer">EhB Cloud Integration &middot; In samenwerking met Flexso &middot; Demo: 19 juni 2026</div>
   </main>
 
-  <!-- Detail Drawer -->
+  <!-- Detail Drawer: slide-in paneel voor reisdetails.
+       drawerOverlay vangt klikken buiten de drawer op en sluit hem.
+       drawerBody wordt dynamisch gevuld door openDrawer().           -->
   <div class="drawer-overlay" id="drawerOverlay"></div>
   <aside class="drawer" id="drawer">
     <div class="drawer-header">
@@ -599,6 +603,7 @@
     </div>
     <div class="drawer-body" id="drawerBody"></div>
     <div class="drawer-footer">
+      <!-- Fiori-link wordt dynamisch ingesteld op het juiste TravelExtensions-record -->
       <a id="drawerFioriLink" class="btn-fiori" href="#" target="_blank">Bewerken in Fiori</a>
     </div>
   </aside>
