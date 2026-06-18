@@ -75,24 +75,11 @@ module.exports = cds.service.impl(async function () {
 
   // ── READ TravelExtensions: StatusLabel vullen ────────────────────────────
   this.on('READ', 'TravelExtensions', async (req) => {
-    const savedSearch = req.query.SELECT?.search;
-    if (req.query.SELECT) req.query.SELECT.search = undefined;
-
     const result = await cds.run(req.query);
     const statusMap = { Pending: 'In behandeling', Approved: 'Goedgekeurd', Rejected: 'Afgekeurd' };
     const fill = e => { e.StatusLabel = statusMap[e.ApprovalStatus] ?? e.ApprovalStatus; return e; };
-    if (!Array.isArray(result)) {
-      if (result) fill(result);
-      return result;
-    }
-    result.forEach(fill);
-
-    if (savedSearch) {
-      if (req.query.SELECT) req.query.SELECT.search = savedSearch;
-      const filtered = applyClientQuery(result, req.query);
-      filtered.$count = filtered.length;
-      return filtered;
-    }
+    if (Array.isArray(result)) { result.forEach(fill); return result; }
+    if (result) fill(result);
     return result;
   });
 

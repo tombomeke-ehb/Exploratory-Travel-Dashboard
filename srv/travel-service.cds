@@ -59,7 +59,7 @@ service TravelService {
     virtual null as TripName        : String,
     virtual null as TripBudget      : Decimal,
     virtual null as TripDescription : String,
-    virtual null as StatusLabel     : String   // Nederlandse vertaling van ApprovalStatus
+    virtual null as StatusLabel     : String
   } actions {
     action goedkeuren()    returns TravelExtensions;
     action afkeuren()      returns TravelExtensions;

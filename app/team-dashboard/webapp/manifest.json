@@ -19,7 +19,7 @@
     "icons": { "icon": "sap-icon://group" }
   },
   "sap.ui5": {
-    "flexEnabled": false,
+    "flexEnabled": true,
     "dependencies": {
       "minUI5Version": "1.136.0",
       "libs": {
@@ -100,7 +100,7 @@
           "options": {
             "settings": {
               "entitySet": "Trips",
-              "variantManagement": "None",
+              "variantManagement": "Page",
               "initialLoad": "Enabled",
               "navigation": {
                 "Trips": { "detail": { "route": "TripsObjectPage" } }
@@ -126,7 +126,7 @@
           "options": {
             "settings": {
               "entitySet": "People",
-              "variantManagement": "None",
+              "variantManagement": "Page",
               "initialLoad": "Enabled",
               "navigation": {
                 "People": { "detail": { "route": "PeopleObjectPage" } }
@@ -152,7 +152,7 @@
           "options": {
             "settings": {
               "entitySet": "Airlines",
-              "variantManagement": "None",
+              "variantManagement": "Page",
               "initialLoad": "Enabled",
               "navigation": {
                 "Airlines": { "detail": { "route": "AirlinesObjectPage" } }
@@ -178,7 +178,7 @@
           "options": {
             "settings": {
               "entitySet": "TravelExtensions",
-              "variantManagement": "None",
+              "variantManagement": "Page",
               "initialLoad": "Enabled",
               "navigation": {
                 "TravelExtensions": { "detail": { "route": "TravelExtensionsObjectPage" } }

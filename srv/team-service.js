@@ -34,6 +34,7 @@ module.exports = cds.service.impl(async function () {
     const savedWhere   = sel?.where;
     const savedOrderBy = sel?.orderBy;
     const savedSearch  = sel?.search;
+    const savedColumns = sel?.columns;
     if (sel) {
       if (Array.isArray(sel.where))   sel.where   = sel.where.filter(t => !t?.ref || !PEOPLE_VIRTUAL_FIELDS.has(t.ref[0]));
       if (Array.isArray(sel.orderBy)) sel.orderBy  = sel.orderBy.filter(o => !o?.ref || !PEOPLE_VIRTUAL_FIELDS.has(o.ref[0]));
@@ -54,6 +55,7 @@ module.exports = cds.service.impl(async function () {
       sel.where   = savedWhere;
       sel.orderBy = savedOrderBy;
       sel.search  = savedSearch;
+      sel.columns = savedColumns;
     }
     if (peopleArr.length === 0) return isOne ? null : peopleArr;
 
@@ -176,7 +178,9 @@ module.exports = cds.service.impl(async function () {
   });
 
   // ── CREATE / DELETE TravelExtensions: verboden voor TeamLead ──────────────
-  // FA v4 §11 rollenmatrix: TeamLead mag enkel ApprovalStatus aanpassen, niet aanmaken/verwijderen.
+  // FA v4 §11 rollenmatrix: TeamLead mag enkel ApprovalStatus aanpassen, niet
+  // aanmaken/verwijderen. Server-side afgedwongen (TA §8.4): ook al toont de UI
+  // het niet, de backend weigert de actie.
   this.before(['CREATE', 'DELETE'], 'TravelExtensions', (req) => {
     return req.error(403,
       'Een Team Lead mag reisextensies niet aanmaken of verwijderen. ' +
@@ -216,12 +220,6 @@ module.exports = cds.service.impl(async function () {
 
   // ── READ TravelExtensions: teamfiltering + StatusLabel vullen ───────────────
   this.on('READ', 'TravelExtensions', async (req) => {
-    // Strip $search uit de DB-query: StatusLabel is virtueel en wordt pas na
-    // de query ingevuld, dus $search moet client-side draaien zodat zoeken
-    // op zowel "Pending" als "In behandeling" werkt.
-    const savedSearch = req.query.SELECT?.search;
-    if (req.query.SELECT) req.query.SELECT.search = undefined;
-
     const result = await cds.run(req.query);
     const statusMap = { Pending: 'In behandeling', Approved: 'Goedgekeurd', Rejected: 'Afgekeurd' };
     const fill = e => { e.StatusLabel = statusMap[e.ApprovalStatus] ?? e.ApprovalStatus; return e; };
@@ -231,7 +229,6 @@ module.exports = cds.service.impl(async function () {
     }
 
     let list = result;
-
     const team = await _resolveTeamUserNames(req);
     if (team) {
       const teamTripIds = await _collectTeamTripIds(TripPin,
@@ -241,16 +238,10 @@ module.exports = cds.service.impl(async function () {
     }
 
     list.forEach(fill);
-
-    // Client-side $search na verrijking (zoekt ook door StatusLabel)
-    if (savedSearch) {
-      if (req.query.SELECT) req.query.SELECT.search = savedSearch;
-      list = applyClientQuery(list, req.query);
-    }
-
     list.$count = list.length;
     return list;
   });
+
 
   // ── FV-24: Goedkeuren / Afkeuren als bound actions (één klik) ──────────────
   // Zelfde teamcheck als de UPDATE; zet de status direct op Approved/Rejected.
