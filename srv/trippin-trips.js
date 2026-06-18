@@ -123,4 +123,44 @@ async function collectTripsForPerson(TripPin, userName) {
   }
 }
 
-module.exports = { collectAllTrips, collectTripsForPerson };
+// Haal ALLE People op, niet enkel de eerste TripPin-pagina. TripPin levert max 8
+// records per pagina en CAP volgt de @odata.nextLink niet, dus `TripPin.run(query)`
+// geeft maar 8 medewerkers terug. Hier doorlopen we alle pagina's via $skip, met
+// behoud van de client-query ($filter/$select/$orderby). Retourneert de volledige lijst.
+async function collectAllPeople(TripPin, query) {
+  const all = [];
+  const sel = query?.SELECT;
+  const origLimit = sel?.limit;            // bewaar de client-limit ($top/$skip)
+  try {
+    for (let skip = 0; skip < 1000; skip += 8) {
+      if (sel) sel.limit = { rows: { val: 8 }, offset: { val: skip } };
+      let page;
+      try {
+        page = await TripPin.run(query);
+      } catch (err) {
+        cds.log('trippin-trips').warn(`Kon People-pagina (skip ${skip}) niet ophalen: ${err.message}`);
+        break;
+      }
+      const arr = Array.isArray(page) ? page : (page ? [page] : []);
+      all.push(...arr);
+      if (arr.length < 8) break;            // onvolledige pagina = laatste pagina
+    }
+  } finally {
+    if (sel) sel.limit = origLimit;         // herstel de client-limit
+  }
+  return all;
+}
+
+// Pas de client-paginatie ($skip/$top) toe op een reeds opgehaalde, verrijkte/gefilterde
+// lijst en zet @odata.count op het volledige aantal. Zo werkt Fiori-growing zonder
+// duplicaten en toont de lijst toch alle records.
+function applyClientPaging(rows, baseQuery) {
+  const lim  = baseQuery?.SELECT?.limit;
+  const skip = lim?.offset?.val ?? 0;
+  const top  = lim?.rows?.val;
+  const paged = (top != null) ? rows.slice(skip, skip + top) : rows.slice(skip);
+  paged.$count = rows.length;
+  return paged;
+}
+
+module.exports = { collectAllTrips, collectTripsForPerson, collectAllPeople, applyClientPaging };
