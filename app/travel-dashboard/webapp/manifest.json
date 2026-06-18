@@ -27,7 +27,7 @@
     "icons": { "icon": "sap-icon://travel-expense" }
   },
   "sap.ui5": {
-    "flexEnabled": true,
+    "flexEnabled": false,
     "dependencies": {
       "minUI5Version": "1.136.0",
       "libs": {
@@ -118,7 +118,7 @@
           "options": {
             "settings": {
               "entitySet": "TravelExtensions",
-              "variantManagement": "Page",
+              "variantManagement": "None",
               "initialLoad": "Enabled",
               "navigation": {
                 "TravelExtensions": { "detail": { "route": "TravelExtensionsObjectPage" } }
@@ -144,7 +144,7 @@
           "options": {
             "settings": {
               "entitySet": "People",
-              "variantManagement": "Page",
+              "variantManagement": "None",
               "initialLoad": "Enabled",
               "navigation": {
                 "People": { "detail": { "route": "PeopleObjectPage" } }
@@ -170,7 +170,7 @@
           "options": {
             "settings": {
               "entitySet": "Airlines",
-              "variantManagement": "Page",
+              "variantManagement": "None",
               "initialLoad": "Enabled",
               "navigation": {
                 "Airlines": { "detail": { "route": "AirlinesObjectPage" } }
@@ -196,7 +196,7 @@
           "options": {
             "settings": {
               "entitySet": "Trips",
-              "variantManagement": "Page",
+              "variantManagement": "None",
               "initialLoad": "Enabled",
               "navigation": {
                 "Trips": { "detail": { "route": "TripsObjectPage" } }
@@ -222,7 +222,7 @@
           "options": {
             "settings": {
               "entitySet": "Airports",
-              "variantManagement": "Page",
+              "variantManagement": "None",
               "initialLoad": "Enabled",
               "navigation": {
                 "Airports": { "detail": { "route": "AirportsObjectPage" } }
