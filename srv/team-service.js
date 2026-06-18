@@ -139,6 +139,15 @@ module.exports = cds.service.impl(async function () {
     return Array.isArray(pending) ? pending.length : 0;
   });
 
+  // ── CREATE / DELETE TravelExtensions: verboden voor TeamLead ──────────────
+  // FA v4 §11 rollenmatrix: TeamLead mag enkel ApprovalStatus aanpassen, niet aanmaken/verwijderen.
+  this.before(['CREATE', 'DELETE'], 'TravelExtensions', (req) => {
+    return req.error(403,
+      'Een Team Lead mag reisextensies niet aanmaken of verwijderen. ' +
+      'Gebruik de Goedkeuren- of Afkeuren-knop om de status te wijzigen.'
+    );
+  });
+
   // ── UPDATE TravelExtensions: alleen ApprovalStatus, alleen eigen team ──────
   // FA v4 §7.2 FV-24 + §11 rollenmatrix
   this.before('UPDATE', 'TravelExtensions', async (req) => {
@@ -167,6 +176,16 @@ module.exports = cds.service.impl(async function () {
     // FV-24: volledige teamcheck — hergebruikt door de Goedkeuren/Afkeuren-acties.
     const tripId = req.data?.TripID ?? _tripIdFromParams(req);
     await _assertTeamOwnership(req, tripId, TripPin);
+  });
+
+  // ── READ TravelExtensions: StatusLabel vullen ──────────────────────────────
+  this.on('READ', 'TravelExtensions', async (req) => {
+    const result = await cds.run(req.query);
+    const statusMap = { Pending: 'In behandeling', Approved: 'Goedgekeurd', Rejected: 'Afgekeurd' };
+    const fill = e => { e.StatusLabel = statusMap[e.ApprovalStatus] ?? e.ApprovalStatus; return e; };
+    if (Array.isArray(result)) { result.forEach(fill); return result; }
+    if (result) fill(result);
+    return result;
   });
 
   // ── FV-24: Goedkeuren / Afkeuren als bound actions (één klik) ──────────────
@@ -231,9 +250,14 @@ async function _setApprovalStatus(req, status, TripPin) {
   await cds.run(
     UPDATE('primepath.TravelExtensions').set({ ApprovalStatus: status }).where({ TripID: tripId })
   );
-  return await cds.run(
+  const rec = await cds.run(
     SELECT.one.from('primepath.TravelExtensions').where({ TripID: tripId })
   );
+  if (rec) {
+    const statusMap = { Pending: 'In behandeling', Approved: 'Goedgekeurd', Rejected: 'Afgekeurd' };
+    rec.StatusLabel = statusMap[rec.ApprovalStatus] ?? rec.ApprovalStatus;
+  }
+  return rec;
 }
 
 // Resolve de TripPin-UserNames van het team van de ingelogde TeamLead.

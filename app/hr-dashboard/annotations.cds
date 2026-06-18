@@ -39,25 +39,25 @@ annotate HRService.TravelExtensions with @(
   UI.HeaderInfo: { TypeName: 'Reisextensie', TypeNamePlural: 'Reisextensies', Title: { Value: TripID } },
   UI.SelectionFields: [ ApprovalStatus ],
   UI.LineItem: [
-    { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
-    { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
-    { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
+    { $Type: 'UI.DataField', Value: TripID,      Label: 'Trip ID' },
+    { $Type: 'UI.DataField', Value: ProjectCode, Label: 'Projectcode' },
+    { $Type: 'UI.DataField', Value: StatusLabel, Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
         { $Eq: [{ $Path: 'ApprovalStatus' }, 'Approved'] }, 3,
         { $If: [{ $Eq: [{ $Path: 'ApprovalStatus' }, 'Rejected'] }, 1, 2] }
     ]}} },
-    { $Type: 'UI.DataField', Value: InternalNote,   Label: 'Interne notitie' }
+    { $Type: 'UI.DataField', Value: InternalNote, Label: 'Interne notitie' }
   ],
   UI.Facets: [
     { $Type: 'UI.ReferenceFacet', Label: 'Reisextensie', Target: '@UI.FieldGroup#ExtInfo' }
   ],
   UI.FieldGroup#ExtInfo: { Label: 'Reisextensie details', Data: [
-    { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
-    { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
-    { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
+    { $Type: 'UI.DataField', Value: TripID,      Label: 'Trip ID' },
+    { $Type: 'UI.DataField', Value: ProjectCode, Label: 'Projectcode' },
+    { $Type: 'UI.DataField', Value: StatusLabel, Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
         { $Eq: [{ $Path: 'ApprovalStatus' }, 'Approved'] }, 3,
         { $If: [{ $Eq: [{ $Path: 'ApprovalStatus' }, 'Rejected'] }, 1, 2] }
     ]}} },
-    { $Type: 'UI.DataField', Value: InternalNote,   Label: 'Interne notitie' },
+    { $Type: 'UI.DataField', Value: InternalNote, Label: 'Interne notitie' },
     { $Type: 'UI.DataField', Value: modifiedAt,     Label: 'Laatst gewijzigd op' },
     { $Type: 'UI.DataField', Value: modifiedBy,     Label: 'Laatst gewijzigd door' }
   ]}
