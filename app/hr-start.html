@@ -587,9 +587,13 @@
 
   <script>
     // ── Helpers ──────────────────────────────────────────────────────────────────
+
+    // Datum- en valutaformatters voor nl-BE locale
     const dateFmt = new Intl.DateTimeFormat('nl-BE', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const eurFmt  = new Intl.NumberFormat('nl-BE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
 
+    // esc(): XSS-preventie — zet willekeurige stringwaarden om naar veilige HTML-tekst
+    // via het textContent-kanaal van een tijdelijk DOM-element (nooit innerHTML als invoer)
     function esc(s) {
       if (s == null) return '';
       const d = document.createElement('div');
@@ -597,6 +601,8 @@
       return d.innerHTML;
     }
 
+    // api(): centrale fetch-wrapper die het JWT-cookie meestuurt en bij 401/403
+    // automatisch terugstuurt naar de HR-loginpagina
     async function api(path) {
       const res = await fetch('/hr/' + path, {
         credentials: 'include',
@@ -610,41 +616,55 @@
       return res.json();
     }
 
+    // setText(): snelle tekstupdate voor KPI-waarden op ID
     function setText(id, val) { document.getElementById(id).textContent = val; }
 
+    // showSpinner() / showError(): vervangen de containerinhoud door een
+    // laadanimatie of een rode foutmelding (esc() voorkomt HTML-injectie)
     function showSpinner(el) { el.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>'; }
     function showError(el, msg) { el.innerHTML = '<div class="error-msg">' + esc(msg) + '</div>'; }
 
     // ── Navigation ──────────────────────────────────────────────────────────────
     const views = ['dashboard', 'reizen', 'airlines', 'medewerkers'];
+    // loaded{}: cache-object — elke view wordt maar één keer geladen
     const loaded = {};
 
     function navigate() {
+      // Stap 1: haal de hash op en valideer (onbekende hashes → dashboard)
       const hash = (location.hash || '#dashboard').slice(1);
       const view = views.includes(hash) ? hash : 'dashboard';
 
+      // Stap 2: deactiveer alle views en activeer de gekozen view
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
       document.getElementById('view-' + view).classList.add('active');
 
+      // Stap 3: sync het actieve nav-item in de sidebar
       document.querySelectorAll('.nav-item').forEach(n => {
         n.classList.toggle('active', n.dataset.view === view);
       });
 
+      // Stap 4: laad de data lazy — alleen de eerste keer dat een view actief wordt
       if (!loaded[view]) {
         loaded[view] = true;
         loaders[view]();
       }
     }
 
+    // Heractiveer navigate() bij elke hash-wijziging (voor- en achteruitknop)
     window.addEventListener('hashchange', navigate);
 
     // ── Logout ──────────────────────────────────────────────────────────────────
+    // POST naar /auth/logout (verwijdert de httpOnly-cookie) en stuur terug
+    // naar de landingspagina; fout bij de fetch wordt genegeerd (redirect volgt toch)
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       try { await fetch('/auth/logout', { method: 'POST', credentials: 'include' }); } catch (e) {}
       window.location.href = '/';
     });
 
     // ── Airline bar-chart renderer ──────────────────────────────────────────────
+    // Stap 1: sorteer stats op TripCount (aflopend) en neem de top 5
+    // Stap 2: bereken het percentage t.o.v. de hoogste waarde (= 100% balk)
+    // Stap 3: genereer HTML-rijen en zet die in de container
     function renderAirlineChart(container, stats) {
       const sorted = stats.slice().sort((a, b) => (b.TripCount || 0) - (a.TripCount || 0));
       const rows = sorted.slice(0, 5);
