@@ -27,20 +27,19 @@ service TripPinService {
     };
     Gender          : String; // Male, Female, Unknown
     Concurrency     : Integer;
-    // Trips: navigatie-property (People → Trips)
-    Trips           : Association to many Trips;
+    Trips           : Association to many Trips on Trips.People_UserName = UserName;
   }
 
   // ── Reizen ─────────────────────────────────────────────────────────────────
   entity Trips {
-    key TripId      : Integer;
-    Name            : String;
-    Budget          : Decimal(10,2);
-    Description     : String;
-    Tags            : many String;
-    StartsAt        : DateTime;
-    EndsAt          : DateTime;
-    // PlanItems: navigatie (Trips → Flights/Events)
+    key TripId          : Integer;
+    People_UserName     : String;
+    Name                : String;
+    Budget              : Decimal(10,2);
+    Description         : String;
+    Tags                : many String;
+    StartsAt            : DateTime;
+    EndsAt              : DateTime;
   }
 
   // ── Airlines ───────────────────────────────────────────────────────────────
