@@ -66,14 +66,14 @@ annotate TeamService.TravelExtensions with @(
   // FV-26: filter op goedkeuringsstatus, met 'In behandeling' als preset
   UI.SelectionFields: [ ApprovalStatus ],
   UI.LineItem: [
-    { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
+    { $Type: 'UI.DataField', Value: TripID,      Label: 'Trip ID' },
     // Gekleurde statusbadge: Approved=3 groen, Rejected=1 rood, Pending=2 oranje
-    { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
+    { $Type: 'UI.DataField', Value: StatusLabel, Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
         { $Eq: [{ $Path: 'ApprovalStatus' }, 'Approved'] }, 3,
         { $If: [{ $Eq: [{ $Path: 'ApprovalStatus' }, 'Rejected'] }, 1, 2] }
     ]}} },
-    { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
-    { $Type: 'UI.DataField', Value: InternalNote,   Label: 'Interne notitie' }
+    { $Type: 'UI.DataField', Value: ProjectCode, Label: 'Projectcode' },
+    { $Type: 'UI.DataField', Value: InternalNote, Label: 'Interne notitie' }
   ],
   UI.SelectionVariant #Pending: {
     Text: 'In behandeling',
@@ -87,12 +87,12 @@ annotate TeamService.TravelExtensions with @(
     { $Type: 'UI.ReferenceFacet', Label: 'Wijzigingshistoriek', Target: '@UI.FieldGroup#Audit' }
   ],
   UI.FieldGroup#Approval: { Label: 'Goedkeuringsstatus', Data: [
-    { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
+    { $Type: 'UI.DataField', Value: StatusLabel,  Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
         { $Eq: [{ $Path: 'ApprovalStatus' }, 'Approved'] }, 3,
         { $If: [{ $Eq: [{ $Path: 'ApprovalStatus' }, 'Rejected'] }, 1, 2] }
     ]}} },
-    { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
-    { $Type: 'UI.DataField', Value: InternalNote,   Label: 'Interne notitie' }
+    { $Type: 'UI.DataField', Value: ProjectCode,  Label: 'Projectcode' },
+    { $Type: 'UI.DataField', Value: InternalNote, Label: 'Interne notitie' }
   ]},
   UI.FieldGroup#Audit: { Label: 'Wijzigingshistoriek', Data: [
     { $Type: 'UI.DataField', Value: modifiedAt, Label: 'Laatst gewijzigd op' },
@@ -118,6 +118,7 @@ annotate TeamService.Airlines with @(
 annotate TeamService.TravelExtensions with {
   TripID         @title: 'Trip ID'            @readonly;
   ApprovalStatus @title: 'Goedkeuringsstatus';
+  StatusLabel    @title: 'Goedkeuringsstatus';
   ProjectCode    @title: 'Projectcode'         @readonly;
   InternalNote   @title: 'Interne notitie'     @readonly;
 }

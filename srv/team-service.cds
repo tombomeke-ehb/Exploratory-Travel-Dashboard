@@ -36,7 +36,10 @@ service TeamService {
   // Schrijven enkel ApprovalStatus – afgedwongen in team-service.js
   // FV-24: Goedkeuren/Afkeuren als bound actions (één klik op de Object Page).
   // De teamcheck (eigen teamlid?) zit in srv/team-service.js (_assertTeamOwnership).
-  entity TravelExtensions as projection on p.TravelExtensions actions {
+  entity TravelExtensions as projection on p.TravelExtensions {
+    *,
+    virtual null as StatusLabel : String   // Nederlandse vertaling van ApprovalStatus
+  } actions {
     action goedkeuren() returns TravelExtensions;
     action afkeuren()  returns TravelExtensions;
   };

@@ -32,7 +32,10 @@ service HRService {
   };
 
   // ── PrimePath velden (read-only voor HR) ──────────────────────────────────
-  @readonly entity TravelExtensions as projection on p.TravelExtensions;
+  @readonly entity TravelExtensions as projection on p.TravelExtensions {
+    *,
+    virtual null as StatusLabel : String   // Nederlandse vertaling van ApprovalStatus
+  };
 
   // ── FV-27 + V8: airline-statistieken (aantal boekingen + totaal budget) ───
   function getAirlineStats() returns array of {
