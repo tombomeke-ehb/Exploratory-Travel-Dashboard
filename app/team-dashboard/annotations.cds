@@ -1,5 +1,6 @@
 // Fiori Annotations - Team Dashboard
 annotate TeamService.People with @(
+  UI.PresentationVariant: { SortOrder: [{ Property: LastName, Descending: false }], Visualizations: ['@UI.LineItem'] },
   UI.HeaderInfo: {
     TypeName: 'Teamlid',
     TypeNamePlural: 'Teamleden',
@@ -21,7 +22,7 @@ annotate TeamService.People with @(
   ],
   UI.DataPoint #TravelStatus: {
     Value: OnTravel,
-    Title: 'Resstatus',
+    Title: 'Reisstatus',
     Criticality: { $edmJson: { $If: [{ $Eq: [{ $Path: 'OnTravel' }, true] }, 1, 3] } }
   },
   UI.Facets: [
@@ -46,14 +47,16 @@ annotate TeamService.Trips with @(
     { $Type: 'UI.DataField', Value: TripId,  Label: 'Trip ID' },
     { $Type: 'UI.DataField', Value: Name,     Label: 'Naam' },
     { $Type: 'UI.DataField', Value: StartsAt, Label: 'Vertrek' },
-    { $Type: 'UI.DataField', Value: EndsAt,   Label: 'Aankomst' }
+    { $Type: 'UI.DataField', Value: EndsAt,   Label: 'Aankomst' },
+    { $Type: 'UI.DataField', Value: Budget,   Label: 'Budget' }
   ],
   UI.Facets: [{ $Type: 'UI.ReferenceFacet', Label: 'Reisgegevens', Target: '@UI.FieldGroup#TripInfo' }],
   UI.FieldGroup#TripInfo: { Label: 'Reisgegevens', Data: [
     { $Type: 'UI.DataField', Value: TripId,   Label: 'Trip ID' },
     { $Type: 'UI.DataField', Value: Name,     Label: 'Naam' },
     { $Type: 'UI.DataField', Value: StartsAt, Label: 'Vertrek' },
-    { $Type: 'UI.DataField', Value: EndsAt,   Label: 'Aankomst' }
+    { $Type: 'UI.DataField', Value: EndsAt,   Label: 'Aankomst' },
+    { $Type: 'UI.DataField', Value: Budget,   Label: 'Budget' }
   ]}
 );
 annotate TeamService.TravelExtensions with @(
@@ -65,7 +68,7 @@ annotate TeamService.TravelExtensions with @(
     { $Type: 'UI.DataFieldForAction', Action: 'TeamService.inBehandeling', Label: 'Terugzetten'                           }
   ],
   // FV-26: filter op goedkeuringsstatus, met 'In behandeling' als preset
-  UI.SelectionFields: [ ApprovalStatus ],
+  UI.SelectionFields: [ ApprovalStatus, ProjectCode ],
   UI.LineItem: [
     { $Type: 'UI.DataField', Value: TripID,      Label: 'Trip ID' },
     // Gekleurde statusbadge: Approved=3 groen, Rejected=1 rood, Pending=2 oranje

@@ -37,7 +37,7 @@ annotate HRService.Trips with @(
 );
 annotate HRService.TravelExtensions with @(
   UI.HeaderInfo: { TypeName: 'Reisextensie', TypeNamePlural: 'Reisextensies', Title: { Value: TripID } },
-  UI.SelectionFields: [ ApprovalStatus ],
+  UI.SelectionFields: [ ApprovalStatus, ProjectCode ],
   UI.LineItem: [
     { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
     { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
@@ -69,25 +69,30 @@ annotate HRService.Airports with @(
   UI.LineItem: [
     { $Type: 'UI.DataField', Value: IcaoCode, Label: 'ICAO-code' },
     { $Type: 'UI.DataField', Value: IataCode, Label: 'IATA-code' },
-    { $Type: 'UI.DataField', Value: Name,     Label: 'Naam' }
+    { $Type: 'UI.DataField', Value: Name,     Label: 'Naam' },
+    { $Type: 'UI.DataField', Value: City,     Label: 'Stad' }
   ],
   UI.Facets: [{ $Type: 'UI.ReferenceFacet', Label: 'Luchthaven details', Target: '@UI.FieldGroup#AirportInfo' }],
   UI.FieldGroup#AirportInfo: { Label: 'Luchthavens', Data: [
     { $Type: 'UI.DataField', Value: IcaoCode, Label: 'ICAO-code' },
     { $Type: 'UI.DataField', Value: IataCode, Label: 'IATA-code' },
-    { $Type: 'UI.DataField', Value: Name,     Label: 'Naam' }
+    { $Type: 'UI.DataField', Value: Name,     Label: 'Naam' },
+    { $Type: 'UI.DataField', Value: City,     Label: 'Stad' }
   ]}
 );
 annotate HRService.People with @(
   UI.PresentationVariant: { SortOrder: [{ Property: LastName, Descending: false }], Visualizations: ['@UI.LineItem'] },
   UI.HeaderInfo: { TypeName: 'Medewerker', TypeNamePlural: 'Medewerkers', Title: { Value: LastName }, Description: { Value: UserName } },
-  UI.SelectionFields: [ LastName ],
+  UI.SelectionFields: [ LastName, UserName ],
   UI.LineItem: [
     { $Type: 'UI.DataField', Value: UserName, Label: 'Gebruikersnaam' },
     { $Type: 'UI.DataField', Value: FirstName, Label: 'Voornaam' },
     { $Type: 'UI.DataField', Value: LastName, Label: 'Familienaam' }
   ],
-  UI.Facets: [{ $Type: 'UI.ReferenceFacet', Label: 'Persoonsgegevens', Target: '@UI.FieldGroup#PersonInfo' }],
+  UI.Facets: [
+    { $Type: 'UI.ReferenceFacet', Label: 'Persoonsgegevens', Target: '@UI.FieldGroup#PersonInfo' },
+    { $Type: 'UI.ReferenceFacet', Label: 'Reisoverzicht', Target: 'Trips/@UI.LineItem' }
+  ],
   UI.FieldGroup#PersonInfo: { Label: 'Medewerkerdetails', Data: [
     { $Type: 'UI.DataField', Value: UserName,  Label: 'Gebruikersnaam' },
     { $Type: 'UI.DataField', Value: FirstName, Label: 'Voornaam' },
