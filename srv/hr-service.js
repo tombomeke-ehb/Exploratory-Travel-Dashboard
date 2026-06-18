@@ -27,7 +27,17 @@ module.exports = cds.service.impl(async function () {
     const all = await collectAllPeople(TripPin, req.query);
     return applyClientPaging(all, req.query);
   });
-  this.on('READ', 'Airports', req => TripPin.run(req.query));
+  this.on('READ', 'Airports', async (req) => {
+    const airports = await TripPin.run(req.query);
+    const arr = Array.isArray(airports) ? airports : (airports ? [airports] : []);
+    try {
+      const cities = await _airportCities(TripPin);
+      arr.forEach(a => { a.City = cities[a.IcaoCode] ?? null; });
+    } catch (err) {
+      cds.log('hr-service').warn('Airport-steden niet gemerged:', err.message);
+    }
+    return Array.isArray(airports) ? arr : arr[0];
+  });
   // FV-18: verrijk de airlines met het aantal boekingen uit de (gecachte) airline-stats.
   // Graceful: faalt de stats-call, dan blijft de lijst werken met TripCount 0.
   this.on('READ', 'Airlines', async (req) => {
@@ -178,4 +188,27 @@ module.exports = cds.service.impl(async function () {
   // Pre-warm de caches bij boot (niet-blokkerend) zodat het eerste verzoek snel is.
   collectAllTrips(TripPin).catch(() => {});
   this.send('getAirlineStats').catch(() => {});
+  _airportCities(TripPin).catch(() => {});
 });
+
+let _airportCityCache = null;
+let _airportCityCacheTime = 0;
+
+async function _airportCities(TripPin) {
+  if (_airportCityCache && (Date.now() - _airportCityCacheTime < CACHE_TTL)) {
+    return _airportCityCache;
+  }
+  const map = {};
+  let skip = 0;
+  while (true) {
+    const resp = await TripPin.send({ method: 'GET', path: `Airports?$skip=${skip}` });
+    const items = Array.isArray(resp?.value) ? resp.value : Array.isArray(resp) ? resp : [];
+    if (items.length === 0) break;
+    items.forEach(a => { if (a.IcaoCode) map[a.IcaoCode] = a.Location?.City?.Name ?? null; });
+    skip += items.length;
+    if (!resp?.value || items.length < 20) break;
+  }
+  _airportCityCache = map;
+  _airportCityCacheTime = Date.now();
+  return map;
+}
