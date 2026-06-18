@@ -48,12 +48,12 @@ cds.on('bootstrap', (app) => {
   // statische app-shell en startpagina's niet zonder geldige sessie laden.
   // Login-/landingspagina's en /auth/* blijven bewust publiek.
   const PROTECTED_UI = [
-    { prefix: '/travel-dashboard', login: '/travel-login.html' },
-    { prefix: '/team-dashboard',   login: '/team-login.html'   },
-    { prefix: '/hr-dashboard',     login: '/hr-login.html'     },
-    { exact:  '/travel-start.html', login: '/travel-login.html' },
-    { exact:  '/team-start.html',   login: '/team-login.html'   },
-    { exact:  '/hr-start.html',     login: '/hr-login.html'     },
+    { prefix: '/travel-dashboard', login: '/travel-login.html', role: 'TravelAdmin' },
+    { prefix: '/team-dashboard',   login: '/team-login.html',   role: 'TeamLead'    },
+    { prefix: '/hr-dashboard',     login: '/hr-login.html',     role: 'TravelViewer'},
+    { exact:  '/travel-start.html', login: '/travel-login.html', role: 'TravelAdmin' },
+    { exact:  '/team-start.html',   login: '/team-login.html',   role: 'TeamLead'    },
+    { exact:  '/hr-start.html',     login: '/hr-login.html',     role: 'TravelViewer'},
   ]
   function readAuthCookie (req) {
     const raw = req.headers?.cookie
@@ -67,7 +67,10 @@ cds.on('bootstrap', (app) => {
     if (!rule) return next()
     const token = readAuthCookie(req)
     if (token) {
-      try { jwt.verify(token, JWT_SECRET); return next() } catch { /* ongeldig/verlopen token */ }
+      try {
+        const payload = jwt.verify(token, JWT_SECRET)
+        if (payload.role === rule.role) return next()
+      } catch { /* ongeldig/verlopen token */ }
     }
     return res.redirect(302, rule.login)
   })

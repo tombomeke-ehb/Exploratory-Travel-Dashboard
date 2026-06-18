@@ -9,5 +9,5 @@ using { primepath } from '../db/schema';
 
 @requires: 'TravelAdmin'
 service AdminService @(path: '/admin') {
-  entity Users as projection on primepath.Users;
+  entity Users as projection on primepath.Users excluding { passwordHash };
 }
