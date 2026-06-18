@@ -2,6 +2,7 @@
 // Opmerking: TravelService.Trips is een read-only projectie op TripPinService.Trips.
 // PrimePath-velden (ApprovalStatus, ProjectCode, InternalNote) zitten in TravelExtensions.
 annotate TravelService.Trips with @(
+  UI.PresentationVariant: { SortOrder: [{ Property: StartsAt, Descending: false }], Visualizations: ['@UI.LineItem'] },
   UI.HeaderInfo: { TypeName: 'Reis', TypeNamePlural: 'Reizen', Title: { Value: Name }, Description: { Value: Description } },
   UI.SelectionFields: [ StartsAt, EndsAt ],
   UI.LineItem: [
