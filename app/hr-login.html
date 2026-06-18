@@ -6,16 +6,24 @@
   <title>PrimePath Travel – Inloggen HR / Administratie</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap');
-    /* PrimePath huisstijl-tokens — gelijk aan landing & startschermen. */
+
+    /* ── Design tokens ───────────────────────────────────────────
+       Huisstijl-variabelen gelijk aan de andere login- en startschermen.
+       --role / --role-dark zijn de HR-accentkleur (oranje/amber).   */
     :root {
       --font-head: 'Poppins','72','Segoe UI',system-ui,sans-serif;
       --font-body: 'Open Sans','72','Segoe UI',system-ui,sans-serif;
       --pp-brand: #0070F2; --pp-brand-dark: #0040A8; --pp-brand-darker: #0A2540;
       --pp-ink: #1A2A3A; --pp-muted: #5B6B7B; --pp-line: #E3E9F0;
       --pp-surface: #FFFFFF;
-      --role: #C8730B; --role-dark: #9E5A08;
+      --role: #C8730B; --role-dark: #9E5A08;   /* HR / Administratie–oranje */
     }
+
+    /* ── Reset ───────────────────────────────────────────────── */
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Pagina-achtergrond ──────────────────────────────────────
+       Gelaagde gradiënt: blauw merkkleur + subtiele cyaan gloed. */
     body {
       font-family: var(--font-body);
       color: var(--pp-ink); min-height: 100vh;
@@ -27,14 +35,20 @@
       -webkit-font-smoothing: antialiased;
     }
     h1 { font-family: var(--font-head); }
+    /* Herbruikbare SVG-klasse: geen fill, enkel stroke zodat iconen
+       dezelfde kleur erven als de omliggende tekst.                 */
     svg.ic { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
+    /* ── Merklogo boven de kaart ─────────────────────────────── */
     .brand-lockup { display: flex; align-items: center; gap: .6rem; color: #fff; margin-bottom: 1.5rem; }
     .brand-lockup .mark { width: 2.1rem; height: 2.1rem; border-radius: 10px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3); display: flex; align-items: center; justify-content: center; }
     .brand-lockup .mark svg { width: 1.15rem; height: 1.15rem; }
     .brand-lockup .name { font-family: var(--font-head); font-size: 1rem; font-weight: 700; letter-spacing: .3px; line-height: 1.1; }
     .brand-lockup .sub  { font-size: .7rem; opacity: .82; }
 
+    /* ── Login-kaart ─────────────────────────────────────────────
+       Witte kaart met schaduw; header in de rol-accentkleur,
+       body bevat het formulier.                                    */
     .login-card {
       background: var(--pp-surface); border-radius: 18px; width: 100%; max-width: 410px;
       box-shadow: 0 18px 50px rgba(10,37,64,.35); overflow: hidden;
@@ -47,18 +61,22 @@
     .card-head .icon svg { width: 1.6rem; height: 1.6rem; }
     .card-body { padding: 1.75rem 2rem 2rem; }
 
+    /* ── Rol-badge, titel en ondertitel ─────────────────────── */
     .role-badge { display: inline-flex; font-size: .68rem; font-weight: 700; letter-spacing: .3px; text-transform: uppercase; padding: .25rem .65rem; border-radius: 999px; background: color-mix(in srgb, var(--role) 12%, #fff); color: var(--role); margin-bottom: .6rem; }
     .login-card h1 { font-size: 1.3rem; font-weight: 700; }
     .card-lead { font-size: .85rem; color: var(--pp-muted); margin: .25rem 0 1.4rem; }
 
+    /* ── Formuliervelden ─────────────────────────────────────── */
     .form-group { margin-bottom: 1rem; }
     .form-group label { display: block; font-size: .82rem; font-weight: 600; margin-bottom: .35rem; color: var(--pp-ink); }
     .form-group input {
       width: 100%; padding: .6rem .8rem; border: 1px solid var(--pp-line); border-radius: 10px;
       font-size: .9rem; font-family: inherit; transition: border-color .15s, box-shadow .15s;
     }
+    /* Focus-ring in de rol-accentkleur voor toegankelijkheid */
     .form-group input:focus { outline: none; border-color: var(--role); box-shadow: 0 0 0 3px color-mix(in srgb, var(--role) 18%, transparent); }
 
+    /* ── Inlogknop ───────────────────────────────────────────── */
     .btn-login {
       width: 100%; padding: .7rem; border: none; border-radius: 10px;
       background: linear-gradient(135deg, var(--role), var(--role-dark)); color: #fff;
@@ -66,8 +84,10 @@
       box-shadow: 0 6px 16px color-mix(in srgb, var(--role) 35%, transparent); transition: transform .12s, box-shadow .12s, opacity .12s;
     }
     .btn-login:hover:not(:disabled) { transform: translateY(-1px); }
+    /* Disabled-state tijdens het verzoek: visuele feedback dat er gewacht wordt */
     .btn-login:disabled { opacity: .6; cursor: not-allowed; }
 
+    /* ── Foutmelding en teruglink ────────────────────────────── */
     .error-msg { display: none; background: #FDECEC; border: 1px solid #F4B6B0; border-radius: 10px; padding: .55rem .8rem; font-size: .8rem; color: #B23A2E; margin-top: .75rem; }
     .back-link { display: block; text-align: center; margin-top: 1.4rem; font-size: .8rem; color: var(--pp-muted); text-decoration: none; }
     .back-link:hover { color: var(--role); }
