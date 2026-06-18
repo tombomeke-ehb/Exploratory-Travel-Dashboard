@@ -119,7 +119,7 @@ annotate TravelService.People with @(
   ],
   UI.DataPoint #TravelStatus: {
     Value: OnTravel,
-    Title: 'Resstatus',
+    Title: 'Reisstatus',
     Criticality: { $edmJson: { $If: [{ $Eq: [{ $Path: 'OnTravel' }, true] }, 1, 3] } }
   },
   UI.Facets: [
