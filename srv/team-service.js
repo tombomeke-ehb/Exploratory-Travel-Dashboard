@@ -178,7 +178,9 @@ module.exports = cds.service.impl(async function () {
   });
 
   // ── CREATE / DELETE TravelExtensions: verboden voor TeamLead ──────────────
-  // FA v4 §11 rollenmatrix: TeamLead mag enkel ApprovalStatus aanpassen, niet aanmaken/verwijderen.
+  // FA v4 §11 rollenmatrix: TeamLead mag enkel ApprovalStatus aanpassen, niet
+  // aanmaken/verwijderen. Server-side afgedwongen (TA §8.4): ook al toont de UI
+  // het niet, de backend weigert de actie.
   this.before(['CREATE', 'DELETE'], 'TravelExtensions', (req) => {
     return req.error(403,
       'Een Team Lead mag reisextensies niet aanmaken of verwijderen. ' +
@@ -216,43 +218,22 @@ module.exports = cds.service.impl(async function () {
     await _assertTeamOwnership(req, tripId, TripPin);
   });
 
-  // ── READ TravelExtensions: teamfiltering + StatusLabel vullen ───────────────
+  // ── READ TravelExtensions: teamfiltering ────────────────────────────────────
   this.on('READ', 'TravelExtensions', async (req) => {
-    // Strip $search uit de DB-query: StatusLabel is virtueel en wordt pas na
-    // de query ingevuld, dus $search moet client-side draaien zodat zoeken
-    // op zowel "Pending" als "In behandeling" werkt.
-    const savedSearch = req.query.SELECT?.search;
-    if (req.query.SELECT) req.query.SELECT.search = undefined;
-
     const result = await cds.run(req.query);
-    const statusMap = { Pending: 'In behandeling', Approved: 'Goedgekeurd', Rejected: 'Afgekeurd' };
-    const fill = e => { e.StatusLabel = statusMap[e.ApprovalStatus] ?? e.ApprovalStatus; return e; };
-    if (!Array.isArray(result)) {
-      if (result) fill(result);
-      return result;
-    }
-
-    let list = result;
+    if (!Array.isArray(result)) return result;
 
     const team = await _resolveTeamUserNames(req);
-    if (team) {
-      const teamTripIds = await _collectTeamTripIds(TripPin,
-        [...team].map(u => ({ TripPinUserName: u }))
-      );
-      list = list.filter(e => teamTripIds.has(Number(e.TripID)));
-    }
+    if (!team) return result;
 
-    list.forEach(fill);
-
-    // Client-side $search na verrijking (zoekt ook door StatusLabel)
-    if (savedSearch) {
-      if (req.query.SELECT) req.query.SELECT.search = savedSearch;
-      list = applyClientQuery(list, req.query);
-    }
-
-    list.$count = list.length;
-    return list;
+    const teamTripIds = await _collectTeamTripIds(TripPin,
+      [...team].map(u => ({ TripPinUserName: u }))
+    );
+    const filtered = result.filter(e => teamTripIds.has(Number(e.TripID)));
+    filtered.$count = filtered.length;
+    return filtered;
   });
+
 
   // ── FV-24: Goedkeuren / Afkeuren als bound actions (één klik) ──────────────
   // Zelfde teamcheck als de UPDATE; zet de status direct op Approved/Rejected.
@@ -317,14 +298,9 @@ async function _setApprovalStatus(req, status, TripPin) {
   await cds.run(
     UPDATE('primepath.TravelExtensions').set({ ApprovalStatus: status }).where({ TripID: tripId })
   );
-  const rec = await cds.run(
+  return await cds.run(
     SELECT.one.from('primepath.TravelExtensions').where({ TripID: tripId })
   );
-  if (rec) {
-    const statusMap = { Pending: 'In behandeling', Approved: 'Goedgekeurd', Rejected: 'Afgekeurd' };
-    rec.StatusLabel = statusMap[rec.ApprovalStatus] ?? rec.ApprovalStatus;
-  }
-  return rec;
 }
 
 // Resolve de TripPin-UserNames van het team van de ingelogde TeamLead.

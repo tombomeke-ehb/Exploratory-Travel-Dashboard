@@ -37,10 +37,9 @@ annotate TravelService.TravelExtensions with @(
   },
   UI.HeaderInfo: { TypeName: 'Reisextensie', TypeNamePlural: 'Reisextensies', Title: { Value: TripID } },
   UI.Identification: [
-    { $Type: 'UI.DataFieldForAction', Action: 'TravelService.goedkeuren',    Label: 'Goedkeuren',        Criticality: #Positive },
-    { $Type: 'UI.DataFieldForAction', Action: 'TravelService.afkeuren',      Label: 'Afkeuren',          Criticality: #Negative },
-    { $Type: 'UI.DataFieldForAction', Action: 'TravelService.inBehandeling', Label: 'Terugzetten'                                },
-    { $Type: 'UI.DataFieldForAction', Action: 'TravelService.bewerkNotitie', Label: 'Notitie bewerken'                           }
+    { $Type: 'UI.DataFieldForAction', Action: 'TravelService.goedkeuren',    Label: 'Goedkeuren',       Criticality: #Positive },
+    { $Type: 'UI.DataFieldForAction', Action: 'TravelService.afkeuren',      Label: 'Afkeuren',         Criticality: #Negative },
+    { $Type: 'UI.DataFieldForAction', Action: 'TravelService.bewerkNotitie', Label: 'Notitie bewerken' }
   ],
   UI.SelectionFields: [ ApprovalStatus, StartsAt, EndsAt ],
   UI.LineItem: [
@@ -49,7 +48,7 @@ annotate TravelService.TravelExtensions with @(
     { $Type: 'UI.DataField', Value: EndsAt,          Label: 'Aankomstdatum' },
     { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
     // Gekleurde statusbadge: Approved=3 groen, Rejected=1 rood, Pending=2 oranje
-    { $Type: 'UI.DataField', Value: StatusLabel,    Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
+    { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
         { $Eq: [{ $Path: 'ApprovalStatus' }, 'Approved'] }, 3,
         { $If: [{ $Eq: [{ $Path: 'ApprovalStatus' }, 'Rejected'] }, 1, 2] }
     ]}} },
@@ -70,7 +69,7 @@ annotate TravelService.TravelExtensions with @(
   UI.FieldGroup#PrimePath: { Label: 'Interne PrimePath Velden', Data: [
     { $Type: 'UI.DataField', Value: TripID,         Label: 'Trip ID' },
     { $Type: 'UI.DataField', Value: ProjectCode,    Label: 'Projectcode' },
-    { $Type: 'UI.DataField', Value: StatusLabel,    Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
+    { $Type: 'UI.DataField', Value: ApprovalStatus, Label: 'Goedkeuringsstatus', Criticality: { $edmJson: { $If: [
         { $Eq: [{ $Path: 'ApprovalStatus' }, 'Approved'] }, 3,
         { $If: [{ $Eq: [{ $Path: 'ApprovalStatus' }, 'Rejected'] }, 1, 2] }
     ]}} },
@@ -84,12 +83,11 @@ annotate TravelService.TravelExtensions with @(
   ]}
 );
 annotate TravelService.TravelExtensions with {
-  TripID              @title: 'Trip ID';
-  ProjectCode         @title: 'Projectcode';
-  ApprovalStatus      @title: 'Goedkeuringsstatus'
+  TripID         @title: 'Trip ID';
+  ProjectCode    @title: 'Projectcode';
+  ApprovalStatus @title: 'Goedkeuringsstatus'
     @Common.ValueListWithFixedValues;
-  InternalNote        @title: 'Interne notitie';
-  StatusLabel         @title: 'Goedkeuringsstatus';
+  InternalNote   @title: 'Interne notitie';
 }
 annotate TravelService.TravelExtensions with actions {
   bewerkNotitie(

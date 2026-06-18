@@ -58,12 +58,10 @@ service TravelService {
     virtual null as EndsAt          : DateTime,
     virtual null as TripName        : String,
     virtual null as TripBudget      : Decimal,
-    virtual null as TripDescription : String,
-    virtual null as StatusLabel     : String   // Nederlandse vertaling van ApprovalStatus
+    virtual null as TripDescription : String
   } actions {
-    action goedkeuren()    returns TravelExtensions;
-    action afkeuren()      returns TravelExtensions;
-    action inBehandeling() returns TravelExtensions;
+    action goedkeuren() returns TravelExtensions;
+    action afkeuren()   returns TravelExtensions;
     action bewerkNotitie(
       ProjectCode  : String,
       InternalNote : String
