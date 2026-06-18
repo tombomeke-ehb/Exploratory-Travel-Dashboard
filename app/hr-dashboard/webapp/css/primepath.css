@@ -395,6 +395,14 @@
 }
 
 /* ── 11. Knoppen ─────────────────────────────────────────────────────────── */
+/* sap.m.Button in emphasized- en default-variant.
+   Emphasized (primaire actie):
+     - Blauw (#0070F2) + hover donkerder (#0058C4) + shadow voor diepte.
+     - Active: schaalverkleining (scale(.97)) geeft een "indruk"-effect.
+   Default (normale knop):
+     - Alleen border-radius en font-grootte worden aangepast; kleur/border
+       komen uit de SAP-theming-variabelen (sectie 1) en worden niet
+       opnieuw gedeclareerd om theming-consistentie te bewaren.             */
 .sapMBtnEmphasized .sapMBtnInner {
   background: #0070F2 !important;
   border-color: #0070F2 !important;
@@ -423,6 +431,10 @@
 }
 
 /* ── 12. Filterbar ───────────────────────────────────────────────────────── */
+/* sap.ui.mdc.FilterBar en sap.m.FilterBar: de filterbalk boven de tabel
+   in List Reports. Krijgt een witte achtergrond met border-bottom om
+   visueel los te staan van de DynamicPage-header erboven.
+   De padding (8px 20px) stemt overeen met de DynamicPage-header (sectie 4). */
 .sapUiMdcFilterBar,
 .sapMFilterBar {
   background: #FFFFFF !important;
@@ -431,6 +443,12 @@
 }
 
 /* ── 13. Dialogen & popovers ─────────────────────────────────────────────── */
+/* sap.m.Dialog en sap.m.Popover: modale overlays voor bevestigingen,
+   formulieren en contextmenu's.
+   De zware drop shadow (22px / 10px, blauwgetint) geeft de dialoog een
+   duidelijke "boven de pagina"-perceptie. De border (1px #E4EAF1) is subtiel
+   maar nodig op lichte achtergronden om de dialoogrand zichtbaar te houden.
+   De titeltekst volgt het kaartpatroon (700 gewicht, donkerblauw).         */
 .sapMPopover,
 .sapMDialog {
   border-radius: 14px !important;
@@ -446,6 +464,11 @@
 }
 
 /* ── 14. Tabs (IconTabBar) ───────────────────────────────────────────────── */
+/* sap.m.IconTabBar: wordt gebruikt in Fiori Elements voor subviews en
+   subdetails van een ObjectPage.
+   - Balk: witte achtergrond + onderlijnrand (analoog aan de filterbalk).
+   - Actief tabblad: blauwe tekst + 2px border-bottom als indicator;
+     geen achtergrondkleur om de actieve tab niet te zwaar te maken.        */
 .sapMITB {
   background: #FFFFFF !important;
   border-bottom: 1px solid #E4EAF1 !important;
@@ -461,12 +484,22 @@
 }
 
 /* ── 15. Breadcrumbs ─────────────────────────────────────────────────────── */
+/* sap.m.Breadcrumbs: navigatiepath bovenaan een ObjectPage.
+   Links worden blauw (#0070F2) gestyled in 12px zodat ze compact blijven
+   maar wel klikbaar ogen; hover/active komen uit de theming-variabelen
+   (sectie 1, --sapLink_Hover_Color) en zijn dus niet hier herhaald.        */
 .sapMBreadcrumbs .sapMLink {
   color: #0070F2 !important;
   font-size: 12px !important;
 }
 
 /* ── 16. Zoekveldje ──────────────────────────────────────────────────────── */
+/* sap.m.SearchField: staat typisch in de tabelwerkbalk voor globale
+   zoekfunctionaliteit.
+   - Rustende staat: lichtblauwe achtergrond (#F3F6FB) met grijsblauwe rand —
+     onderscheidt het zoekveld van een gewone inputknop.
+   - Focus: zelfde blauwe glow-ring als invoervelden (sectie 9) voor
+     consistente focus-UX door de hele app.                                  */
 .sapMSFB,
 .sapMSF .sapMSFB {
   background: #F3F6FB !important;
@@ -487,6 +520,12 @@
 }
 
 /* ── 17. Roltag ───────────────────────────────────────────────────────────── */
+/* sap.fe.DraftBadge / DraftIndicator: de "concept"-badge in Fiori Elements
+   die aangeeft dat een record nog niet is opgeslagen.
+   Wordt omgezet naar dezelfde pill-stijl als de status-badges (sectie 10):
+   border-radius: 999px, 11px tekst, 600 gewicht.
+   Achtergrond- en tekstkleur worden bepaald door SAP Fiori; alleen de vorm
+   wordt hier genormaliseerd.                                                 */
 .sapFeDraftBadge,
 .sapFeDraftIndicator {
   border-radius: 999px !important;
@@ -496,6 +535,12 @@
 }
 
 /* ── 18. Focus-visible ───────────────────────────────────────────────────── */
+/* Toegankelijkheid: zichtbare focusstijl voor toetsenbord- en
+   schakelaargebruikers. :focus-visible is nauwkeuriger dan :focus
+   — het wordt alleen getoond bij toetsenbordnavigatie, niet bij muisklik.
+   De blauwe outline (3px, semi-transparant rgba) volgt dezelfde tint als de
+   focus-ring in invoervelden (sectie 9) voor visuele consistentie.
+   outline-offset: -2px plaatst de ring iets binnenin de componentrand.     */
 .sapMBtn:focus-visible .sapMBtnInner,
 .sapMLink:focus-visible,
 .sapMListTblRow:focus-visible {
@@ -505,12 +550,20 @@
 }
 
 /* ── 19. Tabular nummers ─────────────────────────────────────────────────── */
+/* font-variant-numeric: tabular-nums zorgt dat alle cijfers in tabelcellen
+   een gelijke breedte hebben. Dit voorkomt dat kolommen met wisselende
+   waarden (bijv. kosten, aantallen, datums) visueel verschuiven bij sorteren
+   of vernieuwen. Van toepassing op zowel ResponsiveTable- als GridTable-cellen. */
 .sapMListTblCell,
 .sapUiTableCell {
   font-variant-numeric: tabular-nums !important;
 }
 
 /* ── 20. Scrollbars ──────────────────────────────────────────────────────── */
+/* Webkit-scrollbars (Chrome, Edge, Safari): smal (6px), transparante track,
+   afgeronde grijsblauwe thumb. ::-webkit-scrollbar-* werkt niet in Firefox
+   (die gebruikt scrollbar-width: thin in de native browser-stijl).
+   Dit is puur cosmetisch en tast de functionaliteit niet aan.              */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #8A97A6; border-radius: 999px; }
