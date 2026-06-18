@@ -7,6 +7,12 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap');
 
+    /* ── Design tokens ───────────────────────────────────────────
+       Gedeelde huisstijl-variabelen (gelijk aan team-start.html).
+       --brand-*   : merkblauw palet (header, actieve nav, knoppen)
+       --ink-*     : grijstinten voor tekst en subtitels
+       --sh-1/2/3  : schaduwniveaus (1 = subtiel, 3 = zwevend/drawer)
+       --pp-*      : statuskleuren (success/warning/error) + tabel-zebra */
     :root {
       --font-head: 'Poppins', '72', 'Segoe UI', system-ui, sans-serif;
       --font-body: 'Open Sans', '72', 'Segoe UI', system-ui, sans-serif;
@@ -158,6 +164,8 @@
       padding: 1.5rem 1.5rem; display: flex; flex-direction: column; gap: .5rem;
       overflow: hidden; transition: all .3s cubic-bezier(.4,0,.2,1);
     }
+    /* Gekleurde accentstreep links via de CSS-variabele --accent die
+       inline per kaart wordt ingesteld (bijv. style="--accent: var(--pp-warning)") */
     .kpi-card::before {
       content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 4px;
       background: var(--accent); border-radius: 0 4px 4px 0;
@@ -301,6 +309,9 @@
     .pill-available { color: var(--pp-success); background: var(--pp-success-bg); }
 
     /* ── Detail Drawer ────────────────────────────────────── */
+    /* De overlay verduistert de achtergrond en vangt klikken buiten
+       de drawer op. Standaard onzichtbaar + pointer-events:none zodat
+       het de rest van de UI niet blokkeert als de drawer gesloten is. */
     .drawer-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(10,37,64,.4); z-index: 200; opacity: 0; pointer-events: none;
@@ -308,6 +319,8 @@
       backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
     }
     .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+    /* De drawer schuift van rechts in via translateX(100%) → translateX(0).
+       z-index 210 zorgt dat hij boven de overlay (200) zweeft.           */
     .drawer {
       position: fixed; top: 0; right: 0; bottom: 0; width: 460px;
       background: var(--surface); z-index: 210;
@@ -395,6 +408,9 @@
     }
 
     /* ── Responsive ───────────────────────────────────────── */
+    /* Op kleine schermen verdwijnt de sidebar (slide-over i.p.v. vast).
+       De .open-class wordt via JS toegevoegd bij een menu-toggle.
+       Content krijgt geen margin-left meer omdat de sidebar overlapt. */
     @media (max-width: 1023px) {
       .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); box-shadow: var(--sh-3); }
