@@ -86,8 +86,10 @@ annotate TravelService.TravelExtensions with {
   ApprovalStatus @title: 'Goedkeuringsstatus';
   InternalNote   @title: 'Interne notitie';
 }
-annotate TravelService.bewerk with {
-  ApprovalStatus @title: 'Goedkeuringsstatus' @Common.ValueListWithFixedValues;
+annotate TravelService.TravelExtensions actions {
+  bewerk(
+    ApprovalStatus @title: 'Goedkeuringsstatus' @Common.ValueListWithFixedValues
+  );
 }
 annotate TravelService.People with @(
   UI.HeaderInfo: {
