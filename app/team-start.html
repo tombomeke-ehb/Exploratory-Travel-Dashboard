@@ -507,20 +507,26 @@
       }
 
       // ── Navigation ───────────────────────────────────────────
+      // Koppelt de URL-hash (#dashboard, #mijn-team, #reizen) aan de
+      // bijbehorende view-sectie en triggert lazy data-loading.
       var views = { dashboard: 'view-dashboard', 'mijn-team': 'view-mijn-team', reizen: 'view-reizen' };
 
       function navigate() {
+        // Stap 1: normaliseer de hash naar een bekende view-sleutel
         var hash = (location.hash || '#dashboard').slice(1).split('?')[0];
         if (!views[hash]) hash = 'dashboard';
 
+        // Stap 2: deactiveer alle actieve views en nav-items
         document.querySelectorAll('.view').forEach(function (v) { v.classList.remove('active'); });
         document.querySelectorAll('.nav-item').forEach(function (n) { n.classList.remove('active'); });
 
+        // Stap 3: activeer de juiste view en het bijbehorende nav-item
         var viewEl = document.getElementById(views[hash]);
         if (viewEl) viewEl.classList.add('active');
         var navEl = document.querySelector('.nav-item[data-view="' + hash + '"]');
         if (navEl) navEl.classList.add('active');
 
+        // Stap 4: laad data voor de actieve view (elke view laadt slechts één keer)
         if (hash === 'dashboard') loadDashboard();
         if (hash === 'mijn-team') loadTeam();
         if (hash === 'reizen') loadReizen();
@@ -529,17 +535,22 @@
       window.addEventListener('hashchange', navigate);
 
       // ── Dashboard ────────────────────────────────────────────
+      // Laadt de drie KPI-waarden parallel.
+      // De vlag dashboardLoaded voorkomt dubbele fetches bij terugkeer naar de view.
+      // Na een statuswijziging wordt de vlag gereset zodat KPI's herladen worden.
       var dashboardLoaded = false;
       function loadDashboard() {
         if (dashboardLoaded) return;
         dashboardLoaded = true;
 
+        // KPI 1: openstaande goedkeuringen via de CAP-functieroep
         odata('getPendingCount()').then(function (d) {
           document.getElementById('kpiPending').textContent = d.value != null ? d.value : '—';
         }).catch(function () {
           document.getElementById('kpiPending').textContent = '—';
         });
 
+        // KPI 2 & 3: teamleden op reis en totaal, afgeleid uit de People-lijst
         odata('People').then(function (d) {
           var people = d.value || [];
           var onTravel = people.filter(function (p) { return p.OnTravel === true; }).length;
