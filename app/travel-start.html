@@ -624,7 +624,7 @@
       credentials: 'include',           // JWT-cookie meesturen bij elke request
       headers: { 'Accept': 'application/json' }
     });
-    if (res.status === 401 || res.status === 403) {
+    if (res.status === 401) {
       window.location.href = LOGIN;
       throw new Error('unauthorized');
     }
@@ -811,7 +811,7 @@
       + '<div class="drawer-field"><div class="label">Interne notitie</div><div class="value">' + esc(item.InternalNote || '—') + '</div></div>'
       + '</div>';
     // Stel de Fiori-link in op het correcte TravelExtensions-record
-    document.getElementById('drawerFioriLink').href = '/travel-dashboard/webapp/#/TravelExtensions(' + item.TripID + ')';
+    document.getElementById('drawerFioriLink').href = '/travel-dashboard/#/TravelExtensions(' + item.TripID + ')';
     document.getElementById('drawerOverlay').classList.add('open');
     document.getElementById('drawer').classList.add('open');
   }
@@ -867,7 +867,7 @@
     container.innerHTML = html;
     container.querySelectorAll('tr.clickable').forEach(function (tr) {
       tr.addEventListener('click', function () {
-        window.location.href = '/travel-dashboard/webapp/#/People(\'' + tr.dataset.username + '\')';
+        window.location.href = '/travel-dashboard/#/People(\'' + tr.dataset.username + '\')';
       });
     });
   }
@@ -936,7 +936,7 @@
     container.innerHTML = html;
     container.querySelectorAll('tr.clickable').forEach(function (tr) {
       tr.addEventListener('click', function () {
-        window.location.href = '/travel-dashboard/webapp/#/Airlines(\'' + tr.dataset.code + '\')';
+        window.location.href = '/travel-dashboard/#/Airlines(\'' + tr.dataset.code + '\')';
       });
     });
 
@@ -982,7 +982,7 @@
     container.innerHTML = html;
     container.querySelectorAll('tr.clickable').forEach(function (tr) {
       tr.addEventListener('click', function () {
-        window.location.href = '/travel-dashboard/webapp/#/Airports(\'' + tr.dataset.icao + '\')';
+        window.location.href = '/travel-dashboard/#/Airports(\'' + tr.dataset.icao + '\')';
       });
     });
   }

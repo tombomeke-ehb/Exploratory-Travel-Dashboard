@@ -90,6 +90,18 @@ cds.on('bootstrap', (app) => {
   serveHtml('team-start.html',     '/team-start.html')
   serveHtml('hr-start.html',       '/hr-start.html')
 
+  // ── Fiori Elements apps als statische bestanden ──────────────────────────
+  // In productie staan de apps in ./app/ (gekopieerd via mta.yaml).
+  // In development staan ze in app/*/webapp/.
+  const dashboards = ['travel-dashboard', 'team-dashboard', 'hr-dashboard']
+  for (const name of dashboards) {
+    const prodDir = path.join(__dirname, 'app', name)
+    const devDir  = path.join(__dirname, 'app', name, 'webapp')
+    const dir = fs.existsSync(prodDir) && fs.existsSync(path.join(prodDir, 'index.html'))
+      ? prodDir : (fs.existsSync(devDir) ? devDir : null)
+    if (dir) app.use('/' + name, express.static(dir))
+  }
+
   // ── JSON body-parser voor auth-endpoints ──────────────────────────────────
   app.use('/auth', express.json())
 

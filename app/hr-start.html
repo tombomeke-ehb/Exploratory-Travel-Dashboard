@@ -425,7 +425,7 @@
     </div>
     <div class="header-right">
       <!-- Snelkoppeling naar de Fiori Elements-webapp van het HR-dashboard -->
-      <a href="/hr-dashboard/webapp/">Overzicht</a>
+      <a href="/hr-dashboard/">Overzicht</a>
       <!-- Afmeldknop: POST naar /auth/logout en redirect naar landingspagina -->
       <button class="logout-btn" id="logoutBtn" type="button">Afmelden</button>
     </div>
@@ -608,7 +608,7 @@
         credentials: 'include',
         headers: { 'Accept': 'application/json' }
       });
-      if (res.status === 401 || res.status === 403) {
+      if (res.status === 401) {
         window.location.href = '/hr-login.html';
         throw new Error('unauthorized');
       }
@@ -820,7 +820,7 @@
       wrap.innerHTML = html;
       wrap.querySelectorAll('tr.clickable').forEach(tr => {
         tr.addEventListener('click', () => {
-          window.location.href = '/hr-dashboard/webapp/#/Trips(' + tr.dataset.tripid + ')';
+          window.location.href = '/hr-dashboard/#/Trips(' + tr.dataset.tripid + ')';
         });
       });
     }
@@ -876,7 +876,7 @@
       wrap.innerHTML = html;
       wrap.querySelectorAll('tr.clickable').forEach(tr => {
         tr.addEventListener('click', () => {
-          window.location.href = '/hr-dashboard/webapp/#/Airlines(\'' + tr.dataset.code + '\')';
+          window.location.href = '/hr-dashboard/#/Airlines(\'' + tr.dataset.code + '\')';
         });
       });
 
@@ -915,7 +915,7 @@
       wrap.innerHTML = html;
       wrap.querySelectorAll('tr.clickable').forEach(tr => {
         tr.addEventListener('click', () => {
-          window.location.href = '/hr-dashboard/webapp/#/People(\'' + tr.dataset.username + '\')';
+          window.location.href = '/hr-dashboard/#/People(\'' + tr.dataset.username + '\')';
         });
       });
     }
