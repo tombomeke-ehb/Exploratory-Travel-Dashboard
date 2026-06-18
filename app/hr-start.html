@@ -682,30 +682,38 @@
       }).join('');
     }
 
-    // ── Data stores ─────────────────────────────────────────────────────────────
+    // ── Data stores ──────────────────────────────────────────────────────────────
+    // Gedeelde cache voor de vier views; null = nog niet geladen.
+    // Dashboard vult tripsData/peopleData/airlineStats alvast in,
+    // zodat de andere views deze data niet opnieuw hoeven op te halen.
     let tripsData = null;
     let peopleData = null;
     let airlinesData = null;
     let airlineStats = null;
 
-    // ── Loaders ─────────────────────────────────────────────────────────────────
+    // ── Loaders ──────────────────────────────────────────────────────────────────
+    // Elke loader wordt eenmalig aangeroepen door navigate() via loaded{}.
+    // Hergebruik van al gecachede data (tripsData, peopleData, …) voorkomt
+    // overbodige API-verzoeken bij het navigeren tussen views.
     const loaders = {
 
-      // ── DASHBOARD ───────────────────────────────────────────────────────────
+      // ── DASHBOARD ─────────────────────────────────────────────────────────────
+      // KPI 1 & 2 worden parallel opgehaald (los .then()); KPI 3 + chart
+      // worden sequentieel ingeladen via await (chart hangt af van de stats).
       async dashboard() {
-        // KPI: Totaal reizen
+        // KPI 1: totaal aantal reizen — parallel gestart, vult ook tripsData
         api('Trips').then(d => {
           tripsData = d.value || [];
           setText('kpiTrips', tripsData.length);
         }).catch(() => setText('kpiTrips', '—'));
 
-        // KPI: Medewerkers
+        // KPI 2: aantal medewerkers — parallel gestart, vult ook peopleData
         api('People').then(d => {
           peopleData = d.value || [];
           setText('kpiPeople', peopleData.length);
         }).catch(() => setText('kpiPeople', '—'));
 
-        // KPI: Meest gebruikte airline + chart
+        // KPI 3 + chart: sequentieel via await; chart gebruikt dezelfde airlineStats
         const chartEl = document.getElementById('dashboardAirlineChart');
         try {
           const d = await api('getAirlineStats()');
@@ -725,7 +733,8 @@
         }
       },
 
-      // ── REIZEN ──────────────────────────────────────────────────────────────
+      // ── REIZEN ────────────────────────────────────────────────────────────────
+      // Hergebruikt tripsData als die al geladen is via het dashboard
       async reizen() {
         const wrap = document.getElementById('reizenTableWrap');
         try {
@@ -739,7 +748,8 @@
         }
       },
 
-      // ── AIRLINES ────────────────────────────────────────────────────────────
+      // ── AIRLINES ──────────────────────────────────────────────────────────────
+      // Laadt zowel de airlines-tabel als de balkengrafiek; hergebruikt caches
       async airlines() {
         const tableWrap = document.getElementById('airlinesTableWrap');
         const chartWrap = document.getElementById('airlinesBarChart');
@@ -761,7 +771,8 @@
         }
       },
 
-      // ── MEDEWERKERS ─────────────────────────────────────────────────────────
+      // ── MEDEWERKERS ───────────────────────────────────────────────────────────
+      // Hergebruikt peopleData als die al geladen is via het dashboard
       async medewerkers() {
         const wrap = document.getElementById('medewerkersTableWrap');
         try {
@@ -776,8 +787,12 @@
       }
     };
 
-    // ── Table renderers ─────────────────────────────────────────────────────────
+    // ── Table renderers ──────────────────────────────────────────────────────────
+    // Elke renderer bouwt de HTML-string op met esc() voor alle datavelden,
+    // injecteert die in de container en hangt daarna click-listeners vast.
 
+    // renderTripsTable(): formatteert budget (eurFmt) en datums (dateFmt);
+    // klikken op een rij opent de Fiori-detailpagina van de reis
     function renderTripsTable(data) {
       const wrap = document.getElementById('reizenTableWrap');
       if (!data.length) {
@@ -810,9 +825,14 @@
       });
     }
 
+    // airlinesSortCol / airlinesSortAsc: sorteerstaat voor de airlines-tabel;
+    // null = geen sortering actief (initieel gesorteerd op naam door de API)
     let airlinesSortCol = null;
     let airlinesSortAsc = true;
 
+    // renderAirlinesTable(): client-side sortering op de drie kolommen;
+    // klikken op een header wisselt richting of stelt een nieuwe kolom in;
+    // klikken op een rij opent de Fiori-detailpagina van de airline
     function renderAirlinesTable(data) {
       const wrap = document.getElementById('airlinesTableWrap');
       if (!data.length) {
@@ -870,6 +890,8 @@
       });
     }
 
+    // renderPeopleTable(): vertaalt Gender-waarden naar Nederlands;
+    // klikken op een rij opent de Fiori-detailpagina van de medewerker
     function renderPeopleTable(data) {
       const wrap = document.getElementById('medewerkersTableWrap');
       if (!data.length) {
@@ -898,7 +920,11 @@
       });
     }
 
-    // ── Search handlers ─────────────────────────────────────────────────────────
+    // ── Search handlers ──────────────────────────────────────────────────────────
+    // Beide handlers filteren de gecachede data client-side bij elke toetsaanslag;
+    // lege zoekopdracht herstelt de volledige lijst zonder nieuwe API-aanroep
+
+    // Reizen: zoekt op naam, beschrijving en TripId
     document.getElementById('reizenSearch').addEventListener('input', function () {
       if (!tripsData) return;
       const q = this.value.toLowerCase();
@@ -911,6 +937,7 @@
       renderTripsTable(filtered);
     });
 
+    // Medewerkers: zoekt op gebruikersnaam, voornaam en familienaam
     document.getElementById('medewerkersSearch').addEventListener('input', function () {
       if (!peopleData) return;
       const q = this.value.toLowerCase();
@@ -923,7 +950,8 @@
       renderPeopleTable(filtered);
     });
 
-    // ── Init ────────────────────────────────────────────────────────────────────
+    // ── Init ─────────────────────────────────────────────────────────────────────
+    // Initiële navigatie op basis van de huidige URL-hash (of standaard dashboard)
     navigate();
   </script>
 </body>
