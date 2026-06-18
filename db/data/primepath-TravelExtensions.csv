@@ -5,3 +5,6 @@ TripID,ProjectCode,ApprovalStatus,InternalNote
 1,PROJ-2024-004,Approved,
 2,PROJ-2024-005,Pending,Visum aanvraag in behandeling - opvolgen!
 3,PROJ-2024-006,Approved,Eerste klantbezoek voor Q3-project.
+5007,PROJ-2024-007,Pending,Conferentie in Seattle. Hotelbevestiging afwachten.
+7010,PROJ-2024-008,Approved,Klantworkshop voltooid.
+8011,PROJ-2024-009,Rejected,Reis uitgesteld naar volgend kwartaal.

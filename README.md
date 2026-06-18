@@ -84,13 +84,15 @@ De login-endpoints werken wél (handig om de flow te testen).
 
 ### Demo-accounts
 
-| Gebruikersnaam | Wachtwoord   | Rol           | Dashboard         |
-|----------------|--------------|---------------|-------------------|
-| `traveladmin`  | `Admin1234!` | TravelAdmin   | Travel Dashboard  |
-| `teamlead`     | `Lead1234!`  | TeamLead      | Team Dashboard    |
-| `hrviewer`     | `HR1234!`    | TravelViewer  | HR Dashboard      |
+| Gebruikersnaam | Wachtwoord   | Rol           | Dashboard        | TripPin-identiteit |
+|----------------|--------------|---------------|------------------|--------------------|
+| `traveladmin`  | `Admin1234!` | TravelAdmin   | Travel Dashboard | –                  |
+| `teamlead`     | `Lead1234!`  | TeamLead      | Team Dashboard   | `angelhuffman`     |
+| `teamlead2`    | `teamlead2`  | TeamLead      | Team Dashboard   | `willieashmore`    |
+| `hrviewer`     | `HR1234!`    | TravelViewer  | HR Dashboard     | –                  |
 
 > Wachtwoorden zijn opgeslagen als bcrypt-hash (factor 10) in `db/data/primepath-Users.csv`.
+> `teamlead2` is een demo-account om de autorisatiescheiding tussen teams te tonen.
 
 ---
 
@@ -187,7 +189,11 @@ Gebruikers worden opgeslagen in de HANA-tabel `primepath_Users`. Er is geen XSUA
 
 > **Let op voor TeamLead-authenticatie:** De team-koppeling is puur **TripPin-gebaseerd** (geen BTP-login-IDs of e-mailadressen). In `UserMapping` koppelt `TripPinUserName` (de TripPin-gebruikersnaam van een medewerker) aan `TeamLeadUserName` (de TripPin-gebruikersnaam van zijn/haar Team Lead). Het login-account wordt aan zijn TripPin-identiteit gekoppeld via `Users.tripPinUserName`. Die waarde moet overeenkomen met de `TeamLeadUserName` in `UserMapping`.
 >
-> **Demo-waarden:** het account `teamlead` heeft `tripPinUserName = angelhuffman`; in `UserMapping` staat `angelhuffman` als `TeamLeadUserName` voor de teamleden `russellwhyte`, `scottketchum`, `ronaldmundy` en `javieralfred`. Zie `db/data/primepath-UserMapping.csv` en `db/data/primepath-Users.csv`.
+> **Demo-waarden:**
+> - `teamlead` (`angelhuffman`) → teamleden: `russellwhyte`, `scottketchum`, `ronaldmundy`, `javieralfred`
+> - `teamlead2` (`willieashmore`) → teamleden: `vincentcalabrese`, `clydeguess`, `salliesampson`
+>
+> Elk account ziet enkel de reizen van het eigen team. Zie `db/data/primepath-UserMapping.csv`.
 
 ---
 
