@@ -135,15 +135,22 @@
   </div>
 
   <script>
+    // Login-flow: luistert op het formulier-submit-event en stuurt
+    // de credentials als JSON naar /auth/login. Bij succes controleert
+    // het de teruggestuurde rol vóór de redirect naar hr-start.html.
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('submitBtn');
       const err = document.getElementById('errorMsg');
+
+      // Stap 1: reset de vorige foutmelding en zet de knop op "bezig"
       err.style.display = 'none';
       btn.disabled = true;
       btn.textContent = 'Bezig...';
 
       try {
+        // Stap 2: stuur gebruikersnaam + wachtwoord naar de auth-endpoint
+        // username wordt getrimd; wachtwoord nooit (spaties kunnen bewust zijn)
         const res = await fetch('/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -155,6 +162,7 @@
 
         const data = await res.json();
 
+        // Stap 3: verkeerde credentials of serverfout → toon foutmelding
         if (!res.ok) {
           err.textContent = data.error || 'Inloggen mislukt.';
           err.style.display = 'block';
@@ -163,6 +171,9 @@
           return;
         }
 
+        // Stap 4: juiste credentials maar verkeerde rol → toegang geweigerd
+        // (dit loginscherm is exclusief voor TravelViewer; andere rollen krijgen
+        //  een eigen loginpagina met dezelfde endpoint maar andere rolcontrole)
         if (data.role !== 'TravelViewer') {
           err.textContent = 'Je hebt geen toegang tot het HR Dashboard. Gebruik het juiste dashboard voor jouw rol.';
           err.style.display = 'block';
@@ -171,8 +182,10 @@
           return;
         }
 
+        // Stap 5: inloggen geslaagd → redirect naar de HR-startpagina
         window.location.href = '/hr-start.html';
       } catch {
+        // Netwerkfout (geen verbinding, time-out, …): herstel de knop
         err.textContent = 'Verbindingsfout. Probeer het opnieuw.';
         err.style.display = 'block';
         btn.disabled = false;
