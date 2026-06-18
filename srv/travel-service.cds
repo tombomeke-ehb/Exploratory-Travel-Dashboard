@@ -60,11 +60,11 @@ service TravelService {
     virtual null as TripBudget      : Decimal,
     virtual null as TripDescription : String
   } actions {
-    // FV-17: TravelAdmin bewerkt de PrimePath-velden via een dialoog (lege velden = ongewijzigd).
-    action bewerk(
-      ProjectCode    : String,
-      ApprovalStatus : p.ApprovalStatus,
-      InternalNote   : String
+    action goedkeuren() returns TravelExtensions;
+    action afkeuren()   returns TravelExtensions;
+    action bewerkNotitie(
+      ProjectCode  : String,
+      InternalNote : String
     ) returns TravelExtensions;
   };
 
