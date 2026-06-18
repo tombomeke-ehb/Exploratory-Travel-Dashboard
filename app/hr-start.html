@@ -412,35 +412,47 @@
 </head>
 <body>
 
-  <!-- ═══ HEADER ═══ -->
+  <!-- ═══ HEADER ═══════════════════════════════════════════════
+       Vaste balk met merklogo (vliegtuigicoon), paginatitel,
+       een link naar de Fiori-webapp en de afmeldknop.              -->
   <header class="header">
     <div class="header-left">
+      <!-- Logocontainer: bounce-animatie bij hover via CSS -->
       <div class="header-logo">
         <svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
       </div>
       <span class="header-title">PrimePath Travel <span>| HR Dashboard</span></span>
     </div>
     <div class="header-right">
+      <!-- Snelkoppeling naar de Fiori Elements-webapp van het HR-dashboard -->
       <a href="/hr-dashboard/webapp/">Overzicht</a>
+      <!-- Afmeldknop: POST naar /auth/logout en redirect naar landingspagina -->
       <button class="logout-btn" id="logoutBtn" type="button">Afmelden</button>
     </div>
   </header>
 
-  <!-- ═══ SIDEBAR ═══ -->
+  <!-- ═══ SIDEBAR ════════════════════════════════════════════════
+       Navigatiebalk met vier views. Elk nav-item heeft een
+       data-view-attribuut dat navigate() gebruikt om de juiste
+       view te activeren en de hash in de URL bij te werken.        -->
   <nav class="sidebar">
     <div class="sidebar-nav">
+      <!-- Dashboard: standaard actief bij het laden van de pagina -->
       <a class="nav-item active" data-view="dashboard" href="#dashboard">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         <span class="nav-label">Dashboard</span>
       </a>
+      <!-- Reizen: alleen-lezen overzicht van alle TripPin-reizen -->
       <a class="nav-item" data-view="reizen" href="#reizen">
         <svg viewBox="0 0 24 24"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect x="2" y="6" width="20" height="14" rx="2"/></svg>
         <span class="nav-label">Reizen</span>
       </a>
+      <!-- Airlines: tabel + balkengrafiek van airlinegebruik -->
       <a class="nav-item" data-view="airlines" href="#airlines">
         <svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
         <span class="nav-label">Airlines</span>
       </a>
+      <!-- Medewerkers: lijst van TripPin People-entiteiten -->
       <a class="nav-item" data-view="medewerkers" href="#medewerkers">
         <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         <span class="nav-label">Medewerkers</span>
@@ -448,16 +460,21 @@
     </div>
   </nav>
 
-  <!-- ═══ CONTENT ═══ -->
+  <!-- ═══ CONTENT ════════════════════════════════════════════════
+       Vier views die afwisselend actief zijn; navigate() toont
+       de juiste view op basis van de URL-hash.                    -->
   <main class="content">
 
-    <!-- ── Dashboard view ── -->
+    <!-- ── Dashboard view ──────────────────────────────────────
+         Drie KPI-kaarten (reizen / medewerkers / top airline)
+         plus een balkengrafiek van het airlinegebruik (top 5).   -->
     <div class="view active" id="view-dashboard">
       <h1 style="font-size:1.5rem; font-weight:700; letter-spacing:-.3px; margin-bottom:.25rem;">Dashboard</h1>
       <p style="font-size:.875rem; color:var(--ink-500); margin-bottom:1.75rem;">HR-overzicht van reizen, medewerkers en airlinegebruik.</p>
 
       <div class="section-title">Kerncijfers</div>
       <div class="kpi-grid">
+        <!-- KPI 1: totaal aantal reizen uit TripPin -->
         <div class="kpi-card" style="--accent: var(--brand-500);">
           <div class="kpi-head">
             <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect x="2" y="6" width="20" height="14" rx="2"/></svg></div>
@@ -466,6 +483,7 @@
           <div class="kpi-value" id="kpiTrips">…</div>
           <div class="kpi-sub">in de databron</div>
         </div>
+        <!-- KPI 2: aantal geregistreerde medewerkers (People) -->
         <div class="kpi-card" style="--accent: var(--pp-warning);">
           <div class="kpi-head">
             <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
@@ -474,6 +492,7 @@
           <div class="kpi-value" id="kpiPeople">…</div>
           <div class="kpi-sub">geregistreerde medewerkers</div>
         </div>
+        <!-- KPI 3: meest gebruikte airline op basis van getAirlineStats() -->
         <div class="kpi-card" style="--accent: var(--pp-success);">
           <div class="kpi-head">
             <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></div>
@@ -485,44 +504,55 @@
       </div>
 
       <div class="section-title">Airlinegebruik (top 5)</div>
+      <!-- Grafiekcontainer: spinner staat er standaard in; JS vervangt dit -->
       <div class="airline-chart" id="dashboardAirlineChart">
         <div class="spinner-wrap"><div class="spinner"></div></div>
       </div>
     </div>
 
-    <!-- ── Reizen view ── -->
+    <!-- ── Reizen view ──────────────────────────────────────────
+         Alleen-lezen tabel van alle TripPin-reizen met zoekbalk.
+         Klikken op een rij opent de Fiori-detailpagina van de reis. -->
     <div class="view" id="view-reizen">
       <h1 style="font-size:1.5rem; font-weight:700; letter-spacing:-.3px; margin-bottom:.25rem;">Reizen</h1>
       <p style="font-size:.875rem; color:var(--ink-500); margin-bottom:1.75rem;">Overzicht van alle reizen in het systeem (alleen-lezen).</p>
       <div class="table-card">
         <div class="table-toolbar">
           <h2>Reizen</h2>
+          <!-- Zoekbalk: filtert de reizentabel live bij elke toetsaanslag -->
           <div class="search-wrap">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             <input type="text" class="search-input" id="reizenSearch" placeholder="Zoeken op naam, beschrijving…" />
           </div>
         </div>
+        <!-- Tabelbody: ingevuld door renderTripsTable(); start met spinner -->
         <div id="reizenTableWrap">
           <div class="spinner-wrap"><div class="spinner"></div></div>
         </div>
       </div>
     </div>
 
-    <!-- ── Airlines view ── -->
+    <!-- ── Airlines view ────────────────────────────────────────
+         Tweekolomsindeling: links een tabel met sorteerbare kolommen,
+         rechts een balkengrafiek van het airlinegebruik.            -->
     <div class="view" id="view-airlines">
       <h1 style="font-size:1.5rem; font-weight:700; letter-spacing:-.3px; margin-bottom:.25rem;">Airlines</h1>
       <p style="font-size:.875rem; color:var(--ink-500); margin-bottom:1.75rem;">Luchtvaartmaatschappijen en hun gebruik binnen het bedrijf.</p>
       <div class="airlines-split">
+        <!-- Linkse kolom: airlines-tabel met klikbare rijen -->
         <div class="table-card">
           <div class="table-toolbar">
             <h2>Airlines</h2>
           </div>
+          <!-- Tabelbody: ingevuld door renderAirlinesTable() -->
           <div id="airlinesTableWrap">
             <div class="spinner-wrap"><div class="spinner"></div></div>
           </div>
         </div>
+        <!-- Rechtse kolom: balkengrafiek van airlinegebruik -->
         <div>
           <div class="section-title">Airlinegebruik</div>
+          <!-- Grafiekcontainer: ingevuld door renderAirlineChart() -->
           <div class="airline-chart" id="airlinesBarChart">
             <div class="spinner-wrap"><div class="spinner"></div></div>
           </div>
@@ -530,18 +560,22 @@
       </div>
     </div>
 
-    <!-- ── Medewerkers view ── -->
+    <!-- ── Medewerkers view ──────────────────────────────────────
+         Tabel van alle TripPin People-entiteiten met zoekbalk.
+         Klikken op een rij opent de Fiori-detailpagina.            -->
     <div class="view" id="view-medewerkers">
       <h1 style="font-size:1.5rem; font-weight:700; letter-spacing:-.3px; margin-bottom:.25rem;">Medewerkers</h1>
       <p style="font-size:.875rem; color:var(--ink-500); margin-bottom:1.75rem;">Overzicht van alle geregistreerde medewerkers.</p>
       <div class="table-card">
         <div class="table-toolbar">
           <h2>Medewerkers</h2>
+          <!-- Zoekbalk: filtert op gebruikersnaam, voor- of achternaam -->
           <div class="search-wrap">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             <input type="text" class="search-input" id="medewerkersSearch" placeholder="Zoeken op naam, gebruikersnaam…" />
           </div>
         </div>
+        <!-- Tabelbody: ingevuld door renderPeopleTable() -->
         <div id="medewerkersTableWrap">
           <div class="spinner-wrap"><div class="spinner"></div></div>
         </div>
