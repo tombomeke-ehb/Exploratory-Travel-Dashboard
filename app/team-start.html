@@ -459,12 +459,17 @@
       var dateFmt = new Intl.DateTimeFormat('nl-BE', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
       // ── Data fetch helper ────────────────────────────────────
+      // Centrale wrapper rond fetch() voor alle /team-API-aanroepen.
+      // Voegt automatisch cookie-auth en JSON-accept toe.
+      // Bij 401/403 (sessie verlopen of onvoldoende rechten) wordt
+      // de gebruiker direct doorgestuurd naar de loginpagina.
       function odata(resource, opts) {
         var init = Object.assign({
-          credentials: 'include',
+          credentials: 'include',                       // JWT-cookie meesturen bij elke request
           headers: { 'Accept': 'application/json' }
         }, opts || {});
         return fetch('/team/' + resource, init).then(function (res) {
+          // Sessie verlopen of niet geautoriseerd: redirect naar login
           if (res.status === 401 || res.status === 403) {
             window.location.href = '/team-login.html';
             throw new Error('unauthorized');
@@ -475,12 +480,16 @@
       }
 
       // ── Toast ────────────────────────────────────────────────
+      // Toont een tijdelijke feedbackmelding rechtsonder (3 seconden).
+      // type = 'success' (groen) of 'error' (rood).
       function showToast(message, type) {
         var container = document.getElementById('toastContainer');
+        // Stap 1: maak het toast-element aan en voeg het toe aan de container
         var el = document.createElement('div');
         el.className = 'toast ' + (type || 'success');
         el.textContent = message;
         container.appendChild(el);
+        // Stap 2: na 3 seconden fade-out animatie starten, daarna uit DOM verwijderen
         setTimeout(function () {
           el.classList.add('out');
           setTimeout(function () { el.remove(); }, 250);
@@ -488,6 +497,8 @@
       }
 
       // ── Escape HTML ──────────────────────────────────────────
+      // Converteert serverdata naar veilige HTML-tekst vóór innerHTML-injectie.
+      // Voorkomt XSS wanneer TripPin-velden speciale tekens bevatten.
       function esc(s) {
         if (s == null) return '';
         var d = document.createElement('div');
