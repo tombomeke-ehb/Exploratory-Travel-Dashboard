@@ -7,6 +7,10 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap');
 
+    /* ── Design tokens ───────────────────────────────────────────
+       Huisstijl-variabelen gedeeld door alle drie dashboards.
+       --brand-* = blauw merkpallet; --ink-* = tekstgrijzen;
+       --sh-* = schaduwlagen (1 = subtiel, 3 = diep/hover).       */
     :root {
       --font-head: 'Poppins', '72', 'Segoe UI', system-ui, sans-serif;
       --font-body: 'Open Sans', '72', 'Segoe UI', system-ui, sans-serif;
@@ -37,6 +41,7 @@
       --sh-2: 0 6px 16px rgba(15,31,51,.08), 0 2px 5px rgba(15,31,51,.05);
       --sh-3: 0 22px 48px rgba(0,64,168,.18), 0 10px 20px rgba(15,31,51,.10);
 
+      /* Semantische statuskleuren: success / warning / error + achtergrond */
       --pp-success: #0E8345;
       --pp-success-bg: #E3F5E8;
       --pp-warning: #D97706;
@@ -49,8 +54,10 @@
       --transition-bounce: .4s cubic-bezier(.34,1.56,.64,1);
     }
 
+    /* ── Reset ───────────────────────────────────────────────── */
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* ── Toegankelijkheid: zichtbare focusring ───────────────── */
     :focus-visible {
       outline: 3px solid color-mix(in srgb, var(--brand-500) 45%, transparent);
       outline-offset: 2px;
@@ -66,7 +73,9 @@
 
     h1, h2, h3, h4, h5, h6 { font-family: var(--font-head); }
 
-    /* ── Header ──────────────────────────────────────────── */
+    /* ── Header ─────────────────────────────────────────────────
+       Vaste balk bovenaan (z-index 100); gradiënt van blauw naar
+       donkerblauw zodat de header visueel boven de content zweeft. */
     .header {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       height: 52px;
@@ -107,7 +116,10 @@
     }
     .logout-btn:hover { background: rgba(255,255,255,.25); border-color: rgba(255,255,255,.5); transform: translateY(-1px); }
 
-    /* ── Sidebar ─────────────────────────────────────────── */
+    /* ── Sidebar ─────────────────────────────────────────────────
+       Vaste zijbalk naast de header (top: 52px = headerhoogte).
+       Op mobiel verborgen via translateX(-100%); schuift open
+       met de klasse `.open` (toegevoegd via JS bij kleine schermen). */
     .sidebar {
       position: fixed; top: 52px; left: 0; bottom: 0; width: 256px;
       background: var(--surface);
@@ -146,14 +158,18 @@
     }
     .nav-item:hover svg { transform: scale(1.1); }
 
-    /* ── Content ─────────────────────────────────────────── */
+    /* ── Content ─────────────────────────────────────────────────
+       Offset van sidebar (margin-left: 256px) + header (margin-top: 52px).
+       Op mobiel valt de offset weg zodra de sidebar verborgen is.   */
     .content {
       margin-left: 256px; margin-top: 52px;
       padding: 2rem 2.5rem;
       min-height: calc(100vh - 52px);
     }
 
-    /* ── Section titles ──────────────────────────────────── */
+    /* ── Section titles ─────────────────────────────────────────
+       Kleine, hoofdlettergetypeerde tussentitels die secties
+       in een view scheiden (bijv. "Kerncijfers", "Airlinegebruik"). */
     .section-title {
       font-family: var(--font-head); font-size: .6875rem; font-weight: 700;
       color: var(--ink-400); text-transform: uppercase; letter-spacing: .8px;
@@ -161,7 +177,11 @@
     }
     .section-title:first-child { margin-top: 0; }
 
-    /* ── KPI cards ───────────────────────────────────────── */
+    /* ── KPI cards ──────────────────────────────────────────────
+       Responsief raster van statistiekkaarten. Elke kaart heeft:
+       - --accent: CSS-variabele voor de eigen accentkleur per KPI
+       - ::before: 4px accentsstreep bovenaan die verschijnt bij hover
+       - .kpi-icon: gekleurd ikoonicoontje (12% van --accent tint)    */
     .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
     .kpi-card {
       position: relative; background: var(--surface);
@@ -200,7 +220,10 @@
     }
     .kpi-sub { font-size: .75rem; color: var(--ink-400); margin-top: .45rem; font-weight: 500; }
 
-    /* ── Data table ──────────────────────────────────────── */
+    /* ── Data table ─────────────────────────────────────────────
+       Kaart met tabel; .table-toolbar bevat de titel en zoekbalk.
+       Klikbare rijen (.clickable) navigeren naar de Fiori-detailpagina.
+       Kolomhoofden met .sortable reageren op klik (zie JS renderer).  */
     .table-card {
       background: var(--surface); border: 1px solid var(--line);
       border-radius: var(--r-md); box-shadow: var(--sh-1);
@@ -263,7 +286,10 @@
     .empty-row td { text-align: center; color: var(--ink-400); padding: 3rem 1rem; font-style: italic; }
     .empty-row:hover td { background: transparent; }
 
-    /* ── Pill badges ──────────────────────────────────────── */
+    /* ── Pill badges ────────────────────────────────────────────
+       Kleurige statuslabels (groen / oranje / rood). Het ::before-
+       puntje erft de tekststijlkleur, zodat elke kleurvariant
+       automatisch het juiste bolletje krijgt.                        */
     .pill {
       display: inline-flex; align-items: center; gap: .35rem;
       padding: .3rem .75rem; border-radius: 999px;
@@ -276,7 +302,10 @@
     .pill-orange { color: var(--pp-warning); background: var(--pp-warning-bg); }
     .pill-red { color: var(--pp-error); background: var(--pp-error-bg); }
 
-    /* ── Airline bar chart ────────────────────────────────── */
+    /* ── Airline bar chart ──────────────────────────────────────
+       Horizontale balkengrafiek met 3 kolommen per rij:
+       naam (10rem) · balktrack (1fr) · metadata (7rem).
+       .bar-fill krijgt via JS inline style="width:X%" ingesteld.     */
     .airline-chart {
       background: var(--surface); border: 1px solid var(--line);
       border-radius: var(--r-md); padding: 1.5rem;
@@ -303,10 +332,14 @@
       font-variant-numeric: tabular-nums; font-weight: 500;
     }
 
-    /* ── Airlines split layout ───────────────────────────── */
+    /* ── Airlines split layout ──────────────────────────────────
+       Tweekolomsraster voor de Airlines-view: tabel links,
+       grafiek rechts. Valt terug op één kolom op mobiel.            */
     .airlines-split { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
 
-    /* ── Loading spinner ─────────────────────────────────── */
+    /* ── Loading spinner ────────────────────────────────────────
+       Gecentreerde laadanimatie die getoond wordt terwijl data
+       via de API opgehaald wordt; vervangen door tabel of fout.     */
     .spinner-wrap { display: flex; justify-content: center; align-items: center; padding: 3rem; }
     .spinner {
       width: 32px; height: 32px; border: 3px solid var(--line);
@@ -315,7 +348,9 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Error message ───────────────────────────────────── */
+    /* ── Foutmelding ────────────────────────────────────────────
+       Rode kaartmelding bij een mislukt API-verzoek; geïnjecteerd
+       door showError() in de juiste container-div.                  */
     .error-msg {
       color: var(--pp-error); background: var(--pp-error-bg);
       padding: 1rem 1.25rem; border-radius: var(--r-sm);
@@ -326,7 +361,11 @@
     /* ── Muted helper ────────────────────────────────────── */
     .muted { color: var(--ink-400); font-size: .82rem; }
 
-    /* ── View containers ─────────────────────────────────── */
+    /* ── View containers ────────────────────────────────────────
+       Elke view is standaard verborgen (display:none) en krijgt
+       display:block + fadeIn-animatie zodra navigate() hem activeert.
+       KPI-kaarten en tabelkaarten hebben een gespreide slideUp-delay
+       voor een getrapt inkomsteffect (stagger: 0.05 s per kaart).  */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: none; }
@@ -350,12 +389,17 @@
       font-family: var(--font-body); font-weight: 500;
     }
 
-    /* ── Reduced motion ──────────────────────────────────── */
+    /* ── Reduced motion ─────────────────────────────────────────
+       Accessibility: schakel alle animaties uit voor gebruikers die
+       dat in hun OS instellen (prefers-reduced-motion: reduce).     */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
     }
 
-    /* ── Responsive ──────────────────────────────────────── */
+    /* ── Responsive ─────────────────────────────────────────────
+       Onder 1024px verbergt de sidebar (translateX(-100%)); de
+       content-margin vervalt, KPI-grid en airlines-split worden
+       enkelvoudig, en de zoekbalk neemt de volledige breedte in.   */
     @media (max-width: 1024px) {
       .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); }
