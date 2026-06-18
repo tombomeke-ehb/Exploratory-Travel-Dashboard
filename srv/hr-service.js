@@ -70,16 +70,6 @@ module.exports = cds.service.impl(async function () {
     return trips;
   });
 
-  // ── READ TravelExtensions: StatusLabel vullen ────────────────────────────
-  this.on('READ', 'TravelExtensions', async (req) => {
-    const result = await cds.run(req.query);
-    const statusMap = { Pending: 'In behandeling', Approved: 'Goedgekeurd', Rejected: 'Afgekeurd' };
-    const fill = e => { e.StatusLabel = statusMap[e.ApprovalStatus] ?? e.ApprovalStatus; return e; };
-    if (Array.isArray(result)) { result.forEach(fill); return result; }
-    if (result) fill(result);
-    return result;
-  });
-
   // ── FV-27: airline-statistieken voor grafiek ──────────────────────────────
   // Telt vluchten per airline via FlightNumber-prefix in PlanItems.
   // FlightNumber formaat: "AA26" → airlinecode = "AA".

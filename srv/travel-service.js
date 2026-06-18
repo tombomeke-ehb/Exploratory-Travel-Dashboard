@@ -163,9 +163,6 @@ module.exports = cds.service.impl(async function () {
           `TravelExtension verwijst naar onbekend TripID ${ext.TripID} (mogelijk verwijderd of hergebruikt).`
         );
       }
-      // Nederlandse vertaling van ApprovalStatus voor weergave in de UI
-      const statusMap = { Pending: 'In behandeling', Approved: 'Goedgekeurd', Rejected: 'Afgekeurd' };
-      ext.StatusLabel = statusMap[ext.ApprovalStatus] ?? ext.ApprovalStatus;
     }
 
     // FV-13: datumbereik-filter toepassen op het (verrijkte) virtuele StartsAt.
@@ -314,13 +311,6 @@ module.exports = cds.service.impl(async function () {
     const tripId = _tripIdFromParams(req);
     if (tripId == null) return req.error(400, 'Geen reis geselecteerd.');
     await this.update('TravelExtensions', { TripID: tripId }).with({ ApprovalStatus: 'Rejected' });
-    return await this.read('TravelExtensions', { TripID: tripId });
-  });
-
-  this.on('inBehandeling', 'TravelExtensions', async (req) => {
-    const tripId = _tripIdFromParams(req);
-    if (tripId == null) return req.error(400, 'Geen reis geselecteerd.');
-    await this.update('TravelExtensions', { TripID: tripId }).with({ ApprovalStatus: 'Pending' });
     return await this.read('TravelExtensions', { TripID: tripId });
   });
 
