@@ -12,6 +12,7 @@
 service TripPinService {
 
   // ── Mensen / Medewerkers ───────────────────────────────────────────────────
+  @cds.persistence.skip
   entity People {
     key UserName    : String;
     FirstName       : String;
@@ -31,6 +32,7 @@ service TripPinService {
   }
 
   // ── Reizen ─────────────────────────────────────────────────────────────────
+  @cds.persistence.skip
   entity Trips {
     key TripId          : Integer;
     People_UserName     : String;
@@ -43,12 +45,14 @@ service TripPinService {
   }
 
   // ── Airlines ───────────────────────────────────────────────────────────────
+  @cds.persistence.skip
   entity Airlines {
     key AirlineCode : String;
     Name            : String;
   }
 
   // ── Luchthavens ────────────────────────────────────────────────────────────
+  @cds.persistence.skip
   entity Airports {
     key IcaoCode    : String;
     Name            : String;
