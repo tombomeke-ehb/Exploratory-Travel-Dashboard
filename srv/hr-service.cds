@@ -24,7 +24,12 @@ service HRService {
     *,
     virtual null as TripCount : Integer   // FV-18: aantal boekingen (uit airline-stats)
   };
-  @readonly entity Airports as projection on shared.Airports;
+  @readonly entity Airports as projection on shared.Airports {
+    IcaoCode,
+    IataCode,
+    Name,
+    virtual null as City : String
+  };
 
   // ── PrimePath velden (read-only voor HR) ──────────────────────────────────
   @readonly entity TravelExtensions as projection on p.TravelExtensions;
