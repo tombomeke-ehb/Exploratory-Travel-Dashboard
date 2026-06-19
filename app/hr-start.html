@@ -792,12 +792,20 @@
             const d = await api('Airlines?$orderby=Name');
             airlinesData = d.value || [];
           }
-          renderAirlinesTable(airlinesData);
 
           if (!airlineStats) {
             const d = await api('getAirlineStats()');
             airlineStats = d.value || [];
           }
+
+          const knownCodes = new Set(airlinesData.map(a => a.AirlineCode));
+          airlineStats.forEach(s => {
+            if (!knownCodes.has(s.AirlineCode)) {
+              airlinesData.push({ AirlineCode: s.AirlineCode, Name: s.Name, TripCount: s.TripCount || 0 });
+            }
+          });
+
+          renderAirlinesTable(airlinesData);
           renderAirlineChart(chartWrap, airlineStats);
         } catch (e) {
           showError(tableWrap, 'Kon airlines niet laden.');
