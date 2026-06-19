@@ -392,6 +392,100 @@
     /* ── Reduced motion ─────────────────────────────────────────
        Accessibility: schakel alle animaties uit voor gebruikers die
        dat in hun OS instellen (prefers-reduced-motion: reduce).     */
+    /* ── Kalender ───────────────────────────────────────────────
+       Maandweergave met dagraster (7 kolommen = ma–zo).
+       Reizen worden als gekleurde blokjes in de dagcellen getoond. */
+    .cal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+    .cal-header h2 { font-family: var(--font-head); font-size: 1.15rem; font-weight: 700; }
+    .cal-nav {
+      background: var(--brand-050); border: 1px solid var(--line);
+      border-radius: var(--r-sm); padding: .4rem .9rem;
+      font-family: var(--font-body); font-size: .84rem; font-weight: 600;
+      color: var(--brand-600); cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .cal-nav:hover { background: var(--brand-100); }
+    .cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      gap: 1px; background: var(--line);
+      border: 1px solid var(--line); border-radius: var(--r-md);
+      overflow: hidden;
+    }
+    .cal-day-header {
+      background: var(--bg); padding: .6rem;
+      font-family: var(--font-head); font-size: .7rem; font-weight: 700;
+      color: var(--ink-400); text-transform: uppercase; text-align: center;
+    }
+    .cal-day {
+      background: var(--surface); padding: .5rem;
+      min-height: 80px; font-size: .78rem; position: relative;
+    }
+    .cal-day.other-month { background: var(--bg); color: var(--ink-300); }
+    .cal-day.today { background: var(--brand-050); }
+    .cal-day-num { font-weight: 600; margin-bottom: .35rem; }
+    .cal-trip {
+      display: block; padding: .15rem .4rem;
+      background: var(--brand-500); color: #fff;
+      border-radius: 4px; font-size: .65rem; font-weight: 600;
+      margin-bottom: 2px; white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis; cursor: default;
+      transition: background var(--transition-fast);
+    }
+    .cal-trip:hover { background: var(--brand-600); }
+    .cal-trip.cal-c2 { background: var(--pp-warning); }
+    .cal-trip.cal-c2:hover { background: #b86505; }
+    .cal-trip.cal-c3 { background: var(--pp-success); }
+    .cal-trip.cal-c3:hover { background: #0a6b32; }
+    .cal-more { font-size: .6rem; color: var(--brand-500); cursor: pointer; font-weight: 600; }
+    .cal-more:hover { text-decoration: underline; }
+    .cal-day.clickable { cursor: pointer; }
+    .cal-day.clickable:hover { background: var(--brand-050); }
+    .cal-day.selected { outline: 2px solid var(--brand-500); outline-offset: -2px; }
+    .cal-detail {
+      margin-top: 1.25rem; background: var(--bg); border: 1px solid var(--line);
+      border-radius: var(--r-md); padding: 1.25rem; animation: fadeIn .3s ease;
+    }
+    .cal-detail-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: .75rem;
+    }
+    .cal-detail-header h3 {
+      font-family: var(--font-head); font-size: .95rem; font-weight: 700;
+    }
+    .cal-detail-close {
+      background: none; border: 1px solid var(--line); border-radius: var(--r-sm);
+      padding: .25rem .6rem; font-size: .75rem; font-weight: 600; cursor: pointer;
+      color: var(--ink-500); transition: all var(--transition-fast);
+    }
+    .cal-detail-close:hover { background: var(--surface); color: var(--ink-900); }
+    .cal-detail-item {
+      display: flex; align-items: center; gap: 1rem;
+      padding: .65rem .85rem; background: var(--surface);
+      border: 1px solid var(--line); border-radius: var(--r-sm);
+      margin-bottom: .5rem; cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .cal-detail-item:hover {
+      border-color: var(--brand-200); box-shadow: var(--sh-1);
+      transform: translateX(3px);
+    }
+    .cal-detail-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--brand-500); flex-shrink: 0;
+    }
+    .cal-detail-info { flex: 1; min-width: 0; }
+    .cal-detail-name {
+      font-weight: 600; font-size: .84rem; color: var(--ink-900);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .cal-detail-dates { font-size: .75rem; color: var(--ink-500); margin-top: .15rem; }
+    .cal-detail-arrow { color: var(--ink-400); font-size: 1.1rem; }
+    .cal-detail-item:hover .cal-detail-arrow { color: var(--brand-500); }
+    .cal-detail-empty { color: var(--ink-400); font-size: .84rem; font-style: italic; }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
     }
@@ -465,6 +559,10 @@
       <a class="nav-item" data-view="luchthavens" href="#luchthavens">
         <svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M9 6h.01M15 6h.01M9 10h.01M15 10h.01M9 14h.01M15 14h.01"/></svg>
         <span class="nav-label">Luchthavens</span>
+      </a>
+      <a class="nav-item" data-view="kalender" href="#kalender">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <span class="nav-label">Kalender</span>
       </a>
     </div>
   </nav>
@@ -614,6 +712,23 @@
       <div id="luchthavensTableWrap"><div class="spinner-wrap"><div class="spinner"></div></div></div>
     </div>
 
+    <!-- ── Kalender view ───────────────────────────────────────
+         Maandkalender met reizen als gekleurde blokjes per dag.
+         Navigatie via vorige/volgende-knoppen.                    -->
+    <div class="view" id="view-kalender">
+      <h1 style="font-size:1.5rem; font-weight:700; letter-spacing:-.3px; margin-bottom:.25rem;">Reiskalender</h1>
+      <p style="font-size:.875rem; color:var(--ink-500); margin-bottom:1.75rem;">Visueel overzicht van alle reizen per maand.</p>
+      <div class="table-card" style="padding:1.5rem;">
+        <div class="cal-header">
+          <button class="cal-nav" id="calPrev">&#9664; Vorige</button>
+          <h2 id="calTitle"></h2>
+          <button class="cal-nav" id="calNext">Volgende &#9654;</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div id="calDetail"></div>
+      </div>
+    </div>
+
     <div class="footer">EhB Cloud Integration &middot; In samenwerking met Flexso &middot; Demo: 19 juni 2026</div>
   </main>
 
@@ -657,7 +772,7 @@
     function showError(el, msg) { el.innerHTML = '<div class="error-msg">' + esc(msg) + '</div>'; }
 
     // ── Navigation ──────────────────────────────────────────────────────────────
-    const views = ['dashboard', 'reisgoedkeuringen', 'reizen', 'airlines', 'medewerkers', 'luchthavens'];
+    const views = ['dashboard', 'reisgoedkeuringen', 'reizen', 'airlines', 'medewerkers', 'luchthavens', 'kalender'];
     // loaded{}: cache-object — elke view wordt maar één keer geladen
     const loaded = {};
 
@@ -835,6 +950,27 @@
           goedkeuringenData = d.value || [];
           renderGoedkeuringenTable(goedkeuringenData);
         } catch (e) { showError(wrap, 'Kon reisgoedkeuringen niet laden.'); }
+      },
+
+      async kalender() {
+        try {
+          if (!tripsData) {
+            const d = await api('Trips');
+            tripsData = d.value || [];
+          }
+          calTrips = tripsData;
+          if (tripsData.length > 0) {
+            const dates = tripsData.map(t => new Date(t.StartsAt)).filter(d => !isNaN(d));
+            if (dates.length > 0) {
+              const latest = dates.reduce((a, b) => a > b ? a : b);
+              calYear = latest.getFullYear();
+              calMonth = latest.getMonth();
+            }
+          }
+          renderCalendar();
+        } catch (e) {
+          document.getElementById('calGrid').innerHTML = '<div class="error-msg" style="grid-column:1/-1">Kon reisdata niet laden.</div>';
+        }
       },
 
       async luchthavens() {
@@ -1053,9 +1189,134 @@
         String(e.TripID).toLowerCase().includes(q) ||
         (e.ProjectCode || '').toLowerCase().includes(q) ||
         (e.ApprovalStatus || '').toLowerCase().includes(q) ||
+        (e.StatusLabel || '').toLowerCase().includes(q) ||
         (e.InternalNote || '').toLowerCase().includes(q)
       );
       renderGoedkeuringenTable(filtered);
+    });
+
+    // ── Kalender ─────────────────────────────────────────────────────────────────
+    let calYear = new Date().getFullYear();
+    let calMonth = new Date().getMonth();
+    let calTrips = null;
+    let calSelectedDate = null;
+    const calMonthNames = ['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December'];
+    const calDayNames = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
+
+    function getTripsForDate(ds) {
+      return (calTrips || []).filter(t => {
+        const s = (t.StartsAt || '').slice(0, 10);
+        const e = (t.EndsAt || '').slice(0, 10);
+        return s <= ds && e >= ds;
+      });
+    }
+
+    function showDayDetail(ds) {
+      calSelectedDate = ds;
+      const detail = document.getElementById('calDetail');
+      const dayTrips = getTripsForDate(ds);
+      const d = new Date(ds);
+      const dayLabel = calDayNames[d.getDay()] + ' ' + d.getDate() + ' ' + calMonthNames[d.getMonth()] + ' ' + d.getFullYear();
+
+      let html = '<div class="cal-detail"><div class="cal-detail-header">'
+        + '<h3>' + esc(dayLabel) + ' — ' + dayTrips.length + ' reis' + (dayTrips.length !== 1 ? 'en' : '') + '</h3>'
+        + '<button class="cal-detail-close" id="calDetailClose">Sluiten</button></div>';
+
+      if (dayTrips.length === 0) {
+        html += '<div class="cal-detail-empty">Geen reizen op deze dag.</div>';
+      } else {
+        dayTrips.forEach(t => {
+          const start = t.StartsAt ? dateFmt.format(new Date(t.StartsAt)) : '—';
+          const end = t.EndsAt ? dateFmt.format(new Date(t.EndsAt)) : '—';
+          const budget = t.Budget != null ? eurFmt.format(Number(t.Budget)) : '';
+          html += '<div class="cal-detail-item" data-tripid="' + esc(t.TripId) + '">'
+            + '<div class="cal-detail-dot"></div>'
+            + '<div class="cal-detail-info">'
+            + '<div class="cal-detail-name">' + esc(t.Name) + '</div>'
+            + '<div class="cal-detail-dates">' + esc(start) + ' — ' + esc(end) + (budget ? ' · ' + esc(budget) : '') + '</div>'
+            + '</div>'
+            + '<span class="cal-detail-arrow">&#8250;</span>'
+            + '</div>';
+        });
+      }
+      html += '</div>';
+      detail.innerHTML = html;
+
+      document.getElementById('calDetailClose').addEventListener('click', () => {
+        detail.innerHTML = '';
+        calSelectedDate = null;
+        grid.querySelectorAll('.cal-day.selected').forEach(el => el.classList.remove('selected'));
+      });
+
+      detail.querySelectorAll('.cal-detail-item').forEach(item => {
+        item.addEventListener('click', () => {
+          window.location.href = '/hr-dashboard/#/Trips(' + item.dataset.tripid + ')';
+        });
+      });
+
+      const grid = document.getElementById('calGrid');
+      grid.querySelectorAll('.cal-day.selected').forEach(el => el.classList.remove('selected'));
+      const cell = grid.querySelector('[data-date="' + ds + '"]');
+      if (cell) cell.classList.add('selected');
+    }
+
+    function renderCalendar() {
+      const grid = document.getElementById('calGrid');
+      document.getElementById('calTitle').textContent = calMonthNames[calMonth] + ' ' + calYear;
+      const lastDate = new Date(calYear, calMonth + 1, 0).getDate();
+      let start = new Date(calYear, calMonth, 1).getDay();
+      start = start === 0 ? 6 : start - 1;
+      const today = new Date();
+      const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+      const days = ['Ma','Di','Wo','Do','Vr','Za','Zo'];
+      let html = days.map(d => '<div class="cal-day-header">' + d + '</div>').join('');
+      const prevLast = new Date(calYear, calMonth, 0).getDate();
+      for (let i = start - 1; i >= 0; i--) {
+        html += '<div class="cal-day other-month"><div class="cal-day-num">' + (prevLast - i) + '</div></div>';
+      }
+      for (let d = 1; d <= lastDate; d++) {
+        const ds = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+        const isToday = ds === todayStr;
+        const isSel = ds === calSelectedDate;
+        const dayTrips = getTripsForDate(ds);
+        const hasTrips = dayTrips.length > 0;
+        const badges = dayTrips.slice(0, 2).map((t, i) => {
+          const cls = i % 3 === 1 ? ' cal-c2' : i % 3 === 2 ? ' cal-c3' : '';
+          return '<span class="cal-trip' + cls + '" title="' + esc(t.Name) + '">' + esc(t.Name) + '</span>';
+        }).join('');
+        const more = dayTrips.length > 2 ? '<span class="cal-more">+' + (dayTrips.length - 2) + ' meer</span>' : '';
+        const classes = 'cal-day' + (isToday ? ' today' : '') + (hasTrips ? ' clickable' : '') + (isSel ? ' selected' : '');
+        html += '<div class="' + classes + '" data-date="' + ds + '"><div class="cal-day-num">' + d + '</div>' + badges + more + '</div>';
+      }
+      const total = start + lastDate;
+      const rem = (7 - (total % 7)) % 7;
+      for (let i = 1; i <= rem; i++) {
+        html += '<div class="cal-day other-month"><div class="cal-day-num">' + i + '</div></div>';
+      }
+      grid.innerHTML = html;
+
+      grid.querySelectorAll('.cal-day[data-date]').forEach(cell => {
+        cell.addEventListener('click', () => {
+          const ds = cell.dataset.date;
+          const dayTrips = getTripsForDate(ds);
+          if (dayTrips.length > 0) showDayDetail(ds);
+        });
+      });
+    }
+
+    document.getElementById('calPrev').addEventListener('click', () => {
+      calMonth--;
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      calSelectedDate = null;
+      document.getElementById('calDetail').innerHTML = '';
+      renderCalendar();
+    });
+    document.getElementById('calNext').addEventListener('click', () => {
+      calMonth++;
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      calSelectedDate = null;
+      document.getElementById('calDetail').innerHTML = '';
+      renderCalendar();
     });
 
     // ── Init ─────────────────────────────────────────────────────────────────────
