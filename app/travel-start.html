@@ -718,7 +718,8 @@
     try {
       // Stap 2: laad airlinestatistieken en sorteer op TripCount (hoogste eerst)
       var d = await api('getAirlineStats()');
-      var sorted = (d.value || []).slice().sort(function (a, b) { return (b.TripCount || 0) - (a.TripCount || 0); });
+      _cachedAirlineStats = d.value || [];
+      var sorted = _cachedAirlineStats.slice().sort(function (a, b) { return (b.TripCount || 0) - (a.TripCount || 0); });
 
       // Stap 3: vul de KPI "meest gebruikte airline" met de eerste in de ranking
       var top = sorted[0];
@@ -943,6 +944,7 @@
   // Sorteerbare tabel; airlineSort slaat de actieve kolom en richting op.
   // renderAirlines() sorteert de lokale cache client-side (geen nieuwe fetch).
   var airlinesData = [];
+  var _cachedAirlineStats = null;
   var airlineSort = { col: 'Name', asc: true };
 
   async function loadAirlines() {
@@ -950,6 +952,21 @@
     try {
       var d = await api('Airlines?$orderby=Name');
       airlinesData = d.value || [];
+
+      if (!_cachedAirlineStats) {
+        try {
+          var sd = await api('getAirlineStats()');
+          _cachedAirlineStats = sd.value || [];
+        } catch (e) { _cachedAirlineStats = []; }
+      }
+      var knownCodes = {};
+      airlinesData.forEach(function (a) { knownCodes[a.AirlineCode] = true; });
+      _cachedAirlineStats.forEach(function (s) {
+        if (!knownCodes[s.AirlineCode]) {
+          airlinesData.push({ AirlineCode: s.AirlineCode, Name: s.Name, TripCount: s.TripCount || 0 });
+        }
+      });
+
       renderAirlines();
     } catch (e) {
       container.innerHTML = '<div class="error-msg">Kon airlines niet laden.</div>';
